@@ -367,11 +367,11 @@
           </div>
         </div>
         <div class="copybar">
-          <span class="hint">then · vcskill install</span>
+          <span class="hint">then · vc install &nbsp;<span style="color:var(--faint)">(vc = vcskill)</span></span>
           <button class="copybtn" id="copybtn">Copy command</button>
         </div>
       </div>
-      <p class="mono" style="font-size:12px;color:var(--faint);margin:14px 2px 0;line-height:1.6">Binary is downloaded from the vcskill edge and sha256-checked before it lands. Upgrade later with <span style="color:var(--muted)">vcskill update</span>.</p>
+      <p class="mono" style="font-size:12px;color:var(--faint);margin:14px 2px 0;line-height:1.6">Installs a short <span style="color:var(--coral)">vc</span> alias next to the binary. Downloaded from the vcskill edge and sha256-checked before it lands. Upgrade later with <span style="color:var(--muted)">vc update</span>.</p>
     </div>
   </div>
 
@@ -467,18 +467,23 @@
   <div class="wrap">
     <div class="sec-head">
       <span class="eyebrow">The surface</span>
-      <h2>Nine commands, no ceremony.</h2>
+      <h2>Thirteen commands, no ceremony.</h2>
+      <p class="sec-sub"><span class="mono" style="color:var(--coral)">vc</span> is the short alias — interchangeable with <span class="mono">vcskill</span> everywhere.</p>
     </div>
     <div class="cmds">
-      <div class="cmdrow"><div class="c">vcskill <b>install</b> [--provider a,b] [--global]</div><div class="d">Install the kit to providers; writes a receipt for later health checks.</div></div>
-      <div class="cmdrow"><div class="c">vcskill <b>list</b></div><div class="d">Show kit contents + per-provider install state.</div></div>
-      <div class="cmdrow"><div class="c">vcskill <b>doctor</b></div><div class="d">Health-check an install against its receipt — files, hooks, bindings, version.</div></div>
-      <div class="cmdrow"><div class="c">vcskill <b>update</b> [--check]</div><div class="d">Self-update the binary to the latest release, sha256-verified. <span class="mono">--check</span> is offline-safe.</div></div>
-      <div class="cmdrow"><div class="c">vcskill <b>validate</b></div><div class="d">Lint the kit source — frontmatter, sizes, reference integrity. CI-able exit code.</div></div>
-      <div class="cmdrow"><div class="c">vcskill <b>backups</b> restore &lt;ts&gt;</div><div class="d">Restore file(s) from a timestamped backup, safety-backing up current state first.</div></div>
-      <div class="cmdrow"><div class="c">vcskill <b>add-skill</b> &lt;name&gt;</div><div class="d">Scaffold a new canonical skill — <span class="mono">name: vc:&lt;slug&gt;</span>.</div></div>
-      <div class="cmdrow"><div class="c">vcskill <b>uninstall</b> [--provider a,b]</div><div class="d">Remove a provider's install; preserves any file you've edited since.</div></div>
-      <div class="cmdrow"><div class="c">vcskill <b>migrate</b></div><div class="d">Relocate files when a provider's path convention changes.</div></div>
+      <div class="cmdrow"><div class="c">vc <b>install</b> [--provider a,b] [--global]</div><div class="d">Install the kit to providers; writes a receipt for later health checks.</div></div>
+      <div class="cmdrow"><div class="c">vc <b>doctor</b> [--fix]</div><div class="d">Scored health audit — a 0–100 bar, per-check pass/skip/warn/fail, and the exact command to fix each finding.</div></div>
+      <div class="cmdrow"><div class="c">vc <b>eval</b> [--skill &lt;name&gt;]</div><div class="d">Score kit skill quality — free static tier always, opt-in LLM judge when <span class="mono">VCSKILL_EVAL_CMD</span> is set.</div></div>
+      <div class="cmdrow"><div class="c">vc <b>query</b> [installs|doctor]</div><div class="d">Read the local history log of installs, doctor runs, and updates.</div></div>
+      <div class="cmdrow"><div class="c">vc <b>contract</b> [--json]</div><div class="d">The provider×artifact capability matrix — branded grid in a terminal, or a machine envelope with <span class="mono">--json</span>.</div></div>
+      <div class="cmdrow"><div class="c">vc <b>update</b> [--check]</div><div class="d">Self-update the binary to the latest release, sha256-verified. <span class="mono">--check</span> is offline-safe.</div></div>
+      <div class="cmdrow"><div class="c">vc <b>validate</b> [--check]</div><div class="d">Lint the kit source — frontmatter, sizes, reference integrity. CI-able exit code.</div></div>
+      <div class="cmdrow"><div class="c">vc <b>list</b></div><div class="d">Show kit contents + per-provider install state.</div></div>
+      <div class="cmdrow"><div class="c">vc <b>backups</b> restore &lt;ts&gt;</div><div class="d">Restore file(s) from a timestamped backup, safety-backing up current state first.</div></div>
+      <div class="cmdrow"><div class="c">vc <b>telemetry</b> status</div><div class="d">Anonymous, opt-out, stateless — and off unless you configure it. Nothing is sent by default.</div></div>
+      <div class="cmdrow"><div class="c">vc <b>add-skill</b> &lt;name&gt;</div><div class="d">Scaffold a new canonical skill — <span class="mono">name: vc:&lt;slug&gt;</span>.</div></div>
+      <div class="cmdrow"><div class="c">vc <b>uninstall</b> [--provider a,b]</div><div class="d">Remove a provider's install; preserves any file you've edited since.</div></div>
+      <div class="cmdrow"><div class="c">vc <b>migrate</b></div><div class="d">Relocate files when a provider's path convention changes.</div></div>
     </div>
   </div>
 </section>
@@ -493,7 +498,7 @@
         <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
         <div class="term-body">
           <div class="term-line"><span class="prompt">$</span><span class="term-cmd">curl <span class="flag">-fsSL</span> https://vcskill.vchun.dev/install <span class="pipe">|</span> bash</span></div>
-          <div class="term-line"><span class="prompt">$</span><span class="term-cmd">vcskill install <span class="flag">--provider</span> claude-code,codex,cursor</span></div>
+          <div class="term-line"><span class="prompt">$</span><span class="term-cmd">vc install <span class="flag">--provider</span> claude-code,codex,cursor</span></div>
         </div>
       </div>
     </div>
