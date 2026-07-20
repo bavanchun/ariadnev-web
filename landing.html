@@ -246,6 +246,69 @@
   .foot .mono { font-size: 13px; }
   .foot a:hover { color: var(--coral); }
 
+  /* ---------- playbook (interactive: job → skill chain) ---------- */
+  .play {
+    display: grid;
+    grid-template-columns: 288px 1fr;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel);
+    overflow: hidden;
+  }
+  @media (max-width: 820px) { .play { grid-template-columns: 1fr; } }
+  .play-list { border-right: 1px solid var(--line-soft); padding: 8px; display: flex; flex-direction: column; gap: 2px; }
+  @media (max-width: 820px) { .play-list { flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--line-soft); scrollbar-width: none; } .play-list::-webkit-scrollbar { display: none; } }
+  .job {
+    display: flex; align-items: center; gap: 12px;
+    font-family: var(--sans); font-size: 15px; color: var(--muted);
+    padding: 13px 15px; border-radius: 10px; cursor: pointer;
+    border: 1px solid transparent; text-align: left; background: none; width: 100%;
+    transition: color .15s, background .15s, border-color .15s; white-space: nowrap;
+  }
+  .job .jn { font-family: var(--mono); font-size: 12px; color: var(--faint); width: 18px; flex: none; transition: color .15s; }
+  .job:hover { color: var(--text); background: var(--panel-2); }
+  .job.active { color: var(--text); background: rgba(255,107,69,0.08); border-color: rgba(255,107,69,0.28); }
+  .job.active .jn { color: var(--coral); }
+  .play-view { padding: 32px 34px; min-height: 340px; }
+  @media (max-width: 560px) { .play-view { padding: 24px 20px; } }
+  .play-goal { color: var(--muted); font-size: 16.5px; line-height: 1.55; margin: 0 0 26px; max-width: 52ch; }
+  .play-goal b { color: var(--text); font-weight: 600; }
+  .chain { display: flex; flex-direction: column; gap: 0; }
+  .link { display: grid; grid-template-columns: auto 1fr; gap: 18px; }
+  .link .rail { display: flex; flex-direction: column; align-items: center; }
+  .link .pin {
+    font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--coral);
+    width: 30px; height: 30px; flex: none; border: 1px solid rgba(255,107,69,0.35);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    background: rgba(255,107,69,0.06);
+  }
+  .link .wire { width: 1px; flex: 1; background: var(--line); margin: 4px 0; min-height: 14px; }
+  .link:last-child .wire { display: none; }
+  .link .body { padding-bottom: 22px; }
+  .link:last-child .body { padding-bottom: 0; }
+  .link .cmd { font-family: var(--mono); font-size: 15px; color: var(--text); font-weight: 700; }
+  .link .cmd .sl { color: var(--coral); }
+  .link .note { color: var(--muted); font-size: 14.5px; margin-top: 4px; line-height: 1.5; }
+  .play-foot { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line-soft); font-family: var(--mono); font-size: 12.5px; color: var(--faint); }
+  .play-foot b { color: var(--muted); font-weight: 400; }
+
+  /* ---------- catalog (all skills, grouped) ---------- */
+  .lane { margin-top: 34px; }
+  .lane:first-of-type { margin-top: 0; }
+  .lane-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+  .lane-head .lt { font-family: var(--mono); font-size: 13px; color: var(--text); letter-spacing: 0.08em; text-transform: uppercase; }
+  .lane-head .lc { font-family: var(--mono); font-size: 12px; color: var(--faint); }
+  .lane-head .lr { flex: 1; height: 1px; background: var(--line-soft); }
+  .skill-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(248px, 1fr)); gap: 10px; }
+  .skl {
+    border: 1px solid var(--line-soft); border-radius: 11px; padding: 15px 16px;
+    background: var(--panel); transition: border-color .16s, background .16s, transform .16s;
+  }
+  .skl:hover { border-color: var(--coral-dim); background: var(--panel-2); transform: translateY(-2px); }
+  .skl .sn { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--text); }
+  .skl .sn .sl { color: var(--coral); }
+  .skl .sw { color: var(--muted); font-size: 13.5px; margin-top: 6px; line-height: 1.5; }
+
   /* load reveal */
   .reveal { opacity: 0; transform: translateY(14px); animation: rise .7s cubic-bezier(.2,.7,.2,1) forwards; }
   @keyframes rise { to { opacity: 1; transform: none; } }
@@ -262,9 +325,9 @@
   <div class="wrap nav-inner">
     <div class="brand"><span class="caret">&gt;_</span> vcskill</div>
     <nav class="nav-links">
+      <a href="#playbook">Playbook</a>
+      <a href="#catalog">Skills</a>
       <a href="#adapt">Adapt engine</a>
-      <a href="#kit">The kit</a>
-      <a href="#how">How it works</a>
       <a href="#commands">Commands</a>
       <a class="nav-cta" href="#install">Install</a>
     </nav>
@@ -355,41 +418,31 @@
   </div>
 </section>
 
-<!-- KIT -->
-<section id="kit" style="padding-top:0">
+<!-- PLAYBOOK -->
+<section id="playbook" style="padding-top:0">
   <div class="wrap">
     <div class="sec-head">
-      <span class="eyebrow">What ships</span>
-      <h2>A kit distilled from daily use — not a starter template.</h2>
-      <p class="sec-sub">Every skill clears one bar: a real workflow, an output-format contract, quality-gate self-checks, and a stated position in the graph. Shared risk lanes and proof vocabulary, not siloed per skill.</p>
-    </div>
-    <div class="cols">
-      <div class="card">
-        <div class="idx">CORE LOOP</div>
-        <h3>The everyday graph</h3>
-        <p><code>vc:brainstorm</code> → <code>vc:plan</code> → <code>vc:cook</code> with test &amp; review gates baked in. <code>vc:fix</code> proves a root cause before touching code; <code>vc:scout</code>, <code>vc:git</code>, <code>vc:ask</code>, <code>vc:pm</code> round it out.</p>
-      </div>
-      <div class="card">
-        <div class="idx">13 SUBAGENTS</div>
-        <h3>Personas that co-exist</h3>
-        <p>Install <code>vc-explore</code>, <code>vc-planner</code>, <code>vc-reviewer</code>, <code>vc-tester</code> and more alongside ClaudeKit without conflicts — persona, behavioral checklist, status protocol, zero external CLI coupling.</p>
-      </div>
-      <div class="card">
-        <div class="idx">6 HOOKS</div>
-        <h3>A Claude Code event contract</h3>
-        <p>session-init, rules-inject, privacy-block, scout-block, session-state, subagent-init. Fail-open, <code>node:test</code>-covered. Bindings merge into settings after a y/n confirm — idempotent and backed up.</p>
-      </div>
+      <span class="eyebrow">Start here after install</span>
+      <h2>21 skills is a lot. Pick the job — get the recipe.</h2>
+      <p class="sec-sub">You don't memorize the kit. You name what you're doing, and vcskill chains the right skills in order. Choose a job below.</p>
     </div>
 
-    <div style="margin-top:34px">
-      <div class="loop">
-        <span class="node">/vc:brainstorm</span><span class="arr">→</span>
-        <span class="node">/vc:plan</span><span class="arr">→</span>
-        <span class="node">/vc:cook</span><span class="arr">→</span>
-        <span class="node">/vc:fix</span><span class="arr">→</span>
-        <span class="node">/vc:git</span>
-      </div>
+    <div class="play">
+      <div class="play-list" id="job-list" role="tablist" aria-label="Jobs"><!-- filled by JS --></div>
+      <div class="play-view" id="play-view" role="tabpanel"><!-- filled by JS --></div>
     </div>
+  </div>
+</section>
+
+<!-- CATALOG -->
+<section id="catalog" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">The full kit</span>
+      <h2>Every skill, and the one moment it's for.</h2>
+      <p class="sec-sub">Distilled from daily use — not a starter template. Each clears one bar: a real workflow, an output contract, quality-gate self-checks, and a stated position in the graph. Type <span class="mono" style="color:var(--teal)">/vc:</span> in Claude Code to summon any of them.</p>
+    </div>
+    <div id="catalog-body"><!-- filled by JS --></div>
   </div>
 </section>
 
@@ -521,6 +574,131 @@
       tr.appendChild(td);
     });
     body.appendChild(tr);
+  });
+
+  // ---------- Playbook: job → skill chain ----------
+  var RECIPES = [
+    { label: "Build a feature", goal: "Take an idea all the way to <b>shipped, tested, reviewed</b> code.", chain: [
+      { s: "vc:brainstorm", n: "Weigh approaches while the requirements are still fuzzy." },
+      { s: "vc:plan", n: "Break the chosen approach into phases under plans/." },
+      { s: "vc:cook", n: "Implement each phase — test + review gates run inside." },
+      { s: "vc:git", n: "Commit or open a PR with clean history." }
+    ]},
+    { label: "Fix a bug or red CI", goal: "Kill a bug, a failing test, or a broken pipeline — <b>with a proven cause</b>, not a guess.", chain: [
+      { s: "vc:fix", n: "Scouts the code and proves a root cause before it changes a line." },
+      { s: "vc:git", n: "Ship the fix once it's green." }
+    ]},
+    { label: "Understand a codebase", goal: "Land in unfamiliar code and get oriented <b>fast</b>.", chain: [
+      { s: "vc:scout", n: "Parallel explore agents map which modules your change touches." },
+      { s: "vc:ask", n: "Ask design questions and get honest trade-offs — analysis, no edits." }
+    ]},
+    { label: "Decide & de-risk", goal: "Choose between competing options <b>before</b> you commit to one.", chain: [
+      { s: "vc:research", n: "Sourced findings on the real options, not memory." },
+      { s: "vc:predict", n: "A 5-persona debate stress-tests the call." },
+      { s: "vc:plan", n: "Phase the winner into executable work." }
+    ]},
+    { label: "Ship safely", goal: "Get a release out the door <b>without leaving holes</b> behind.", chain: [
+      { s: "vc:scenario", n: "Generate edge cases across risk dimensions." },
+      { s: "vc:security-scan", n: "Secrets, vulnerable deps, OWASP-style patterns." },
+      { s: "vc:git", n: "Cut the release with confidence." }
+    ]},
+    { label: "Break out of stuck", goal: "You're circling a bug or over-building a design. <b>Reset the frame.</b>", chain: [
+      { s: "vc:problem-solving", n: "Systematic reframing when you keep hitting the same wall." },
+      { s: "vc:sequential-thinking", n: "Structured, revisable step-by-step reasoning." }
+    ]},
+    { label: "Record what happened", goal: "Close the loop so the <b>next session</b> (or teammate) isn't lost.", chain: [
+      { s: "vc:pm", n: "Sync plan files back to what actually shipped." },
+      { s: "vc:docs", n: "Write a durable decision record in docs/." },
+      { s: "vc:journal", n: "Honest post-mortem that can change a rule." }
+    ]},
+    { label: "Start from scratch", goal: "A brand-new project or full-stack feature with <b>no scaffold yet</b>.", chain: [
+      { s: "vc:bootstrap", n: "Stack choice, planning, and the first working slice — end to end." }
+    ]}
+  ];
+
+  var jobList = document.getElementById("job-list");
+  var playView = document.getElementById("play-view");
+
+  function renderRecipe(i) {
+    var r = RECIPES[i];
+    var links = r.chain.map(function (step) {
+      var cmd = '<span class="cmd"><span class="sl">/vc:</span>' + step.s.replace(/^vc:/, "") + "</span>";
+      return '<div class="link"><div class="rail"><span class="pin">' + (r.chain.indexOf(step) + 1) +
+        '</span><span class="wire"></span></div><div class="body">' + cmd +
+        '<div class="note">' + step.n + "</div></div></div>";
+    }).join("");
+    var flow = r.chain.map(function (s) { return "/" + s.s; }).join("  →  ");
+    playView.innerHTML =
+      '<p class="play-goal">' + r.goal + "</p>" +
+      '<div class="chain">' + links + "</div>" +
+      '<div class="play-foot"><b>run in order · </b>' + flow + "</div>";
+  }
+
+  RECIPES.forEach(function (r, i) {
+    var b = document.createElement("button");
+    b.className = "job" + (i === 0 ? " active" : "");
+    b.setAttribute("role", "tab");
+    b.innerHTML = '<span class="jn">' + String(i + 1).padStart(2, "0") + "</span>" + r.label;
+    b.addEventListener("click", function () {
+      jobList.querySelectorAll(".job").forEach(function (x) { x.classList.remove("active"); });
+      b.classList.add("active");
+      renderRecipe(i);
+    });
+    jobList.appendChild(b);
+  });
+  renderRecipe(0);
+
+  // ---------- Catalog: every skill, grouped by lane ----------
+  var LANES = [
+    { title: "Core loop", note: "the everyday graph", skills: [
+      ["brainstorm", "Explore approaches when requirements are fuzzy."],
+      ["plan", "Break multi-step work into phases under plans/."],
+      ["cook", "Implement features & execute plans — tested + reviewed."],
+      ["fix", "Prove a root cause for bugs, test & CI failures."],
+      ["scout", "Map a codebase fast with parallel explore agents."],
+      ["git", "Commits, PRs, branch hygiene, the full PR pipeline."],
+      ["ask", "Design questions & honest trade-offs — no code."],
+      ["pm", "Keep plan files truthful; progress & handoffs."]
+    ]},
+    { title: "Support", note: "reach for when needed", skills: [
+      ["bootstrap", "Start a project from scratch, end to end."],
+      ["research", "Sourced findings on tech, libraries & best practices."],
+      ["predict", "A 5-persona debate before a risky change."],
+      ["scenario", "Generate edge cases & test scenarios."],
+      ["security-scan", "Secrets, vulnerable deps, OWASP patterns."],
+      ["problem-solving", "Reframe when stuck or over-complicating."],
+      ["sequential-thinking", "Structured, revisable step-by-step reasoning."],
+      ["docs", "Init/maintain docs/ + durable decision records."],
+      ["docs-seeker", "Look up a library's current docs before trusting memory."],
+      ["journal", "Honest post-mortem after a failure or hard-won fix."],
+      ["worktree", "Isolated git worktrees for parallel work."],
+      ["skill-creator", "Author or edit vc kit skills to the spec."]
+    ]},
+    { title: "Personal", note: "one specialized skill", skills: [
+      ["obsidian-second-brain-note", "Save knowledge into an Obsidian vault — tags, links, MOCs."]
+    ]}
+  ];
+
+  var catalog = document.getElementById("catalog-body");
+  LANES.forEach(function (lane) {
+    var head = document.createElement("div");
+    head.className = "lane";
+    head.innerHTML =
+      '<div class="lane-head"><span class="lt">' + lane.title +
+      '</span><span class="lc">' + lane.skills.length + " · " + lane.note +
+      '</span><span class="lr"></span></div>';
+    var grid = document.createElement("div");
+    grid.className = "skill-grid";
+    lane.skills.forEach(function (s) {
+      var card = document.createElement("div");
+      card.className = "skl";
+      card.innerHTML =
+        '<div class="sn"><span class="sl">/vc:</span>' + s[0] + "</div>" +
+        '<div class="sw">' + s[1] + "</div>";
+      grid.appendChild(card);
+    });
+    head.appendChild(grid);
+    catalog.appendChild(head);
   });
 </script>
 </body>
