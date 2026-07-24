@@ -9,8 +9,9 @@ routes = [
 ]
 
 # Import landing.html as a string module (served at `/`).
+# fallthrough = true keeps Wrangler's default Text rules (.txt/.sql) active too.
 rules = [
-  { type = "Text", globs = ["**/*.html"] }
+  { type = "Text", globs = ["**/*.html"], fallthrough = true }
 ]
 
 # Secret (do NOT put the value here — set it out of band):
