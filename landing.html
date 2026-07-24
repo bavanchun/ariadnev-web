@@ -449,7 +449,7 @@
   <div class="wrap">
     <div class="sec-head">
       <span class="eyebrow">Start here after install</span>
-      <h2>21 skills is a lot. Pick the job — get the recipe.</h2>
+      <h2>26 skills is a lot. Pick the job — get the recipe.</h2>
       <p class="sec-sub">You don't memorize the kit. You name what you're doing, and vcskill chains the right skills in order. Choose a job below.</p>
     </div>
 
@@ -613,7 +613,8 @@
       { s: "vc:brainstorm", n: "Weigh approaches while the requirements are still fuzzy." },
       { s: "vc:plan", n: "Break the chosen approach into phases under plans/." },
       { s: "vc:cook", n: "Implement each phase — test + review gates run inside." },
-      { s: "vc:git", n: "Commit or open a PR with clean history." }
+      { s: "vc:code-review", n: "An independent evidence-based pass before it ships." },
+      { s: "vc:ship", n: "One command: test → review → commit, push, open the PR." }
     ]},
     { label: "Fix a bug or red CI", goal: "Kill a bug, a failing test, or a broken pipeline — <b>with a proven cause</b>, not a guess.", chain: [
       { s: "vc:fix", n: "Scouts the code and proves a root cause before it changes a line." },
@@ -631,7 +632,8 @@
     { label: "Ship safely", goal: "Get a release out the door <b>without leaving holes</b> behind.", chain: [
       { s: "vc:scenario", n: "Generate edge cases across risk dimensions." },
       { s: "vc:security-scan", n: "Secrets, vulnerable deps, OWASP-style patterns." },
-      { s: "vc:git", n: "Cut the release with confidence." }
+      { s: "vc:test", n: "Run unit/integration/e2e + coverage as a release gate." },
+      { s: "vc:review-pr", n: "Review the PR on GitHub; merge only when CI's green." }
     ]},
     { label: "Break out of stuck", goal: "You're circling a bug or over-building a design. <b>Reset the frame.</b>", chain: [
       { s: "vc:problem-solving", n: "Systematic reframing when you keep hitting the same wall." },
@@ -639,7 +641,7 @@
     ]},
     { label: "Record what happened", goal: "Close the loop so the <b>next session</b> (or teammate) isn't lost.", chain: [
       { s: "vc:pm", n: "Sync plan files back to what actually shipped." },
-      { s: "vc:docs", n: "Write a durable decision record in docs/." },
+      { s: "vc:handoff", n: "Redacted session snapshot — decisions, state, next steps." },
       { s: "vc:journal", n: "Honest post-mortem that can change a rule." }
     ]},
     { label: "Start from scratch", goal: "A brand-new project or full-stack feature with <b>no scaffold yet</b>.", chain: [
@@ -708,6 +710,10 @@
       ["plan", "Break multi-step work into phases under plans/."],
       ["cook", "Implement features & execute plans — tested + reviewed."],
       ["fix", "Prove a root cause for bugs, test & CI failures."],
+      ["code-review", "Evidence-based review of a diff, PR, commit, or codebase."],
+      ["test", "Run unit/integration/e2e + coverage as a gate verdict."],
+      ["ship", "One pass: test → review → commit, push, open the PR."],
+      ["review-pr", "Review a GitHub PR — fix, reply, or merge when CI's green."],
       ["scout", "Map a codebase fast with parallel explore agents."],
       ["git", "Commits, PRs, branch hygiene, the full PR pipeline."],
       ["ask", "Design questions & honest trade-offs — no code."],
@@ -724,6 +730,7 @@
       ["docs", "Init/maintain docs/ + durable decision records."],
       ["docs-seeker", "Look up a library's current docs before trusting memory."],
       ["journal", "Honest post-mortem after a failure or hard-won fix."],
+      ["handoff", "Compact the session into a redacted handoff for a fresh agent."],
       ["worktree", "Isolated git worktrees for parallel work."],
       ["skill-creator", "Author or edit vc kit skills to the spec."]
     ]},
