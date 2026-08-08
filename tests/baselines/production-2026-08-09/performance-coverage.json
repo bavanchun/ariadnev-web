@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "qualification": {
+    "status": "frozen-for-phase-11",
+    "runOrder": [
+      "marketing-home#1",
+      "docs-en-installation#1",
+      "docs-vi-installation#1",
+      "marketing-home#2",
+      "docs-en-installation#2",
+      "docs-vi-installation#2",
+      "marketing-home#3",
+      "docs-en-installation#3",
+      "docs-vi-installation#3",
+      "marketing-home#4",
+      "docs-en-installation#4",
+      "docs-vi-installation#4",
+      "marketing-home#5",
+      "docs-en-installation#5",
+      "docs-vi-installation#5"
+    ],
+    "interactions": [
+      "install-cta-navigation",
+      "marketing-graph-keyboard-traversal",
+      "docs-search-open-type-select",
+      "docs-locale-version-switch"
+    ]
+  },
+  "legacyBaseline": {
+    "runOrder": [
+      "marketing-home#1",
+      "marketing-home#2",
+      "marketing-home#3",
+      "marketing-home#4",
+      "marketing-home#5"
+    ],
+    "routes": [
+      {
+        "routeId": "marketing-home",
+        "status": "observed",
+        "artifacts": [
+          "lighthouse/performance-run-1.json",
+          "lighthouse/performance-run-2.json",
+          "lighthouse/performance-run-3.json",
+          "lighthouse/performance-run-4.json",
+          "lighthouse/performance-run-5.json"
+        ],
+        "summary": "lighthouse/performance-summary.json"
+      },
+      {
+        "routeId": "docs-en-installation",
+        "status": "observed-not-available",
+        "reason": "The legacy production topology returns its generic unknown-route response because no docs product is deployed.",
+        "routeSnapshotId": "legacy-docs-en-installation",
+        "observedHttpStatus": 404
+      },
+      {
+        "routeId": "docs-vi-installation",
+        "status": "observed-not-available",
+        "reason": "The legacy production topology returns its generic unknown-route response because no Vietnamese docs product is deployed.",
+        "routeSnapshotId": "legacy-docs-vi-installation",
+        "observedHttpStatus": 404
+      }
+    ],
+    "interactions": [
+      {
+        "interactionId": "install-cta-navigation",
+        "status": "observed-pass",
+        "artifacts": [
+          "lighthouse/performance-run-1.json",
+          "lighthouse/performance-run-2.json",
+          "lighthouse/performance-run-3.json",
+          "lighthouse/performance-run-4.json",
+          "lighthouse/performance-run-5.json"
+        ]
+      },
+      {
+        "interactionId": "marketing-graph-keyboard-traversal",
+        "status": "observed-pass",
+        "artifacts": [
+          "lighthouse/performance-run-1.json",
+          "lighthouse/performance-run-2.json",
+          "lighthouse/performance-run-3.json",
+          "lighthouse/performance-run-4.json",
+          "lighthouse/performance-run-5.json"
+        ]
+      },
+      {
+        "interactionId": "docs-search-open-type-select",
+        "status": "observed-not-available",
+        "reason": "The legacy route has no docs shell or static search control to exercise.",
+        "routeSnapshotId": "legacy-docs-en-installation"
+      },
+      {
+        "interactionId": "docs-locale-version-switch",
+        "status": "observed-not-available",
+        "reason": "The legacy route has no docs locale or version controls to exercise.",
+        "routeSnapshotId": "legacy-docs-en-installation"
+      }
+    ]
+  }
+}

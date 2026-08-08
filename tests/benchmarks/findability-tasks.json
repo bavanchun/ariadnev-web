@@ -1,0 +1,271 @@
+{
+  "schemaVersion": 1,
+  "metadata": {
+    "observedLegacyProof": {
+      "release": "0.11.0",
+      "goldenTasksClaimed": 14,
+      "observedOn": "2026-08-09"
+    },
+    "futureBenchmark": {
+      "goldenTasksTarget": 15,
+      "notes": "The accepted Phase 1 corpus adds an explicit workflow-authority task rather than rewriting the current 0.11.0 proof claim."
+    }
+  },
+  "tasks": [
+    {
+      "id": "install-unix",
+      "criticality": "critical",
+      "startUrl": "https://vcskill.vchun.dev/",
+      "startState": { "locale": "en", "release": "0.11.0", "javascript": "enabled" },
+      "userQuestion": "How do I install vcskill on macOS or Linux?",
+      "canonicalExpectedFactSource": "landing install command and /install route",
+      "maxActions": 1,
+      "oracle": {
+        "mustFind": "curl -fsSL https://vcskill.vchun.dev/install | bash",
+        "evidenceType": "landing-command"
+      },
+      "failureArtifact": {
+        "kind": "screenshot-and-navigation-log",
+        "pathTemplate": "viewports/findability-install-unix-failure"
+      }
+    },
+    {
+      "id": "install-windows",
+      "criticality": "critical",
+      "startUrl": "https://vcskill.vchun.dev/",
+      "startState": { "locale": "en", "release": "0.11.0", "javascript": "enabled" },
+      "userQuestion": "How do I install vcskill on Windows?",
+      "canonicalExpectedFactSource": "landing install command and /install.ps1 route",
+      "maxActions": 1,
+      "oracle": {
+        "mustFind": "irm https://vcskill.vchun.dev/install.ps1 | iex",
+        "evidenceType": "landing-command"
+      },
+      "failureArtifact": {
+        "kind": "screenshot-and-navigation-log",
+        "pathTemplate": "viewports/findability-install-windows-failure"
+      }
+    },
+    {
+      "id": "prerequisites",
+      "criticality": "high",
+      "startUrl": "https://vcskill.vchun.dev/",
+      "startState": { "locale": "en", "release": "0.11.0", "javascript": "enabled" },
+      "userQuestion": "Do I need Node installed before using vcskill?",
+      "canonicalExpectedFactSource": "landing copy and install route",
+      "maxActions": 2,
+      "oracle": {
+        "mustFind": "standalone CLI needs no Node",
+        "evidenceType": "landing-copy"
+      },
+      "failureArtifact": {
+        "kind": "screenshot-and-navigation-log",
+        "pathTemplate": "viewports/findability-prerequisites-failure"
+      }
+    },
+    {
+      "id": "first-provider",
+      "criticality": "critical",
+      "startUrl": "https://vcskill.vchun.dev/",
+      "startState": { "locale": "en", "release": "0.11.0", "javascript": "enabled" },
+      "userQuestion": "Which provider targets are supported first?",
+      "canonicalExpectedFactSource": "SITE provider matrix",
+      "maxActions": 2,
+      "oracle": {
+        "mustFind": "claude-code, codex, cursor, antigravity, opencode, generic",
+        "evidenceType": "provider-matrix"
+      },
+      "failureArtifact": {
+        "kind": "screenshot-and-navigation-log",
+        "pathTemplate": "viewports/findability-first-provider-failure"
+      }
+    },
+    {
+      "id": "first-read-only-run",
+      "criticality": "critical",
+      "startUrl": "https://vcskill.vchun.dev/",
+      "startState": { "locale": "en", "release": "0.11.0", "javascript": "enabled" },
+      "userQuestion": "What is the first safe read-only command I should run?",
+      "canonicalExpectedFactSource": "landing proof boundary copy",
+      "maxActions": 2,
+      "oracle": {
+        "mustFind": "vc run read-only-delivery --validate --json",
+        "evidenceType": "landing-copy"
+      },
+      "failureArtifact": {
+        "kind": "screenshot-and-navigation-log",
+        "pathTemplate": "viewports/findability-first-read-only-run-failure"
+      }
+    },
+    {
+      "id": "status",
+      "criticality": "high",
+      "startUrl": "https://vcskill.vchun.dev/",
+      "startState": { "locale": "en", "release": "0.11.0", "javascript": "enabled" },
+      "userQuestion": "How do I check the status of a durable run?",
+      "canonicalExpectedFactSource": "SITE command descriptions",
+      "maxActions": 2,
+      "oracle": {
+        "mustFind": "resume, status, and cancel keep durable runs operable",
+        "evidenceType": "command-description"
+      },
+      "failureArtifact": {
+        "kind": "screenshot-and-navigation-log",
+        "pathTemplate": "viewports/findability-status-failure"
+      }
+    },
+    {
+      "id": "resume",
+      "criticality": "high",
+      "startUrl": "https://vcskill.vchun.dev/",
+      "startState": { "locale": "en", "release": "0.11.0", "javascript": "enabled" },
+      "userQuestion": "Can a durable run be resumed?",
+      "canonicalExpectedFactSource": "SITE command descriptions",
+      "maxActions": 2,
+      "oracle": {
+        "mustFind": "resume, status, and cancel keep durable runs operable",
+        "evidenceType": "command-description"
+      },
+      "failureArtifact": {
+        "kind": "screenshot-and-navigation-log",
+        "pathTemplate": "viewports/findability-resume-failure"
+      }
+    },
+    {
+      "id": "cancel",
+      "criticality": "high",
+      "startUrl": "https://vcskill.vchun.dev/",
+      "startState": { "locale": "en", "release": "0.11.0", "javascript": "enabled" },
+      "userQuestion": "Can a durable run be cancelled safely?",
+      "canonicalExpectedFactSource": "SITE command descriptions",
+      "maxActions": 2,
+      "oracle": {
+        "mustFind": "resume, status, and cancel keep durable runs operable",
+        "evidenceType": "command-description"
+      },
+      "failureArtifact": {
+        "kind": "screenshot-and-navigation-log",
+        "pathTemplate": "viewports/findability-cancel-failure"
+      }
+    },
+    {
+      "id": "update-backup-uninstall",
+      "criticality": "critical",
+      "startUrl": "https://vcskill.vchun.dev/",
+      "startState": { "locale": "en", "release": "0.11.0", "javascript": "enabled" },
+      "userQuestion": "How do I update, restore a backup, or uninstall vcskill?",
+      "canonicalExpectedFactSource": "SITE command list",
+      "maxActions": 2,
+      "oracle": {
+        "mustFind": "update, backups, uninstall",
+        "evidenceType": "command-list"
+      },
+      "failureArtifact": {
+        "kind": "screenshot-and-navigation-log",
+        "pathTemplate": "viewports/findability-update-backup-uninstall-failure"
+      }
+    },
+    {
+      "id": "exact-cli-syntax",
+      "criticality": "critical",
+      "startUrl": "https://vcskill.vchun.dev/",
+      "startState": { "locale": "en", "release": "0.11.0", "javascript": "enabled" },
+      "userQuestion": "What exact CLI syntax should I copy for the main commands?",
+      "canonicalExpectedFactSource": "SITE command args",
+      "maxActions": 2,
+      "oracle": {
+        "mustFind": "run <workflow> [--runtime codex|claude-code] [--json]",
+        "evidenceType": "command-args"
+      },
+      "failureArtifact": {
+        "kind": "screenshot-and-navigation-log",
+        "pathTemplate": "viewports/findability-exact-cli-syntax-failure"
+      }
+    },
+    {
+      "id": "workflow-authority",
+      "criticality": "high",
+      "startUrl": "https://vcskill.vchun.dev/",
+      "startState": { "locale": "en", "release": "0.11.0", "javascript": "enabled" },
+      "userQuestion": "Where is the canonical workflow authority for vcskill?",
+      "canonicalExpectedFactSource": "future docs benchmark target; current landing only claims graph counts",
+      "maxActions": 2,
+      "oracle": {
+        "mustFind": "explicit workflow authority entry point or route",
+        "evidenceType": "future-docs-navigation"
+      },
+      "failureArtifact": {
+        "kind": "screenshot-and-navigation-log",
+        "pathTemplate": "viewports/findability-workflow-authority-failure"
+      }
+    },
+    {
+      "id": "skill-lookup",
+      "criticality": "high",
+      "startUrl": "https://vcskill.vchun.dev/",
+      "startState": { "locale": "en", "release": "0.11.0", "javascript": "enabled" },
+      "userQuestion": "How can I look up what skills are available?",
+      "canonicalExpectedFactSource": "SITE lanes and skill inventory",
+      "maxActions": 2,
+      "oracle": {
+        "mustFind": "26 unique skills",
+        "evidenceType": "skill-inventory"
+      },
+      "failureArtifact": {
+        "kind": "screenshot-and-navigation-log",
+        "pathTemplate": "viewports/findability-skill-lookup-failure"
+      }
+    },
+    {
+      "id": "provider-support",
+      "criticality": "high",
+      "startUrl": "https://vcskill.vchun.dev/",
+      "startState": { "locale": "en", "release": "0.11.0", "javascript": "enabled" },
+      "userQuestion": "Which artifacts are supported by each provider target?",
+      "canonicalExpectedFactSource": "SITE provider support matrix",
+      "maxActions": 2,
+      "oracle": {
+        "mustFind": "provider-by-artifact capability matrix",
+        "evidenceType": "provider-matrix"
+      },
+      "failureArtifact": {
+        "kind": "screenshot-and-navigation-log",
+        "pathTemplate": "viewports/findability-provider-support-failure"
+      }
+    },
+    {
+      "id": "security-proof-boundary",
+      "criticality": "critical",
+      "startUrl": "https://vcskill.vchun.dev/",
+      "startState": { "locale": "en", "release": "0.11.0", "javascript": "enabled" },
+      "userQuestion": "What is the security and proof boundary of the public experience?",
+      "canonicalExpectedFactSource": "landing proof caveat and copy",
+      "maxActions": 2,
+      "oracle": {
+        "mustFind": "Public execution is read-only, and workspace-changing execution remains policy-denied",
+        "evidenceType": "proof-boundary"
+      },
+      "failureArtifact": {
+        "kind": "screenshot-and-navigation-log",
+        "pathTemplate": "viewports/findability-security-proof-boundary-failure"
+      }
+    },
+    {
+      "id": "release-integrity",
+      "criticality": "critical",
+      "startUrl": "https://vcskill.vchun.dev/",
+      "startState": { "locale": "en", "release": "0.11.0", "javascript": "enabled" },
+      "userQuestion": "How do I know the download is release-integrity checked?",
+      "canonicalExpectedFactSource": "landing copy and checksums.txt route",
+      "maxActions": 2,
+      "oracle": {
+        "mustFind": "SHA-256 is checked against checksums.txt before anything runs",
+        "evidenceType": "release-integrity-copy"
+      },
+      "failureArtifact": {
+        "kind": "screenshot-and-navigation-log",
+        "pathTemplate": "viewports/findability-release-integrity-failure"
+      }
+    }
+  ]
+}
