@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>vcskill | quality-gated workflows across agents</title>
-<meta name="description" content="Install a curated workflow kit with 26 connected skills, source-aware quality gates, and honest adaptation across coding-agent targets." />
-<meta property="og:title" content="vcskill | quality-gated workflows across agents" />
-<meta property="og:description" content="A curated workflow kit with measured skill quality, pinned provenance, and a standalone cross-platform CLI." />
+<title>vcskill | graph-native workflows across agents</title>
+<meta name="description" content="Install 26 connected skills and run versioned, resumable workflows through a local graph harness with measured proof boundaries." />
+<meta property="og:title" content="vcskill | graph-native workflows across agents" />
+<meta property="og:description" content="A measured workflow kit with graph lint, behavioral benchmarks, durable local runs, and a standalone cross-platform CLI." />
 <meta property="og:type" content="website" />
 <meta name="theme-color" content="#0a0c0b" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0c0b'/%3E%3Ctext x='16' y='23' font-family='monospace' font-size='20' font-weight='700' fill='%23ff6b45' text-anchor='middle'%3E%3E%3C/text%3E%3C/svg%3E" />
@@ -209,6 +209,8 @@
   .copybtn:active { transform: translateY(2px); }
   .copybtn.done { color: var(--teal); border-color: var(--teal); }
   .runtime-note { font-size: 13px; color: var(--faint); margin: 16px 4px 0; line-height: 1.6; }
+  .graph-command { max-width: 760px; margin-top: 32px; }
+  .graph-boundary { color: var(--faint); font-family: var(--mono); font-size: 13px; margin: 20px 0 0; max-width: 84ch; }
 
   /* stat band */
   .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--line); border-radius: var(--radius); margin-top: 56px; overflow: hidden; background: var(--panel); }
@@ -400,8 +402,8 @@
     <div class="brand"><span class="caret">&gt;_</span> vcskill</div>
     <nav class="nav-links" aria-label="Primary navigation">
       <a href="#proof">Proof</a>
+      <a href="#graph">Graph</a>
       <a href="#playbook">Playbook</a>
-      <a href="#adapt">Adapt engine</a>
       <a href="#commands">Commands</a>
       <a class="nav-cta" href="#install">Install</a>
     </nav>
@@ -414,8 +416,8 @@
   <div class="wrap hero-grid">
     <div class="reveal" style="animation-delay:.05s">
       <span class="release-badge">release&nbsp;<span data-release></span></span>
-      <h1 class="title">One workflow kit.<br /><span class="em">Quality-gated.</span></h1>
-      <p class="lede">Install <strong><span data-stat="skills"></span> connected skills</strong>, <span data-stat="agents"></span> specialist agents, and six Claude Code hooks across six coding-agent targets.</p>
+      <h1 class="title">One workflow kit.<br /><span class="em">Graph-native.</span></h1>
+      <p class="lede">Install <strong><span data-stat="skills"></span> connected skills</strong>, <span data-stat="agents"></span> specialist agents, and six Claude Code hooks across six coding-agent targets. Run versioned workflows locally through Codex and Claude Code adapters.</p>
       <div class="hero-cta">
         <a class="btn btn-primary" href="#install">Install vcskill</a>
         <a class="btn btn-ghost" href="#proof">See proof</a>
@@ -447,7 +449,7 @@
           <span id="copy-status" class="sr-only" aria-live="polite"></span>
         </div>
       </div>
-      <p class="runtime-note mono">The standalone CLI needs no Node. Claude Code hooks invoke Node after install.</p>
+      <p class="runtime-note mono">The standalone CLI needs no Node. Claude Code hooks invoke Node after install. Graph runs stay local, append-only, and resumable.</p>
     </div>
   </div>
 
@@ -461,10 +463,35 @@
   <div class="wrap">
     <div class="sec-head">
       <span class="eyebrow">Measured in release <span data-release></span></span>
-      <h2>Static gates, with the boundary visible.</h2>
-      <p class="sec-sub">Measured structure and traceability ship beside an explicit statement of what the gates cannot prove.</p>
+      <h2>Static lint, behavioral proof, runtime boundaries.</h2>
+      <p class="sec-sub">Behavioral checks cover all 26 skills and 14 golden tasks. Each claim names its evidence layer so release facts stay useful without overstating what a benchmark establishes.</p>
     </div>
     <div class="proof-layout" id="proof-ledger"></div>
+  </div>
+</section>
+
+<!-- GRAPH HARNESS -->
+<section id="graph" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Graph-native execution</span>
+      <h2>Compile the workflow before the model runs.</h2>
+      <p class="sec-sub">Release <span data-release></span> turns three canonical delivery workflows into versioned graph contracts, rejects unsafe structure, and keeps local runs recoverable.</p>
+    </div>
+    <div class="pipe-grid">
+      <div class="step"><h3>Graph IR</h3><p>Versioned JSON contracts make nodes, edges, authority, state ownership, and failure paths explicit.</p></div>
+      <div class="step"><h3>Lint</h3><p>Reject unreachable nodes, unbounded loops or retries, missing failure edges, and authority gaps before execution.</p></div>
+      <div class="step"><h3>Execute</h3><p>A provider-neutral runner emits redacted append-only events while adapters handle runtime-specific invocation.</p></div>
+      <div class="step"><h3>Resume</h3><p>Checkpoints, idempotency leases, and reconciliation recover defined failures without duplicate effects.</p></div>
+    </div>
+    <div class="term graph-command">
+      <div class="term-bar"><span class="term-tag">shell · graph validation</span></div>
+      <div class="term-body">
+        <div class="term-line"><span class="prompt">$</span><span class="term-cmd">vc run read-only-delivery --validate --json</span></div>
+        <div class="term-out"><span class="ok">✓</span> graph v1.0.0 &nbsp; <span class="ok">✓</span> 7 nodes / 12 edges &nbsp; <span class="ok">✓</span> valid</div>
+      </div>
+    </div>
+    <p class="graph-boundary">Public execution is read-only. Safe-change workflows validate, but workspace-changing execution remains policy-denied until an explicit approval and side-effect adapter are available.</p>
   </div>
 </section>
 
@@ -549,12 +576,13 @@
 <section style="padding-top:0">
   <div class="wrap">
     <div class="band">
-      <h2>Install the kit. Keep your workflow.</h2>
+      <h2>Install the kit. Run the graph.</h2>
       <div class="term">
         <div class="term-bar"><span class="term-tag">shell · one-liner</span></div>
         <div class="term-body">
           <div class="term-line"><span class="prompt">$</span><span class="term-cmd">curl <span class="flag">-fsSL</span> https://vcskill.vchun.dev/install <span class="pipe">|</span> bash</span></div>
           <div class="term-line"><span class="prompt">$</span><span class="term-cmd">vc install <span class="flag">--provider</span> claude-code,codex,cursor</span></div>
+          <div class="term-line"><span class="prompt">$</span><span class="term-cmd">vc run read-only-delivery <span class="flag">--validate --json</span></span></div>
         </div>
       </div>
     </div>
@@ -578,15 +606,23 @@
 <script>
   // SITE_DATA_START
   var SITE = {
-    release: "0.10.0",
+    release: "0.11.0",
     stats: { skills: 26, agents: 13, hooks: 6, targets: 6 },
     statLabels: { skills: "Skills", agents: "Agents", hooks: "Claude hooks", targets: "Targets" },
     proof: {
-      tierOne: { passed: 26, total: 26 },
-      claimCoverage: { passed: 8, total: 8 },
-      provenance: { pinned: 25, original: 1 }
+      behavioral: { skillsPassed: 26, skillsTotal: 26, goldenTasks: 14 },
+      static: {
+        claimCoverage: { passed: 8, total: 8 },
+        provenance: { pinned: 25, original: 1 }
+      },
+      graph: { workflows: 3, canonicalNodes: 7, canonicalEdges: 12 },
+      recovery: { passed: true, duplicateEffects: 0 },
+      performance: { p95NodeBudgetMs: 200, passed: true },
+      context: { retrievalGainPoints: 26.7656, taskSuccessGainPoints: 38.4615, tokenDelta: 0 },
+      runtime: { adapters: 2, evidence: "pinned-capability-gated" },
+      release: { binaries: 5, checksums: true }
     },
-    proofCaveat: "These static gates do not run golden tasks and do not prove behavioral parity.",
+    proofCaveat: "Graph lint is static; behavioral and recovery results use deterministic fixtures; live-provider evidence is pinned and capability-gated. Public execution is read-only, and workspace-changing execution remains policy-denied. These gates do not establish general provider parity or safe arbitrary mutation.",
     artifacts: ["skill", "agent", "command", "rules", "scripts", "env", "hook"],
     providers: [
       { name: "claude-code", support: { skill:1, agent:1, command:1, rules:1, scripts:1, env:1, hook:1 } },
@@ -602,6 +638,7 @@
     },
     commands: [
       { name: "install", args: " [--provider a,b] [--global]", description: "Install the kit to selected targets and write a receipt for health checks." },
+      { name: "run", args: " <workflow> [--runtime codex|claude-code] [--json]", description: "Validate or execute a versioned graph; resume, status, and cancel keep durable runs operable." },
       { name: "doctor", args: " [--fix]", description: "Run the scored 0-100 health audit and print the exact repair for each finding." },
       { name: "eval", args: " [--skill <name>]", description: "Score skill quality with the static tier, plus an opt-in LLM judge when configured." },
       { name: "coverage", args: " [--skill <name>]", description: "Check classified upstream claims against distilled skill content." },
@@ -726,14 +763,16 @@
   var proof = SITE.proof;
   var proofLedger = document.getElementById("proof-ledger");
   proofLedger.innerHTML =
-    '<div class="proof-primary"><div class="value">' + proof.tierOne.passed + "/" + proof.tierOne.total + "</div>" +
-      '<h3>Tier-1 static gate</h3><p>Every shipped skill passes structural lint, required-section, and reference checks.</p></div>' +
+    '<div class="proof-primary"><div class="value">' + proof.behavioral.skillsPassed + "/" + proof.behavioral.skillsTotal + "</div>" +
+      '<h3>Behavioral skill contracts</h3><p>Every shipped skill passes positive trigger, nearest-negative routing, and output-contract coverage. <strong>' + proof.behavioral.goldenTasks + " golden tasks</strong> exercise the core workflows.</p></div>" +
     '<dl class="proof-list">' +
-      '<div class="proof-row"><dt>Strict claim coverage</dt><dd><strong>' + proof.claimCoverage.passed + "/" + proof.claimCoverage.total +
-        "</strong> tracked skills pass.</dd></div>" +
-      '<div class="proof-row"><dt>Source provenance</dt><dd><strong>' + proof.provenance.pinned +
-        "</strong> upstream-pinned, <strong>" + proof.provenance.original + "</strong> kit-original.</dd></div>" +
-      '<div class="proof-row"><dt>Release contract</dt><dd><strong>SHA-256</strong> verified standalone binaries for five platform targets.</dd></div>' +
+      '<div class="proof-row"><dt>Static traceability</dt><dd><strong>' + proof.static.claimCoverage.passed + "/" + proof.static.claimCoverage.total +
+        "</strong> tracked claims pass; <strong>" + proof.static.provenance.pinned + "</strong> skills are upstream-pinned and <strong>" + proof.static.provenance.original + "</strong> is kit-original.</dd></div>" +
+      '<div class="proof-row"><dt>Graph contracts</dt><dd><strong>' + proof.graph.workflows + "</strong> workflows; the released canonical graph has <strong>" + proof.graph.canonicalNodes + "</strong> nodes and <strong>" + proof.graph.canonicalEdges + "</strong> edges.</dd></div>" +
+      '<div class="proof-row"><dt>Recovery and safety</dt><dd>Defined failure-injection cases pass with <strong>' + proof.recovery.duplicateEffects + "</strong> duplicate effects.</dd></div>" +
+      '<div class="proof-row"><dt>Context graph</dt><dd><strong>+' + proof.context.retrievalGainPoints.toFixed(2) + "</strong> retrieval points, <strong>+" + proof.context.taskSuccessGainPoints.toFixed(2) + "</strong> task-success points, <strong>" + proof.context.tokenDelta + "</strong> token delta.</dd></div>" +
+      '<div class="proof-row"><dt>Performance gate</dt><dd>Orchestration p95 stays within the <strong>' + proof.performance.p95NodeBudgetMs + " ms/node</strong> budget, excluding provider and tool time.</dd></div>" +
+      '<div class="proof-row"><dt>Runtime and release</dt><dd><strong>' + proof.runtime.adapters + "</strong> pinned, capability-gated adapters; <strong>" + proof.release.binaries + "</strong> SHA-256-verified binaries.</dd></div>" +
     "</dl>" +
     '<p class="proof-caveat">boundary: ' + SITE.proofCaveat + "</p>";
 
