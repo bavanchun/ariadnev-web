@@ -1,11 +1,13 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, rmSync } from "node:fs";
+import { cpSync, existsSync, rmSync } from "node:fs";
 import { resolve } from "node:path";
 import process from "node:process";
 
 import { toolchainCompatibilityGeneratedPaths } from "./toolchain-compatibility-paths.mjs";
 
 const workspaceRoot = process.cwd();
+const siteCompatibilityOutput = resolve(workspaceRoot, "apps/site/dist");
+let seededSiteCompatibilityOutput = false;
 
 function clean() {
   for (const path of toolchainCompatibilityGeneratedPaths) {
@@ -39,6 +41,10 @@ try {
   if (!existsSync(resolve(workspaceRoot, "tests/compatibility/fixtures/astro/dist/index.html"))) {
     throw new Error("Astro compatibility build did not emit index.html");
   }
+  if (!existsSync(siteCompatibilityOutput)) {
+    cpSync(resolve(workspaceRoot, "tests/compatibility/fixtures/astro/dist"), siteCompatibilityOutput, { recursive: true });
+    seededSiteCompatibilityOutput = true;
+  }
   run(["exec", "next", "build"], {
     cwd: resolve(workspaceRoot, "tests/compatibility/fixtures/docs"),
   });
@@ -47,5 +53,6 @@ try {
   }
   run(["--filter", "@vcskill/edge", "run", "wrangler:dry-run"]);
 } finally {
+  if (seededSiteCompatibilityOutput) rmSync(siteCompatibilityOutput, { force: true, recursive: true });
   clean();
 }
