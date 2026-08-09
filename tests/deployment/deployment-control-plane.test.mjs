@@ -303,10 +303,18 @@ test("complete product..evidence diff binds the exact nonempty Phase 11 blob inv
   })), /regular Git blobs only/);
 });
 
-test("clean structural validation precedes owner outputs; artifact validation remains fail-closed", async () => {
+test("clean structural validation precedes owner outputs; artifact validation remains fail-closed", async (t) => {
+  const emptyRepository = await mkdtemp(resolve(tmpdir(), "vcskill-empty-deploy-"));
+  t.after(() => rm(emptyRepository, { recursive: true, force: true }));
   const staging = await makeInput({ environment: "staging" });
   await validateDeploymentInput(staging, validationOptions(staging));
-  await assert.rejects(validateDeploymentInput(staging, validationOptions(staging, { checkArtifacts: true })), /required deployment artifact is absent/);
+  await assert.rejects(validateDeploymentInput(staging, validationOptions(staging, {
+    checkArtifacts: true,
+    repoRoot: emptyRepository,
+    schemaPath: DEPLOYMENT_SCHEMA,
+    topology: await loadTopology(),
+    topologyPath: TOPOLOGY_PATH,
+  })), /required deployment artifact is absent/);
 });
 
 test("build verification requires exact config, output, unit, and product digests", async (t) => {
