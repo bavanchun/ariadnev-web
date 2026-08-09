@@ -114,13 +114,17 @@ test("Candidate B protects collisions and applies the same bounded static respon
 
 test("Candidate A SITE and Candidate B ASSETS match HTML, hashed asset, and 404 response policy", async () => {
   const assets = createAssetsBinding();
-  const policyHeaders = ["cache-control", "x-content-type-options", "referrer-policy", "x-frame-options"];
+  const contentSecurityPolicy = "default-src 'self'; base-uri 'self'; connect-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; img-src 'self' data:; object-src 'none'; script-src 'self'; style-src 'self'";
+  const permissionsPolicy = "camera=(), geolocation=(), microphone=(), payment=(), usb=()";
+  const policyHeaders = ["cache-control", "content-security-policy", "permissions-policy", "x-content-type-options", "referrer-policy", "x-frame-options"];
   const site = {
     async fetch(request) {
       const path = new URL(request.url).pathname;
       const status = path === "/missing" ? 404 : 200;
       const headers = new Headers({
         "cache-control": status === 404 ? "no-store" : path.includes("abc123") ? "public, max-age=31536000, immutable" : "public, max-age=300",
+        "content-security-policy": contentSecurityPolicy,
+        "permissions-policy": permissionsPolicy,
         "content-type": path === "/" ? "text/html; charset=utf-8" : "text/plain",
         "x-content-type-options": "nosniff", "referrer-policy": "strict-origin-when-cross-origin", "x-frame-options": "DENY",
       });
