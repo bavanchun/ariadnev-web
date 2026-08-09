@@ -1,8 +1,8 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, resolve } from "node:path";
+import { basename, dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { writeDecisionArtifacts } from "./edge-evidence-artifacts.mjs";
@@ -14,6 +14,7 @@ import {
   REQUIRED_CELLS,
   REQUIRED_REPETITIONS,
   sanitizeObservedCell,
+  validateLiveReprobeRecord,
   validateObservedMatrix,
   validateSanitizedDecision,
   validateStagingStateRecord,
@@ -22,6 +23,7 @@ import {
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const defaultDecisionPath = resolve(repoRoot, "docs/decisions/edge-routing-topology.md");
 const defaultStatePath = resolve(repoRoot, "docs/decisions/edge-staging-state.json");
+const defaultReprobePath = resolve(repoRoot, "docs/decisions/edge-routing-reprobe.json");
 const stagingWranglerPath = resolve(repoRoot, "workers/edge/wrangler.combined.toml");
 
 export { sanitizeObservedCell, validateStagingStateRecord, writeDecisionArtifacts };
@@ -139,12 +141,16 @@ function isChecksumManifest(bodyText) {
   return lines.length > 0 && lines.every((line) => /^[a-f0-9]{64}\s{2}\S+$/i.test(line));
 }
 
+function hasValidCfRay(headers) {
+  return /^[0-9a-f]{16,32}-[A-Z0-9]{3,8}$/i.test(headers.get("cf-ray") || "");
+}
+
 export function deriveLiveContentClass(observation) {
   const contentType = observation.headers.get("content-type") || "";
   const disposition = observation.headers.get("content-disposition") || "";
   const bodyText = observation.body.toString("utf8");
   const trimmedBody = bodyText.trim();
-  const cfRayPresent = observation.headers.has("cf-ray");
+  const cfRayPresent = hasValidCfRay(observation.headers);
 
   if (observation.status === 403 && cfRayPresent && !fixtureLeakPattern.test(bodyText)) return "ingress-block";
   if (observation.status === 404 && observation.body.byteLength === 0 && contentType === "") return "physical-404";
@@ -159,10 +165,12 @@ export function deriveLiveContentClass(observation) {
   return "unexpected-response";
 }
 
-function classifyLiveProbe(spec, observation) {
+function classifyLiveProbe(spec, observation, repetition) {
   const cacheControl = observation.headers.get("cache-control") || "(absent)";
   const disposition = observation.headers.get("content-disposition") || "";
   const bodyText = observation.body.toString("utf8");
+  const cfRay = observation.headers.get("cf-ray") || "";
+  const cfRayPresent = hasValidCfRay(observation.headers);
   const contentClass = deriveLiveContentClass(observation);
   const bodyMatches = spec.bodyText === undefined || bodyText.trim() === spec.bodyText;
   const dispositionMatches = spec.disposition === undefined || disposition === `attachment; filename=\"${spec.disposition}\"`;
@@ -171,19 +179,21 @@ function classifyLiveProbe(spec, observation) {
     : cacheControl === spec.cacheControl;
   return {
     id: spec.id,
+    repetition,
     requestPath: spec.path.includes("?") ? `${spec.path.split("?", 1)[0]}?[query-redacted]` : spec.path,
     status: observation.status,
     contentClass,
     cacheControl,
     bodySha256: createHash("sha256").update(observation.body).digest("hex"),
-    cfRayPresent: observation.headers.has("cf-ray"),
+    cfRayPresent,
+    cfRaySha256: cfRayPresent ? createHash("sha256").update(cfRay).digest("hex") : null,
     observedAt: new Date().toISOString(),
     pass: observation.status === spec.status
       && contentClass === spec.contentClass
       && cacheMatches
       && bodyMatches
       && dispositionMatches
-      && observation.headers.has("cf-ray"),
+      && cfRayPresent,
   };
 }
 
@@ -212,8 +222,14 @@ export async function collectLiveCandidateBProbes({
   const checkedBeforeAt = new Date().toISOString();
   validateIngressCheck(await checkIngressRule(), expectedRule, expectedDigest);
   const workerVersionId = await resolveVersion();
+  const versionCheckedBeforeAt = new Date().toISOString();
   const cells = [];
-  for (const spec of specs) cells.push(classifyLiveProbe(spec, await probe(normalizedBaseUrl, spec.path)));
+  for (let repetition = 1; repetition <= REQUIRED_REPETITIONS; repetition += 1) {
+    for (const spec of specs) cells.push(classifyLiveProbe(spec, await probe(normalizedBaseUrl, spec.path), repetition));
+  }
+  const workerVersionAfter = await resolveVersion();
+  const versionCheckedAfterAt = new Date().toISOString();
+  if (workerVersionAfter !== workerVersionId) throw new Error("staging Worker version changed during live re-probe");
   validateIngressCheck(await checkIngressRule(), expectedRule, expectedDigest);
   const checkedAfterAt = new Date().toISOString();
   return {
@@ -232,8 +248,31 @@ export async function collectLiveCandidateBProbes({
       checkedAfterAt,
     },
     workerVersionId,
+    workerVersionVerification: {
+      status: "stable",
+      checkedBeforeAt: versionCheckedBeforeAt,
+      checkedAfterAt: versionCheckedAfterAt,
+    },
     cells,
   };
+}
+
+export async function writeLiveReprobeArtifact(path, record) {
+  validateLiveReprobeRecord(record);
+  const policy = await loadIngressPolicy();
+  if (record.ingressGuard.policyDigest !== ingressPolicyDigest(policy, "staging")) {
+    throw new Error("live re-probe must match the source-controlled ingress policy digest");
+  }
+  const targetPath = resolve(path);
+  const targetDir = dirname(targetPath);
+  const temporaryPath = resolve(targetDir, `.${basename(targetPath)}.${process.pid}.${randomUUID()}.tmp`);
+  await mkdir(targetDir, { recursive: true });
+  try {
+    await writeFile(temporaryPath, `${JSON.stringify(record, null, 2)}\n`, { flag: "wx" });
+    await rename(temporaryPath, targetPath);
+  } finally {
+    await rm(temporaryPath, { force: true });
+  }
 }
 
 function parseArgs(argv) {
@@ -243,6 +282,7 @@ function parseArgs(argv) {
     liveInputPath: null,
     probeLive: false,
     checkIngress: false,
+    writeReprobe: false,
     version: null,
     writeArtifacts: false,
     decisionPath: defaultDecisionPath,
@@ -252,6 +292,7 @@ function parseArgs(argv) {
     if (arg === "--write-artifacts") options.writeArtifacts = true;
     else if (arg === "--probe-live") options.probeLive = true;
     else if (arg === "--check-ingress") options.checkIngress = true;
+    else if (arg === "--write-reprobe") options.writeReprobe = true;
     else if (arg.startsWith("--base-url=")) options.baseUrl = arg.slice(11);
     else if (arg.startsWith("--profile=")) options.profile = arg.slice(10);
     else if (arg.startsWith("--live-input=")) options.liveInputPath = resolve(repoRoot, arg.slice(13));
@@ -279,8 +320,16 @@ async function main(argv) {
       checkIngressRule: () => reconcileIngressRule({ mode: "check", environment: "staging", token }),
     });
     process.stdout.write(`${JSON.stringify(observations, null, 2)}\n`);
-    if (observations.cells.some((cell) => cell.pass !== true)) process.exitCode = 1;
+    if (observations.cells.some((cell) => cell.pass !== true)) {
+      process.exitCode = 1;
+    } else {
+      validateLiveReprobeRecord(observations);
+      if (options.writeReprobe) await writeLiveReprobeArtifact(defaultReprobePath, observations);
+    }
     return;
+  }
+  if (options.checkIngress || options.writeReprobe) {
+    throw new Error("ingress checking and re-probe writing require --probe-live");
   }
   const matrix = await loadMatrix(options);
   if (options.liveInputPath) {

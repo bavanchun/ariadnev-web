@@ -20,6 +20,17 @@ export const REQUIRED_CELLS = Object.freeze({
 export const REQUIRED_CELL_IDS = Object.freeze(Object.keys(REQUIRED_CELLS));
 export const REQUIRED_REPETITIONS = 2;
 
+export const LIVE_REPROBE_CELLS = Object.freeze({
+  "current-version": { requestPath: "/version", status: 200, contentClass: "version-text", cacheControls: ["no-store"] },
+  "pinned-version": { requestPath: "/version?[query-redacted]", status: 200, contentClass: "version-text", cacheControls: ["no-store"] },
+  "pinned-checksums": { requestPath: "/download/checksums.txt?[query-redacted]", status: 200, contentClass: "download-stream", cacheControls: ["no-store"] },
+  "encoded-checksums": { requestPath: "/download/checksums%2Etxt", status: 200, contentClass: "download-stream", cacheControls: ["no-store"] },
+  "physical-404": { requestPath: "/not-found", status: 404, contentClass: "physical-404", cacheControls: ["no-store"] },
+  "site-lookalike": { requestPath: "/installer", status: 200, contentClass: "site-lookalike", cacheControls: ["public, max-age=300"] },
+  "raw-dot-segment-lower": { requestPath: "/download/%2e%2e", status: 403, contentClass: "ingress-block", cacheControls: ["(absent)", "no-store"] },
+  "raw-dot-segment-mixed": { requestPath: "/download/a/%2E%2e/checksums.txt", status: 403, contentClass: "ingress-block", cacheControls: ["(absent)", "no-store"] },
+});
+
 export const REQUIRED_DEPLOYMENTS = Object.freeze({
   "candidate-a-edge-first": { environment: "staging", profile: "edge", purpose: "candidate-a-gate", retained: false },
   "candidate-a-failed": { environment: "staging", profile: "edge", purpose: "candidate-a-route-failure", retained: false },
@@ -211,6 +222,67 @@ function validateIngressGuard(guard) {
   if (guard?.environment !== "staging" || guard.phase !== "http_request_firewall_custom" || guard.action !== "block" || guard.enabled !== true || guard.productionEnabled !== false || !/^[0-9a-f]{64}$/.test(guard.policyDigest || "") || !Number.isFinite(Date.parse(guard.observedAt))) {
     throw fail("active source-bound staging ingress guard is required");
   }
+}
+
+export function validateLiveReprobeRecord(record) {
+  if (record?.environment?.evidenceKind !== "cloudflare-live-reprobe") throw fail("verified live re-probe evidence kind is required");
+  const baseUrl = normalizeBaseUrl(record.environment.baseUrl);
+  if (new URL(baseUrl).hostname !== "staging.vcskill.vchun.dev" || record.environment.profile !== "combined") {
+    throw fail("live re-probe must target the retained combined staging endpoint");
+  }
+  validateImmutableVersion(record.workerVersionId, "live re-probe");
+  const environmentObservedAt = Date.parse(record.environment.observedAt);
+  const checkedBeforeAt = Date.parse(record.ingressGuard?.checkedBeforeAt);
+  const checkedAfterAt = Date.parse(record.ingressGuard?.checkedAfterAt);
+  const versionCheckedBeforeAt = Date.parse(record.workerVersionVerification?.checkedBeforeAt);
+  const versionCheckedAfterAt = Date.parse(record.workerVersionVerification?.checkedAfterAt);
+  if (
+    record.ingressGuard?.status !== "current"
+    || record.ingressGuard.ref !== "vcskill_raw_download_dot_segments_staging"
+    || !/^[0-9a-f]{64}$/.test(record.ingressGuard.policyDigest || "")
+    || record.ingressGuard.position !== 1
+    || !Number.isFinite(checkedBeforeAt)
+    || !Number.isFinite(checkedAfterAt)
+    || checkedBeforeAt > checkedAfterAt
+    || !Number.isFinite(environmentObservedAt)
+    || environmentObservedAt < checkedAfterAt
+  ) throw fail("source-bound live re-probe ingress verification is required");
+  if (
+    record.workerVersionVerification?.status !== "stable"
+    || !Number.isFinite(versionCheckedBeforeAt)
+    || !Number.isFinite(versionCheckedAfterAt)
+    || versionCheckedBeforeAt > versionCheckedAfterAt
+    || environmentObservedAt < versionCheckedAfterAt
+  ) throw fail("stable live re-probe Worker version verification is required");
+
+  if (!Array.isArray(record.cells)) throw fail("complete live re-probe cells are required");
+  const expected = new Set(Object.keys(LIVE_REPROBE_CELLS).flatMap((id) => (
+    Array.from({ length: REQUIRED_REPETITIONS }, (_, index) => `${id}#${index + 1}`)
+  )));
+  for (const cell of record.cells) {
+    const frozen = LIVE_REPROBE_CELLS[cell?.id];
+    const key = `${cell?.id}#${cell?.repetition}`;
+    const observedAt = Date.parse(cell?.observedAt);
+    if (
+      !frozen
+      || !expected.delete(key)
+      || cell.requestPath !== frozen.requestPath
+      || cell.status !== frozen.status
+      || cell.contentClass !== frozen.contentClass
+      || !frozen.cacheControls.includes(cell.cacheControl)
+      || !/^[0-9a-f]{64}$/.test(cell.bodySha256 || "")
+      || cell.cfRayPresent !== true
+      || !/^[0-9a-f]{64}$/.test(cell.cfRaySha256 || "")
+      || cell.pass !== true
+      || !Number.isFinite(observedAt)
+      || observedAt < checkedBeforeAt
+      || observedAt > checkedAfterAt
+      || observedAt < versionCheckedBeforeAt
+      || observedAt > versionCheckedAfterAt
+    ) throw fail("complete passing live re-probe cells are required");
+  }
+  if (expected.size) throw fail("complete live re-probe cells are required");
+  return record;
 }
 
 function validateCompatibilityProbes(probes) {
