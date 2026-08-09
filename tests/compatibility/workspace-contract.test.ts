@@ -51,7 +51,7 @@ describe("workspace contract", () => {
     });
     expect(json("apps/docs/package.json").scripts).toMatchObject({
       "build:owner": "node scripts/build-docs.mjs",
-      "typecheck:owner": "tsc --noEmit",
+      "typecheck:owner": "fumadocs-mdx source.config.ts .source && tsc --noEmit",
     });
     expect(json("packages/contracts/package.json").scripts).toMatchObject({
       test: "node ../../scripts/run-owner-command.mjs contracts test",

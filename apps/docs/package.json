@@ -8,7 +8,7 @@
     "build:owner": "node scripts/build-docs.mjs",
     "test": "node ../../scripts/run-node-tests.mjs ../../tests/docs",
     "typecheck": "node ../../scripts/run-owner-command.mjs docs typecheck",
-    "typecheck:owner": "tsc --noEmit"
+    "typecheck:owner": "fumadocs-mdx source.config.ts .source && tsc --noEmit"
   },
   "dependencies": {
     "@mdx-js/mdx": "3.1.1",
