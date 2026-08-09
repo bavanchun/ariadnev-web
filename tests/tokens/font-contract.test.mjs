@@ -8,6 +8,7 @@ import * as fontkit from "fontkit";
 import { ROOT, corpusCodePoints, readJson, sha256 } from "./token-test-helpers.mjs";
 
 const manifest = readJson("packages/tokens/src/font-manifest.json");
+const performanceBudgets = readJson("tests/benchmarks/performance-budgets.json");
 const corpusPath = resolve(ROOT, "packages/tokens", manifest.coverage.corpus);
 const corpusBytes = readFileSync(corpusPath);
 const corpus = JSON.parse(corpusBytes.toString("utf8"));
@@ -27,19 +28,28 @@ test("font manifest freezes one licensed WOFF2 for every semantic role", () => {
   assert.equal(manifest.coverage.codePointCount, requiredCodePoints.length);
   assert.deepEqual(manifest.fonts.map((font) => font.role), ["body", "display", "mono"]);
 
+  let totalFontBytes = 0;
   for (const entry of manifest.fonts) {
     assert.match(entry.sourceRevision, /^[0-9a-f]{40}$/);
+    assert.match(entry.sourceSha256, /^[0-9a-f]{64}$/);
     assert.ok(entry.sourceUrl.startsWith("https://raw.githubusercontent.com/"));
     assert.ok(entry.sourceUrl.includes(entry.sourceRevision));
     assert.ok(entry.licenseUrl.includes(entry.sourceRevision));
     assert.equal(entry.license, "SIL Open Font License 1.1");
     assert.equal(entry.style, "normal");
+    assert.deepEqual(entry.subset, {
+      tool: "fonttools",
+      version: "4.63.0",
+      flavor: "woff2",
+      coverageProfileId: corpus.profileId,
+    });
 
     const fontPath = ownedPath(entry.file);
     const licensePath = ownedPath(entry.licenseFile);
     const fontStat = lstatSync(fontPath);
     const licenseStat = lstatSync(licensePath);
     assert.ok(fontStat.isFile() && !fontStat.isSymbolicLink());
+    totalFontBytes += fontStat.size;
     assert.ok(licenseStat.isFile() && !licenseStat.isSymbolicLink());
 
     const fontBytes = readFileSync(fontPath);
@@ -62,6 +72,10 @@ test("font manifest freezes one licensed WOFF2 for every semantic role", () => {
     assert.equal(entry.unicodeCoverage.corpusSha256, sha256(corpusBytes));
     assert.equal(entry.unicodeCoverage.codePointCount, requiredCodePoints.length);
   }
+
+  const transferBudget = performanceBudgets.budgets.find(({ id }) => id === "marketing-fonts-compressed");
+  assert.ok(transferBudget, "marketing font transfer budget must exist");
+  assert.ok(totalFontBytes <= transferBudget.cap, `${totalFontBytes} font bytes exceed the ${transferBudget.cap} byte budget`);
 });
 
 test("font assets use stable semantic names and contain no untracked payload type", () => {
