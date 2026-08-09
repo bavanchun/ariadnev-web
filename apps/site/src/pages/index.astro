@@ -1,0 +1,27 @@
+---
+import BaseLayout from "../layouts/base-layout.astro";
+import EvidenceLedger from "../components/evidence-ledger.astro";
+import ExecutionMap from "../components/execution-map.astro";
+import FinalInstall from "../components/final-install.astro";
+import PromiseSection from "../components/promise-section.astro";
+import ProviderProjection from "../components/provider-projection.astro";
+import SiteHeader from "../components/site-header.astro";
+import WorkflowSection from "../components/workflow-section.astro";
+import { loadReleasePin } from "../content/marketing-facts";
+
+const releasePin = loadReleasePin();
+const title = "vcskill | Accountable execution for agent engineers";
+const description = "Compile agent intent into policy-bound execution, retained checkpoints, and source-linked proof.";
+---
+<BaseLayout title={title} description={description}>
+  <SiteHeader />
+  <main id="main-content">
+    <PromiseSection />
+    <ExecutionMap />
+    <WorkflowSection />
+    <ProviderProjection />
+    <EvidenceLedger releasePin={releasePin} />
+    <FinalInstall />
+  </main>
+  <footer class="site-footer"><span>vcskill</span><span>Execution cartography for agent engineers.</span></footer>
+</BaseLayout>

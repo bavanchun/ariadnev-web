@@ -1,0 +1,12 @@
+{
+  "name": "vcskill",
+  "short_name": "vcskill",
+  "description": "Accountable execution for agent engineers.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#11151d",
+  "theme_color": "#11151d",
+  "icons": [
+    { "src": "/mark.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

@@ -1,0 +1,18 @@
+---
+import type { ReleasePin } from "../content/marketing-facts";
+import { siteFacts } from "../content/marketing-facts";
+interface Props { releasePin?: ReleasePin; }
+const { releasePin } = Astro.props;
+const evidenceRows = releasePin ? [...siteFacts.evidence, {
+  claim: `Release ${releasePin.tag} is available through the version-aware public edge.`,
+  sourceLabel: "Read exact release version", sourceUrl: `https://vcskill.vchun.dev/version?version=${encodeURIComponent(releasePin.version)}`,
+  caveat: "The version route proves release availability only; it does not prove this static build's source provenance or qualification.",
+}] : siteFacts.evidence;
+---
+<section id="evidence" class="evidence-section" data-site-section aria-labelledby="evidence-title">
+  <header><h2 id="evidence-title">Claims stay attached to proof.</h2><p>Every row names its source and the boundary of what that source establishes.</p></header>
+  <div class="evidence-ledger">
+    <div class="ledger-head" aria-hidden="true"><span>Claim</span><span>Source</span><span>Caveat</span></div>
+    {evidenceRows.map((item) => <article><p>{item.claim}</p><a href={item.sourceUrl}>{item.sourceLabel}</a><p>{item.caveat}</p></article>)}
+  </div>
+</section>

@@ -1,0 +1,16 @@
+---
+import BaseLayout from "../layouts/base-layout.astro";
+import { siteFacts } from "../content/marketing-facts";
+---
+<BaseLayout title="Route not found | vcskill" description="This route is not part of the vcskill public surface." robots="noindex, nofollow">
+  <main id="main-content" class="not-found">
+    <p class="section-kicker">Route held</p>
+    <h1>That route is not mapped.</h1>
+    <p>Return to the execution map, install vcskill, or open the stable documentation.</p>
+    <nav aria-label="Recovery links">
+      <a class="button button-primary" href="/">Return home</a>
+      <a class="button button-secondary" href={siteFacts.installUrl}>Install vcskill</a>
+      <a class="text-link" href={siteFacts.docsUrl}>Read docs</a>
+    </nav>
+  </main>
+</BaseLayout>

@@ -1,0 +1,25 @@
+---
+import { siteFacts } from "../content/marketing-facts";
+---
+<section id="promise" class="promise-section" data-site-section aria-labelledby="promise-title">
+  <div class="hero-copy">
+    <h1 id="promise-title">Compile agent intent into accountable execution.</h1>
+    <p>vcskill maps policy, action, checkpoints, and proof into one route engineers can inspect.</p>
+    <div class="hero-actions" aria-label="Get started">
+      <a class="button button-primary" href="#install">Install vcskill</a>
+      <a class="button button-secondary" href={siteFacts.docsUrl}>Read docs</a>
+    </div>
+    <div class="install-command-list" aria-label="Install commands">
+      {siteFacts.installCommands.map(({ id, label, command }) => (
+        <div class="command-option">
+          <span class="command-label">{label}</span>
+          <div class="command-line">
+            <code id={`hero-${id}-install-command`} tabindex="0">{command}</code>
+            <button type="button" data-copy-target={`hero-${id}-install-command`} aria-describedby="copy-status" hidden>Copy</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+  <div class="hero-route" aria-label="Execution route summary"><span>intent</span><span>policy gate</span><span>retained proof</span></div>
+</section>
