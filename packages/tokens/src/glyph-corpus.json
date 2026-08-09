@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "profileId": "vietnamese-ui-cli-v1",
+  "segments": {
+    "asciiLettersAndDigits": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+    "asciiPunctuation": " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~",
+    "developerPunctuation": "–—‘’“”…•←→",
+    "vietnameseBase": "ĂÂĐÊÔƠƯăâđêôơư",
+    "vietnameseLowercase": "àáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ",
+    "vietnameseUppercase": "ÀÁẢÃẠẰẮẲẴẶẦẤẨẪẬÈÉẺẼẸỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌỒỐỔỖỘỜỚỞỠỢÙÚỦŨỤỪỨỬỮỰỲÝỶỸỴ"
+  },
+  "combiningCodePoints": [
+    "U+0300",
+    "U+0301",
+    "U+0302",
+    "U+0303",
+    "U+0306",
+    "U+0309",
+    "U+031B",
+    "U+0323"
+  ]
+}
