@@ -165,6 +165,9 @@ test("all Wrangler profiles disable previews and declare coherent topology bindi
     assert.match(source, /not_found_handling = "none"/);
     assert.match(source, /TOPOLOGY_MODE = "combined"/);
   }
+  assert.match(combined, /directory = "\.\.\/\.\.\/apps\/site\/dist"/);
+  assert.doesNotMatch(combined, /test\/fixtures/);
+  assert.match(spike, /directory = "\.\/test\/fixtures\/site-dist"/);
   assert.match(site, /binding = "ASSETS"/);
   assert.match(site, /run_worker_first = true/);
   assert.match(site, /not_found_handling = "none"/);

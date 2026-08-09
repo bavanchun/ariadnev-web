@@ -46,7 +46,7 @@ export function validateIngressPolicy(source) {
   return source;
 }
 
-export function buildIngressRule(source, environment) {
+export function buildIngressRuleDefinition(source, environment) {
   validateIngressPolicy(source);
   if (!ENVIRONMENTS.has(environment)) throw fail("known ingress policy environment is required");
   const target = source.environments[environment];
@@ -55,13 +55,23 @@ export function buildIngressRule(source, environment) {
     description: source.description,
     expression: renderExpression(target.hostname, source.rawDotSegmentVariants),
     action: source.action,
-    enabled: target.enabled,
   };
 }
 
+export function buildIngressRule(source, environment, { enabled } = {}) {
+  validateIngressPolicy(source);
+  if (!ENVIRONMENTS.has(environment)) throw fail("known ingress policy environment is required");
+  const desiredEnabled = enabled ?? source.environments[environment].enabled;
+  if (typeof desiredEnabled !== "boolean") throw fail("ingress rule enabled state must be boolean");
+  return { ...buildIngressRuleDefinition(source, environment), enabled: desiredEnabled };
+}
+
 export function ingressPolicyDigest(source, environment) {
-  const rule = buildIngressRule(source, environment);
-  return createHash("sha256").update(JSON.stringify(rule)).digest("hex");
+  validateIngressPolicy(source);
+  const definition = buildIngressRuleDefinition(source, environment);
+  return createHash("sha256")
+    .update(JSON.stringify({ phase: source.phase, definition }))
+    .digest("hex");
 }
 
 export async function loadIngressPolicy() {
