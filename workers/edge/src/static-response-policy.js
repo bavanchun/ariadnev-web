@@ -1,4 +1,5 @@
 const HASHED_ASSET = /(?:^|\/)[^/]+(?:[-_.])[0-9a-f]{6,}\.[a-z0-9]+$/i;
+const ASTRO_ASSET = /^\/_astro\/[^/]+$/;
 const CONTENT_SECURITY_POLICY = "default-src 'self'; base-uri 'self'; connect-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; img-src 'self' data:; object-src 'none'; script-src 'self'; style-src 'self'";
 const PERMISSIONS_POLICY = "camera=(), geolocation=(), microphone=(), payment=(), usb=()";
 
@@ -12,7 +13,7 @@ export function applyStaticResponsePolicy(response, pathname) {
 
   if (response.status >= 400) {
     headers.set("cache-control", "no-store");
-  } else if (HASHED_ASSET.test(pathname)) {
+  } else if (ASTRO_ASSET.test(pathname) || HASHED_ASSET.test(pathname)) {
     headers.set("cache-control", "public, max-age=31536000, immutable");
   } else {
     const contentType = headers.get("content-type") || "";

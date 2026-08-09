@@ -122,7 +122,7 @@ test("Candidate A SITE and Candidate B ASSETS match HTML, hashed asset, and 404 
       const path = new URL(request.url).pathname;
       const status = path === "/missing" ? 404 : 200;
       const headers = new Headers({
-        "cache-control": status === 404 ? "no-store" : path.includes("abc123") ? "public, max-age=31536000, immutable" : "public, max-age=300",
+        "cache-control": status === 404 ? "no-store" : path.includes("abc123") || path.startsWith("/_astro/") ? "public, max-age=31536000, immutable" : "public, max-age=300",
         "content-security-policy": contentSecurityPolicy,
         "permissions-policy": permissionsPolicy,
         "content-type": path === "/" ? "text/html; charset=utf-8" : "text/plain",
@@ -131,7 +131,7 @@ test("Candidate A SITE and Candidate B ASSETS match HTML, hashed asset, and 404 
       return new Response("site", { status, headers });
     },
   };
-  for (const path of ["/", "/assets/app-abc123.js", "/missing"]) {
+  for (const path of ["/", "/assets/app-abc123.js", "/_astro/marketing-facts.CwdlDf5u.css", "/missing"]) {
     const [candidateA, candidateB] = await Promise.all([invokeEdge(path, { site }), invokeEdge(path, { assets, topology: "combined" })]);
     for (const name of policyHeaders) assert.equal(candidateB.response.headers.get(name), candidateA.response.headers.get(name), `${path} ${name}`);
   }

@@ -50,9 +50,9 @@ export function createAssetsBinding() {
     async fetch(request) {
       const path = new URL(request.url).pathname;
       calls.push(path);
-      const bodies = { "/": "<!doctype html>", "/assets/app-abc123.js": "app", "/installer": "fixture lookalike", "/download": "download page", "/download-page": "download lookalike", "/version": "LEAK" };
+      const bodies = { "/": "<!doctype html>", "/assets/app-abc123.js": "app", "/_astro/marketing-facts.CwdlDf5u.css": "css", "/installer": "fixture lookalike", "/download": "download page", "/download-page": "download lookalike", "/version": "LEAK" };
       const status = Object.hasOwn(bodies, path) ? 200 : 404;
-      const contentType = path === "/" ? "text/html; charset=utf-8" : "text/plain";
+      const contentType = path === "/" ? "text/html; charset=utf-8" : path.endsWith(".css") ? "text/css" : "text/plain";
       return new Response(bodies[path] || "physical 404", { status, headers: { "content-type": contentType } });
     },
   };
