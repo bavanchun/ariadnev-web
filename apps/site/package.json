@@ -1,0 +1,22 @@
+{
+  "name": "@vcskill/site",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node ../../scripts/run-owner-command.mjs site build",
+    "build:owner": "astro build",
+    "test": "node ../../scripts/run-node-tests.mjs ../../tests/site",
+    "typecheck": "node ../../scripts/run-owner-command.mjs site typecheck",
+    "typecheck:owner": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "3.7.3",
+    "@vcskill/tokens": "workspace:0.0.0",
+    "astro": "7.2.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "typescript": "6.0.3"
+  }
+}

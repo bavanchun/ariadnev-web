@@ -1,0 +1,16 @@
+packages:
+  - apps/*
+  - packages/*
+  - workers/*
+
+allowBuilds:
+  esbuild: true
+  workerd: true
+
+autoInstallPeers: false
+engineStrict: true
+preferFrozenLockfile: true
+saveExact: true
+strictDepBuilds: true
+strictPeerDependencies: true
+verifyDepsBeforeRun: error

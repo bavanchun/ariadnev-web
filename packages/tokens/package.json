@@ -1,0 +1,29 @@
+{
+  "name": "@vcskill/tokens",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./site.css": "./dist/site.css",
+    "./docs.css": "./dist/docs.css",
+    "./tokens": "./dist/tokens.json"
+  },
+  "files": ["assets", "dist"],
+  "scripts": {
+    "build": "node ../../scripts/run-owner-command.mjs tokens build",
+    "build:owner": "node scripts/build-tokens.mjs",
+    "check": "node ../../scripts/run-owner-command.mjs tokens check",
+    "check:owner": "node scripts/build-tokens.mjs --check",
+    "test": "node ../../scripts/run-node-tests.mjs ../../tests/tokens",
+    "typecheck": "node ../../scripts/run-owner-command.mjs tokens typecheck",
+    "typecheck:owner": "tsc --noEmit"
+  },
+  "dependencies": {
+    "fontkit": "2.0.4"
+  },
+  "devDependencies": {
+    "@types/fontkit": "2.0.9",
+    "@types/node": "26.2.0",
+    "typescript": "6.0.3"
+  }
+}
