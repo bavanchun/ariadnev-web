@@ -1,7 +1,11 @@
 const HASHED_ASSET = /(?:^|\/)[^/]+(?:[-_.])[0-9a-f]{6,}\.[a-z0-9]+$/i;
+const CONTENT_SECURITY_POLICY = "default-src 'self'; base-uri 'self'; connect-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; img-src 'self' data:; object-src 'none'; script-src 'self'; style-src 'self'";
+const PERMISSIONS_POLICY = "camera=(), geolocation=(), microphone=(), payment=(), usb=()";
 
 export function applyStaticResponsePolicy(response, pathname) {
   const headers = new Headers(response.headers);
+  headers.set("content-security-policy", CONTENT_SECURITY_POLICY);
+  headers.set("permissions-policy", PERMISSIONS_POLICY);
   headers.set("x-content-type-options", "nosniff");
   headers.set("referrer-policy", "strict-origin-when-cross-origin");
   headers.set("x-frame-options", "DENY");
