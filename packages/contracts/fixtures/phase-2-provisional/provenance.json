@@ -1,0 +1,13 @@
+{
+  "producer": "packages/cli/scripts/generate-docs-bundle.ts",
+  "producerDigest": "sha256:77ab4dc1f75c09256198f46462055e34735d9441ceef3058c16c85fb17707bbc",
+  "producerSha": "86f8304df0226fdf348dea3dcea911192fc128b4",
+  "mode": "provisional",
+  "version": "0.11.0",
+  "assets": {
+    "checksums.txt": "sha256:4d34c96b56f88bb8c329edc3cb0212b1f37b8e807c94bdf62b30fc873642fecb",
+    "docs-bundle-manifest-v1.schema.json": "sha256:a758791077b0856242f070f815ae6b6e4d59473c8ddcabfd4cce06dca4831978",
+    "docs-bundle.manifest.json": "sha256:364a33b6f7771cc938d1c240b8fcfc7bfa0dbec03839250e131bbc6da6b4af2a",
+    "docs-bundle.tar.gz": "sha256:171ae8f2f7f49221d29c4c50ffb80b027538745ce3b2d63a94d879561c326786"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "bundle": "vcskill-docs-bundle",
+  "fileCount": 7,
+  "generatedAt": "2026-08-09T17:39:36+07:00",
+  "generatorSha": "86f8304df0226fdf348dea3dcea911192fc128b4",
+  "mode": "provisional",
+  "payload": [
+    {
+      "bytes": 505,
+      "digest": "sha256:6af28e4e5083466f08ed7dd0b492b6e662932f68ba5799599682e5ad52c93d64",
+      "path": "proof/release-summary.json"
+    },
+    {
+      "bytes": 17522,
+      "digest": "sha256:571e0b9f22f029c71b93dc9d07294cc5d5958bc0db5481463ceadce93e37fcf4",
+      "path": "reference/cli/commands.json"
+    },
+    {
+      "bytes": 4348,
+      "digest": "sha256:8a4ba8c355a61ea9e9b2be7e4965f00a9b44b5173d8826f78eb98ec308fd6bfa",
+      "path": "reference/providers/providers.json"
+    },
+    {
+      "bytes": 16212,
+      "digest": "sha256:f3714f9169488c4b3088a60f9a675dfb145980f2bdebb5d5b71b2d942e515e35",
+      "path": "reference/skills/skills.json"
+    },
+    {
+      "bytes": 11833,
+      "digest": "sha256:4be56a64ac6f6421aa81e1dc7936e3f58e54a74dbda8e7bf57ee76a09351c9a7",
+      "path": "reference/workflows/workflows.json"
+    },
+    {
+      "bytes": 724,
+      "digest": "sha256:b4ad8326edc23604400afc7f899edd225271d60f2301c0ce58b67a62f5f89f85",
+      "path": "release-notes.md"
+    },
+    {
+      "bytes": 3290,
+      "digest": "sha256:a758791077b0856242f070f815ae6b6e4d59473c8ddcabfd4cce06dca4831978",
+      "path": "schemas/docs-bundle-manifest-v1.schema.json"
+    }
+  ],
+  "proofBoundary": "allowlist:v1",
+  "publishable": false,
+  "releaseTag": null,
+  "schemaId": "https://vcskill.dev/schemas/docs-bundle-manifest-v1.schema.json",
+  "schemaVersion": 1,
+  "sourceDateEpoch": 1786271976,
+  "sourceSha": "86f8304df0226fdf348dea3dcea911192fc128b4",
+  "totalBytes": 54434,
+  "version": "0.11.0"
+}
