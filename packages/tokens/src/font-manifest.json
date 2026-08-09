@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "coverage": {
+    "profileId": "vietnamese-ui-cli-v1",
+    "corpus": "src/glyph-corpus.json",
+    "sha256": "005b7690e214b5c4ebd66a8a35dc350e6ef645465a4a0d0604cf4877de729404",
+    "codePointCount": 247
+  },
+  "fonts": [
+    {
+      "role": "body",
+      "cssFamily": "VC Inter",
+      "sourceFamily": "Inter Variable",
+      "style": "normal",
+      "weight": { "min": 100, "max": 900 },
+      "file": "assets/fonts/body-vietnamese.woff2",
+      "sha256": "693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3",
+      "sourceRevision": "353b61b9f4430d5f420d56605a6e7993e0941470",
+      "sourceUrl": "https://raw.githubusercontent.com/rsms/inter/353b61b9f4430d5f420d56605a6e7993e0941470/docs/font-files/InterVariable.woff2",
+      "license": "SIL Open Font License 1.1",
+      "licenseFile": "assets/licenses/body-font-license.txt",
+      "licenseSha256": "262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a",
+      "licenseUrl": "https://raw.githubusercontent.com/rsms/inter/353b61b9f4430d5f420d56605a6e7993e0941470/LICENSE.txt",
+      "unicodeCoverage": {
+        "profileId": "vietnamese-ui-cli-v1",
+        "corpusSha256": "005b7690e214b5c4ebd66a8a35dc350e6ef645465a4a0d0604cf4877de729404",
+        "codePointCount": 247,
+        "scripts": ["Latin", "Vietnamese"],
+        "normalization": ["NFC", "combining-marks"]
+      }
+    },
+    {
+      "role": "display",
+      "cssFamily": "VC Space Grotesk",
+      "sourceFamily": "Space Grotesk Light",
+      "style": "normal",
+      "weight": { "min": 300, "max": 700 },
+      "file": "assets/fonts/display-vietnamese.woff2",
+      "sha256": "8e085aa438094f11487a836652edd5c054fa6a96f63fc7c282105ee3a4b08c07",
+      "sourceRevision": "03507d024a01282884232081fc6011c09ff4e849",
+      "sourceUrl": "https://raw.githubusercontent.com/floriankarsten/space-grotesk/03507d024a01282884232081fc6011c09ff4e849/fonts/woff2/SpaceGrotesk%5Bwght%5D.woff2",
+      "license": "SIL Open Font License 1.1",
+      "licenseFile": "assets/licenses/display-font-license.txt",
+      "licenseSha256": "564ce565c371c5e5bbf286006565a7c9aa55a9f56e7ca58d56e05d649dd61a72",
+      "licenseUrl": "https://raw.githubusercontent.com/floriankarsten/space-grotesk/03507d024a01282884232081fc6011c09ff4e849/OFL.txt",
+      "unicodeCoverage": {
+        "profileId": "vietnamese-ui-cli-v1",
+        "corpusSha256": "005b7690e214b5c4ebd66a8a35dc350e6ef645465a4a0d0604cf4877de729404",
+        "codePointCount": 247,
+        "scripts": ["Latin", "Vietnamese"],
+        "normalization": ["NFC", "combining-marks"]
+      }
+    },
+    {
+      "role": "mono",
+      "cssFamily": "VC JetBrains Mono",
+      "sourceFamily": "JetBrains Mono",
+      "style": "normal",
+      "weight": { "min": 100, "max": 800 },
+      "file": "assets/fonts/mono-vietnamese.woff2",
+      "sha256": "31ec365b93e4bad6f202ce23352a56d01ca4462b2afc782ed2cf6fa42ca9ac0e",
+      "sourceRevision": "19371302b95d218af43299bce79ddbddd0bc364d",
+      "sourceUrl": "https://raw.githubusercontent.com/JetBrains/JetBrainsMono/19371302b95d218af43299bce79ddbddd0bc364d/fonts/webfonts/JetBrainsMono%5Bwght%5D.woff2",
+      "license": "SIL Open Font License 1.1",
+      "licenseFile": "assets/licenses/mono-font-license.txt",
+      "licenseSha256": "a76abf002c49097d146e86740a3105a5d00450b1592e820a1109a8c5680cd697",
+      "licenseUrl": "https://raw.githubusercontent.com/JetBrains/JetBrainsMono/19371302b95d218af43299bce79ddbddd0bc364d/OFL.txt",
+      "unicodeCoverage": {
+        "profileId": "vietnamese-ui-cli-v1",
+        "corpusSha256": "005b7690e214b5c4ebd66a8a35dc350e6ef645465a4a0d0604cf4877de729404",
+        "codePointCount": 247,
+        "scripts": ["Latin", "Vietnamese"],
+        "normalization": ["NFC", "combining-marks"]
+      }
+    }
+  ]
+}
