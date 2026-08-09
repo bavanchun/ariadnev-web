@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vcskill.dev/schemas/deployment-input-v1.schema.json",
+  "title": "vcskill immutable deployment input v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "schema", "environment", "topologyId", "product", "qualification", "release", "productionPolicyAttestation", "productionPolicyAttestationDigest", "deploymentInputDigest", "digests", "ingress", "units", "firstCutover"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "schema": { "const": "https://vcskill.dev/schemas/deployment-input-v1.schema.json" },
+    "environment": { "enum": ["staging", "production"] },
+    "topologyId": { "const": "candidate-b" },
+    "product": {
+      "type": "object", "additionalProperties": false,
+      "required": ["repository", "sha", "ref", "version", "outputDigest"],
+      "properties": {
+        "repository": { "const": "bavanchun/vcskill-web" }, "sha": { "$ref": "#/$defs/sha" },
+        "ref": { "$ref": "#/$defs/immutableRef" }, "version": { "$ref": "#/$defs/semver" }, "outputDigest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "qualification": {
+      "type": "object", "additionalProperties": false,
+      "required": ["evidenceSha", "productSha", "productOutputDigest", "evidenceDigest", "evidencePaths"],
+      "properties": {
+        "evidenceSha": { "$ref": "#/$defs/sha" }, "productSha": { "$ref": "#/$defs/sha" },
+        "productOutputDigest": { "$ref": "#/$defs/digest" }, "evidenceDigest": { "$ref": "#/$defs/digest" },
+        "evidencePaths": { "type": "array", "minItems": 1, "maxItems": 256, "uniqueItems": true, "items": { "$ref": "#/$defs/evidencePath" } }
+      }
+    },
+    "release": {
+      "type": "object", "additionalProperties": false,
+      "required": ["repository", "tag", "version", "sourceSha", "releaseId", "publicationState", "draft", "immutable", "latest", "assetSetDigest", "docsManifestDigest", "docsBundleDigest", "finalizerWorkflowRef", "finalizerWorkflowDigest"],
+      "properties": {
+        "repository": { "const": "bavanchun/vcskill" }, "tag": { "type": "string", "pattern": "^vcskill@(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$" },
+        "version": { "$ref": "#/$defs/semver" }, "sourceSha": { "$ref": "#/$defs/sha" }, "releaseId": { "type": "string", "pattern": "^[1-9][0-9]*$" },
+        "publicationState": { "enum": ["held-draft", "immutable-publication"] }, "draft": { "type": "boolean" }, "immutable": { "type": "boolean" }, "latest": { "type": "boolean" },
+        "assetSetDigest": { "$ref": "#/$defs/digest" }, "docsManifestDigest": { "$ref": "#/$defs/digest" }, "docsBundleDigest": { "$ref": "#/$defs/digest" },
+        "finalizerWorkflowRef": { "type": "string", "pattern": "^bavanchun/vcskill/\\.github/workflows/finalize-release\\.yml@[a-f0-9]{40}$" }, "finalizerWorkflowDigest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "productionPolicyAttestation": { "type": "object" },
+    "productionPolicyAttestationDigest": { "$ref": "#/$defs/digest" },
+    "deploymentInputDigest": { "$ref": "#/$defs/digest" },
+    "digests": {
+      "type": "object", "additionalProperties": false, "required": ["topology", "unitSet", "productOutputs"],
+      "properties": { "topology": { "$ref": "#/$defs/digest" }, "unitSet": { "$ref": "#/$defs/digest" }, "productOutputs": { "$ref": "#/$defs/digest" } }
+    },
+    "ingress": {
+      "type": "object", "additionalProperties": false, "required": ["policyDigest", "prestate"],
+      "properties": { "policyDigest": { "$ref": "#/$defs/digest" }, "prestate": { "$ref": "#/$defs/ingressSnapshot" } }
+    },
+    "units": {
+      "type": "array", "minItems": 2, "maxItems": 2,
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "artifactVersion", "configDigest", "outputDigest", "rollbackWorkerVersionId"],
+        "properties": {
+          "id": { "enum": ["docs", "combined-edge-site"] }, "artifactVersion": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$" },
+          "configDigest": { "$ref": "#/$defs/digest" }, "outputDigest": { "$ref": "#/$defs/digest" }, "rollbackWorkerVersionId": { "$ref": "#/$defs/workerVersion" }
+        }
+      }
+    },
+    "firstCutover": {
+      "type": "object", "additionalProperties": false, "required": ["eligible", "legacyWorker", "candidateWorker", "docsHost"],
+      "properties": {
+        "eligible": { "type": "boolean" },
+        "legacyWorker": {
+          "type": "object", "additionalProperties": false,
+          "required": ["name", "versionId", "bindingStateDigest", "orderedBindingState", "credentialContext", "secretNamespace", "requiredSecretNames", "credentialMutation", "liveReadOnlyCompatible"],
+          "properties": {
+            "name": { "const": "vcskill" }, "versionId": { "$ref": "#/$defs/workerVersion" }, "bindingStateDigest": { "$ref": "#/$defs/digest" },
+            "orderedBindingState": { "type": "array", "minItems": 1, "maxItems": 16, "items": { "$ref": "#/$defs/bindingState" } },
+            "credentialContext": { "const": "existing-production-unchanged" }, "secretNamespace": { "const": "legacy-production" },
+            "requiredSecretNames": { "const": ["GH_TOKEN"] }, "credentialMutation": { "const": "prohibited-until-rollback-window-closes" }, "liveReadOnlyCompatible": { "const": true }
+          }
+        },
+        "candidateWorker": {
+          "type": "object", "additionalProperties": false, "required": ["name", "secretNamespace", "requiredSecretNames", "outputDigest"],
+          "properties": { "name": { "const": "vcskill-edge-combined-production" }, "secretNamespace": { "const": "candidate-production" }, "requiredSecretNames": { "const": ["GH_TOKEN"] }, "outputDigest": { "$ref": "#/$defs/digest" } }
+        },
+        "docsHost": {
+          "type": "object", "additionalProperties": false, "required": ["hostname", "candidateWorkerName", "prestateDigest", "orderedPrestate"],
+          "properties": {
+            "hostname": { "const": "docs.vcskill.vchun.dev" }, "prestateDigest": { "$ref": "#/$defs/digest" },
+            "candidateWorkerName": { "const": "vcskill-docs-production" },
+            "orderedPrestate": { "type": "array", "minItems": 2, "maxItems": 2, "prefixItems": [{ "$ref": "#/$defs/docsOwnerState" }, { "$ref": "#/$defs/docsDnsState" }], "items": false }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha": { "type": "string", "pattern": "^[a-f0-9]{40}$" }, "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "semver": { "type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$" },
+    "immutableRef": { "type": "string", "pattern": "^refs/tags/[A-Za-z0-9][A-Za-z0-9._@+-]{0,127}$" },
+    "workerVersion": { "type": "string", "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$" },
+    "evidencePath": { "type": "string", "pattern": "^tests/(qualification/[A-Za-z0-9._/-]+|baselines/flagship/[A-Za-z0-9._/-]+)$", "maxLength": 240 },
+    "ingressSnapshot": {
+      "type": "object", "additionalProperties": false, "required": ["schemaVersion", "environment", "phase", "policyDigest", "definitionDigest", "entrypoint", "managedRule", "unrelatedRules", "stateDigest"],
+      "properties": {
+        "schemaVersion": { "const": 1 }, "environment": { "enum": ["staging", "production"] }, "phase": { "const": "http_request_firewall_custom" },
+        "policyDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "definitionDigest": { "$ref": "#/$defs/digest" }, "stateDigest": { "$ref": "#/$defs/digest" },
+        "entrypoint": { "type": "object", "additionalProperties": false, "required": ["exists", "identityDigest", "metadataDigest"], "properties": { "exists": { "type": "boolean" }, "identityDigest": { "type": ["string", "null"], "pattern": "^sha256:[a-f0-9]{64}$" }, "metadataDigest": { "type": ["string", "null"], "pattern": "^sha256:[a-f0-9]{64}$" } } },
+        "managedRule": { "oneOf": [{ "type": "null" }, { "type": "object", "additionalProperties": false, "required": ["identityDigest", "index", "enabled", "definitionDigest"], "properties": { "identityDigest": { "$ref": "#/$defs/digest" }, "index": { "type": "integer", "minimum": 1 }, "enabled": { "type": "boolean" }, "definitionDigest": { "$ref": "#/$defs/digest" } } }] },
+        "unrelatedRules": { "type": "object", "additionalProperties": false, "required": ["count", "digest"], "properties": { "count": { "type": "integer", "minimum": 0 }, "digest": { "$ref": "#/$defs/digest" } } }
+      }
+    },
+    "bindingState": {
+      "oneOf": [
+        { "type": "object", "additionalProperties": false, "required": ["kind", "pattern", "customDomain", "position"], "properties": { "kind": { "const": "custom-domain" }, "pattern": { "const": "vcskill.vchun.dev" }, "customDomain": { "const": true }, "position": { "const": 1 } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "routes", "position"], "properties": { "kind": { "const": "route-set" }, "routes": { "const": [] }, "position": { "const": 2 } } }
+      ]
+    },
+    "docsOwnerState": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "ownerType", "workerName"],
+      "properties": { "kind": { "const": "owner" }, "ownerType": { "enum": ["unassigned", "worker"] }, "workerName": { "type": ["string", "null"], "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,62}$" } }
+    },
+    "docsDnsState": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "present", "record", "recordDigest"],
+      "properties": {
+        "kind": { "const": "dns" },
+        "present": { "type": "boolean" },
+        "record": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object", "additionalProperties": false,
+              "required": ["type", "name", "content", "ttl", "proxied", "comment", "tags", "settings"],
+              "properties": {
+                "type": { "enum": ["A", "AAAA", "CNAME"] },
+                "name": { "const": "docs.vcskill.vchun.dev" },
+                "content": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9:.-]{0,252}$" },
+                "ttl": { "type": "integer", "minimum": 1, "maximum": 86400 },
+                "proxied": { "type": "boolean" },
+                "comment": { "type": ["string", "null"], "maxLength": 500 },
+                "tags": { "type": "array", "maxItems": 32, "uniqueItems": true, "items": { "type": "string", "minLength": 1, "maxLength": 100 } },
+                "settings": {
+                  "type": "object", "additionalProperties": false,
+                  "properties": { "flatten_cname": { "type": "boolean" }, "ipv4_only": { "type": "boolean" }, "ipv6_only": { "type": "boolean" } }
+                }
+              }
+            }
+          ]
+        },
+        "recordDigest": { "type": ["string", "null"], "pattern": "^sha256:[a-f0-9]{64}$" }
+      },
+      "allOf": [
+        { "if": { "properties": { "present": { "const": false } } }, "then": { "properties": { "record": { "const": null }, "recordDigest": { "const": null } } } },
+        { "if": { "properties": { "present": { "const": true } } }, "then": { "properties": { "record": { "type": "object" }, "recordDigest": { "$ref": "#/$defs/digest" } } } }
+      ]
+    }
+  }
+}

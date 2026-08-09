@@ -1,0 +1,86 @@
+name: Deploy immutable web units
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Exact deployment environment
+        required: true
+        type: choice
+        options: [staging, production]
+      product_sha:
+        description: Exact qualified product commit SHA
+        required: true
+        type: string
+      deployment_input_json:
+        description: Schema-valid immutable deployment input
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      environment: { required: true, type: string }
+      product_sha: { required: true, type: string }
+      deployment_input_json: { required: true, type: string }
+    secrets:
+      CLOUDFLARE_API_TOKEN: { required: true }
+
+permissions: {}
+
+concurrency:
+  group: web-mutation-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy ${{ inputs.environment }} from immutable product
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment == 'production' && 'web-production' || 'web-staging' }}
+    permissions:
+      contents: read
+    env:
+      DEPLOYMENT_INPUT_JSON: ${{ inputs.deployment_input_json }}
+    steps:
+      - name: Checkout exact product source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ inputs.product_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+        with:
+          version: 11.0.9
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: "26.0.0"
+          cache: pnpm
+      - name: Install frozen dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Validate immutable deployment input
+        env:
+          EXPECTED_ENVIRONMENT: ${{ inputs.environment }}
+          EXPECTED_PRODUCT_SHA: ${{ inputs.product_sha }}
+        run: |
+          node scripts/deploy/validate-deployment-input.mjs --input-env=DEPLOYMENT_INPUT_JSON --skip-artifacts=true > "$RUNNER_TEMP/deployment-validation.json"
+          node -e 'const v=JSON.parse(require("node:fs").readFileSync(process.argv[1]));if(v.environment!==process.env.EXPECTED_ENVIRONMENT||v.productSha!==process.env.EXPECTED_PRODUCT_SHA)process.exit(1)' "$RUNNER_TEMP/deployment-validation.json"
+      - name: Verify protected production controls
+        if: inputs.environment == 'production'
+        run: node scripts/deploy/verify-production-environment.mjs --input-env=DEPLOYMENT_INPUT_JSON > "$RUNNER_TEMP/production-preflight.json"
+      - name: Deploy topology units and smoke each unit
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          cloudflare_token="$CLOUDFLARE_API_TOKEN"
+          export -n cloudflare_token
+          unset CLOUDFLARE_API_TOKEN
+          printf '%s' "$cloudflare_token" | node scripts/deploy/deploy-units.mjs --input-env=DEPLOYMENT_INPUT_JSON > "$RUNNER_TEMP/deploy-result.json"
+      - name: Upload sanitized deployment evidence
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874
+        with:
+          name: web-deploy-${{ inputs.environment }}-${{ inputs.product_sha }}
+          path: ${{ runner.temp }}/deploy-result.json
+          if-no-files-found: error
+          retention-days: 90
+          overwrite: false

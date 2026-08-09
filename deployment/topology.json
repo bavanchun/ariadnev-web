@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "schema": "https://vcskill.dev/schemas/deployment-topology-v1.schema.json",
+  "id": "candidate-b",
+  "selected": true,
+  "deployOrder": ["docs", "combined-edge-site"],
+  "rollbackOrder": ["combined-edge-site", "docs"],
+  "protectedRoutes": ["/install", "/install.sh", "/install.ps1", "/version", "/download/checksums.txt"],
+  "qualificationEvidencePathPrefixes": ["tests/qualification/", "tests/baselines/flagship/"],
+  "credentialPolicy": {
+    "repository": "bavanchun/vcskill",
+    "scope": "single-repository",
+    "contents": "read",
+    "actions": "write",
+    "allowedContexts": ["edge-release-read", "exact-artifact-retrieval", "protected-finalizer-dispatch"],
+    "forbiddenContexts": ["content", "build", "web-deploy", "cloudflare-deploy", "finalizer"],
+    "contentsWrite": false,
+    "releaseWrite": false,
+    "administrationWrite": false
+  },
+  "finalizer": {
+    "repository": "bavanchun/vcskill",
+    "path": ".github/workflows/finalize-release.yml",
+    "environment": "core-release-production",
+    "permissions": { "actions": "read", "contents": "write" }
+  },
+  "workerIdentities": {
+    "legacy": { "name": "vcskill", "secretNamespace": "legacy-production", "mutationPolicy": "prohibited-until-rollback-window-closes" },
+    "candidate": { "name": "vcskill-edge-combined-production", "secretNamespace": "candidate-production" },
+    "docs": {
+      "staging": { "name": "vcskill-docs-staging" },
+      "production": { "name": "vcskill-docs-production" }
+    }
+  },
+  "firstCutover": {
+    "requiredSecretNames": ["GH_TOKEN"],
+    "legacyBindingState": [
+      { "kind": "custom-domain", "pattern": "vcskill.vchun.dev", "customDomain": true, "position": 1 },
+      { "kind": "route-set", "routes": [], "position": 2 }
+    ],
+    "restoreOperations": ["restore-legacy-version", "restore-legacy-bindings", "restore-docs-prestate"]
+  },
+  "environments": {
+    "staging": {
+      "githubEnvironment": "web-staging",
+      "ingress": { "required": true, "manager": "scripts/manage-edge-ingress-rule.mjs", "mode": "apply", "policy": "workers/edge/rules/raw-download-path-guard.json" },
+      "units": {
+        "docs": {
+          "config": "apps/docs/wrangler.staging.toml",
+          "output": "apps/docs/out",
+          "buildCommand": ["pnpm", "--filter", "@vcskill/docs", "build"],
+          "deployCommand": ["pnpm", "exec", "wrangler", "deploy", "--config", "{config}"],
+          "rollbackCommand": ["pnpm", "exec", "wrangler", "rollback", "{rollbackWorkerVersionId}", "--config", "{config}", "--yes"],
+          "smoke": [
+            { "url": "https://staging.docs.vcskill.vchun.dev/", "statuses": [200] },
+            { "url": "https://staging.vcskill.vchun.dev/install", "statuses": [200] },
+            { "url": "https://staging.vcskill.vchun.dev/install.sh", "statuses": [200] },
+            { "url": "https://staging.vcskill.vchun.dev/install.ps1", "statuses": [200] },
+            { "url": "https://staging.vcskill.vchun.dev/version", "statuses": [200] },
+            { "url": "https://staging.vcskill.vchun.dev/download/checksums.txt", "statuses": [200] }
+          ]
+        },
+        "combined-edge-site": {
+          "config": "workers/edge/wrangler.combined.toml",
+          "output": "apps/site/dist",
+          "buildCommand": ["pnpm", "--filter", "@vcskill/site", "build"],
+          "deployCommand": ["pnpm", "exec", "wrangler", "deploy", "--config", "{config}"],
+          "rollbackCommand": ["pnpm", "exec", "wrangler", "rollback", "{rollbackWorkerVersionId}", "--config", "{config}", "--yes"],
+          "smoke": [
+            { "url": "https://staging.vcskill.vchun.dev/install", "statuses": [200] },
+            { "url": "https://staging.vcskill.vchun.dev/install.sh", "statuses": [200] },
+            { "url": "https://staging.vcskill.vchun.dev/install.ps1", "statuses": [200] },
+            { "url": "https://staging.vcskill.vchun.dev/version", "statuses": [200] },
+            { "url": "https://staging.vcskill.vchun.dev/download/checksums.txt", "statuses": [200] }
+          ]
+        }
+      }
+    },
+    "production": {
+      "githubEnvironment": "web-production",
+      "ingress": { "required": true, "manager": "scripts/manage-edge-ingress-rule.mjs", "mode": "apply", "policy": "workers/edge/rules/raw-download-path-guard.json" },
+      "units": {
+        "docs": {
+          "config": "apps/docs/wrangler.production.toml",
+          "output": "apps/docs/out",
+          "buildCommand": ["pnpm", "--filter", "@vcskill/docs", "build"],
+          "deployCommand": ["pnpm", "exec", "wrangler", "deploy", "--config", "{config}"],
+          "rollbackCommand": ["pnpm", "exec", "wrangler", "rollback", "{rollbackWorkerVersionId}", "--config", "{config}", "--yes"],
+          "smoke": [
+            { "url": "https://docs.vcskill.vchun.dev/", "statuses": [200] },
+            { "url": "https://vcskill.vchun.dev/install", "statuses": [200] },
+            { "url": "https://vcskill.vchun.dev/install.sh", "statuses": [200] },
+            { "url": "https://vcskill.vchun.dev/install.ps1", "statuses": [200] },
+            { "url": "https://vcskill.vchun.dev/version", "statuses": [200] },
+            { "url": "https://vcskill.vchun.dev/download/checksums.txt", "statuses": [200] }
+          ]
+        },
+        "combined-edge-site": {
+          "config": "workers/edge/wrangler.combined.production.toml",
+          "output": "apps/site/dist",
+          "buildCommand": ["pnpm", "--filter", "@vcskill/site", "build"],
+          "deployCommand": ["pnpm", "exec", "wrangler", "deploy", "--config", "{config}"],
+          "rollbackCommand": ["pnpm", "exec", "wrangler", "rollback", "{rollbackWorkerVersionId}", "--config", "{config}", "--yes"],
+          "smoke": [
+            { "url": "https://vcskill.vchun.dev/install", "statuses": [200] },
+            { "url": "https://vcskill.vchun.dev/install.sh", "statuses": [200] },
+            { "url": "https://vcskill.vchun.dev/install.ps1", "statuses": [200] },
+            { "url": "https://vcskill.vchun.dev/version", "statuses": [200] },
+            { "url": "https://vcskill.vchun.dev/download/checksums.txt", "statuses": [200] }
+          ]
+        }
+      }
+    }
+  }
+}
