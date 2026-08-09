@@ -38,6 +38,8 @@ test("Cloudflare rule is staging-only until production cutover and uses raw pre-
   assert.equal(staging.enabled, true);
   assert.equal(production.enabled, false);
   assert.match(staging.expression, /raw\.http\.request\.uri\.path/);
+  assert.match(staging.expression, /starts_with\(raw\.http\.request\.uri\.path, \"\/download\/\"\)/);
+  assert.doesNotMatch(staging.expression, /starts_with\(lower\(raw\.http\.request\.uri\.path\)/);
   assert.match(staging.expression, /staging\.vcskill\.vchun\.dev/);
   assert.doesNotMatch(staging.expression, /vcskill\.vchun\.dev\" and.*production/);
   assert.match(production.expression, /http\.host eq \"vcskill\.vchun\.dev\"/);

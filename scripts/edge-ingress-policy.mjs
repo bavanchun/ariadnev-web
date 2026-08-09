@@ -22,12 +22,13 @@ export function rawDownloadPathNeedsIngressBlock(rawPath) {
 }
 
 function renderExpression(hostname, variants) {
-  const pathField = "lower(raw.http.request.uri.path)";
+  const rawPathField = "raw.http.request.uri.path";
+  const normalizedPathField = `lower(${rawPathField})`;
   const dotSegmentChecks = variants.flatMap((variant) => [
-    `contains(${pathField}, \"/${variant}/\")`,
-    `ends_with(${pathField}, \"/${variant}\")`,
+    `contains(${normalizedPathField}, \"/${variant}/\")`,
+    `ends_with(${normalizedPathField}, \"/${variant}\")`,
   ]);
-  return `(http.host eq \"${hostname}\" and starts_with(${pathField}, \"/download/\") and (${dotSegmentChecks.join(" or ")}))`;
+  return `(http.host eq \"${hostname}\" and starts_with(${rawPathField}, \"/download/\") and (${dotSegmentChecks.join(" or ")}))`;
 }
 
 export function validateIngressPolicy(source) {

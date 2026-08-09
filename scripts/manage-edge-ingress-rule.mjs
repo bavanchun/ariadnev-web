@@ -12,7 +12,7 @@ function fail(message) {
   return error;
 }
 
-async function readTokenFromStdin() {
+export async function readTokenFromStdin() {
   if (process.stdin.isTTY) throw fail("Cloudflare token must be supplied on stdin");
   let token = "";
   for await (const chunk of process.stdin) token += chunk;
