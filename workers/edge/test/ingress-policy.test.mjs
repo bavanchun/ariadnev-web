@@ -1,7 +1,9 @@
+import { createHash } from "node:crypto";
 import test from "node:test";
 
 import {
   buildIngressRule,
+  buildIngressRuleDefinition,
   ingressPolicyDigest,
   loadIngressPolicy,
   rawDownloadPathNeedsIngressBlock,
@@ -44,4 +46,16 @@ test("Cloudflare rule is staging-only until production cutover and uses raw pre-
   assert.doesNotMatch(staging.expression, /vcskill\.vchun\.dev\" and.*production/);
   assert.match(production.expression, /http\.host eq \"vcskill\.vchun\.dev\"/);
   assert.match(ingressPolicyDigest(policy, "staging"), /^[0-9a-f]{64}$/);
+  assert.deepEqual(
+    buildIngressRule(policy, "production", { enabled: true }),
+    { ...buildIngressRuleDefinition(policy, "production"), enabled: true },
+  );
+  assert.equal(
+    ingressPolicyDigest(policy, "production"),
+    createHash("sha256").update(JSON.stringify({
+      phase: policy.phase,
+      definition: buildIngressRuleDefinition(policy, "production"),
+    })).digest("hex"),
+    "activation state must not change the immutable rule-definition digest",
+  );
 });

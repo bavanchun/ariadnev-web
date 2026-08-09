@@ -17,7 +17,7 @@ TOPOLOGY_MODE = "combined"
 ALLOWED_HOSTS = "staging.vcskill.vchun.dev"
 
 [assets]
-directory = "./test/fixtures/site-dist"
+directory = "../../apps/site/dist"
 binding = "ASSETS"
 run_worker_first = true
 not_found_handling = "none"
