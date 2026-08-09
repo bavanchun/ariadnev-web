@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vcskill.dev/schemas/cutover-record-v1.schema.json",
+  "title": "vcskill cutover evidence record v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "schema", "recordId", "state", "previousState", "recordedAt", "identity", "observations", "resets"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "schema": { "const": "https://vcskill.dev/schemas/cutover-record-v1.schema.json" },
+    "recordId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$" },
+    "state": { "enum": ["preflight", "cutover-started", "unit-deployed", "cutover-succeeded", "rollback-started", "rolled-back", "aborted", "soak-complete"] },
+    "previousState": { "type": ["string", "null"], "enum": [null, "preflight", "cutover-started", "unit-deployed", "cutover-succeeded", "rollback-started", "rolled-back", "aborted"] },
+    "recordedAt": { "type": "string", "format": "date-time" },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["environment", "topologyId", "productSha", "qualificationEvidenceSha", "releaseTag", "releaseSourceSha", "releaseAssetSetDigest", "productOutputDigest", "unitSetDigest", "productionPolicyAttestationDigest", "deploymentInputDigest", "ingressPrestateDigest"],
+      "properties": {
+        "environment": { "enum": ["staging", "production"] },
+        "topologyId": { "const": "candidate-b" },
+        "productSha": { "$ref": "#/$defs/sha" },
+        "qualificationEvidenceSha": { "$ref": "#/$defs/sha" },
+        "releaseTag": { "type": "string", "pattern": "^vcskill@[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "releaseSourceSha": { "$ref": "#/$defs/sha" },
+        "releaseAssetSetDigest": { "$ref": "#/$defs/digest" },
+        "productOutputDigest": { "$ref": "#/$defs/digest" },
+        "unitSetDigest": { "$ref": "#/$defs/digest" },
+        "productionPolicyAttestationDigest": { "$ref": "#/$defs/digest" },
+        "deploymentInputDigest": { "$ref": "#/$defs/digest" },
+        "ingressPrestateDigest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "observations": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "status", "deploymentRef", "observedAt", "details"],
+        "properties": {
+          "kind": { "enum": ["preflight", "deploy", "smoke", "ingress", "rollback", "legacy-compatibility", "convergence", "soak"] },
+          "status": { "enum": ["passed", "failed", "pending"] },
+          "deploymentRef": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$" },
+          "observedAt": { "type": "string", "format": "date-time" },
+          "details": { "type": "object", "maxProperties": 32 }
+        }
+      }
+    },
+    "resets": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["trigger", "observedAt"],
+        "properties": {
+          "trigger": { "enum": ["deployment-change", "binding-change", "credential-change", "release-change", "output-drift", "failed-smoke", "failed-convergence"] },
+          "observedAt": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+  }
+}

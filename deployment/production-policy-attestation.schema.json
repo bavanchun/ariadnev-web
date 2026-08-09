@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vcskill.dev/schemas/production-policy-attestation-v1.schema.json",
+  "title": "vcskill operator production-policy attestation v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "schema", "issuedAt", "expiresAt", "environments", "immutableReleasesEnabled", "finalizer", "credentialPolicy"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "schema": { "const": "https://vcskill.dev/schemas/production-policy-attestation-v1.schema.json" },
+    "issuedAt": { "type": "string", "format": "date-time" },
+    "expiresAt": { "type": "string", "format": "date-time" },
+    "environments": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "prefixItems": [
+        { "$ref": "#/$defs/webEnvironment" },
+        { "$ref": "#/$defs/coreEnvironment" }
+      ],
+      "items": false
+    },
+    "immutableReleasesEnabled": { "const": true },
+    "finalizer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "path", "environment", "ref", "digest", "permissions"],
+      "properties": {
+        "repository": { "const": "bavanchun/vcskill" },
+        "path": { "const": ".github/workflows/finalize-release.yml" },
+        "environment": { "const": "core-release-production" },
+        "ref": { "type": "string", "pattern": "^bavanchun/vcskill/\\.github/workflows/finalize-release\\.yml@[a-f0-9]{40}$" },
+        "digest": { "$ref": "#/$defs/digest" },
+        "permissions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["actions", "contents"],
+          "properties": { "actions": { "const": "read" }, "contents": { "const": "write" } }
+        }
+      }
+    },
+    "credentialPolicy": { "$ref": "#/$defs/credentialPolicy" }
+  },
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "environmentBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "name", "trustAnchor", "requiredReviewerCount", "preventSelfReview", "administratorsCanBypass", "protectedBranchesOnly"],
+      "properties": {
+        "repository": { "type": "string" },
+        "name": { "type": "string" },
+        "trustAnchor": { "const": "protected-github-environment" },
+        "requiredReviewerCount": { "const": 1 },
+        "preventSelfReview": { "const": true },
+        "administratorsCanBypass": { "const": false },
+        "protectedBranchesOnly": { "const": true }
+      }
+    },
+    "webEnvironment": {
+      "allOf": [
+        { "$ref": "#/$defs/environmentBase" },
+        { "type": "object", "properties": { "repository": { "const": "bavanchun/vcskill-web" }, "name": { "const": "web-production" } } }
+      ]
+    },
+    "coreEnvironment": {
+      "allOf": [
+        { "$ref": "#/$defs/environmentBase" },
+        { "type": "object", "properties": { "repository": { "const": "bavanchun/vcskill" }, "name": { "const": "core-release-production" } } }
+      ]
+    },
+    "credentialPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "scope", "contents", "actions", "allowedContexts", "forbiddenContexts", "contentsWrite", "releaseWrite", "administrationWrite"],
+      "properties": {
+        "repository": { "const": "bavanchun/vcskill" },
+        "scope": { "const": "single-repository" },
+        "contents": { "const": "read" },
+        "actions": { "const": "write" },
+        "allowedContexts": { "const": ["edge-release-read", "exact-artifact-retrieval", "protected-finalizer-dispatch"] },
+        "forbiddenContexts": { "const": ["content", "build", "web-deploy", "cloudflare-deploy", "finalizer"] },
+        "contentsWrite": { "const": false },
+        "releaseWrite": { "const": false },
+        "administrationWrite": { "const": false }
+      }
+    }
+  }
+}
