@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <rect width="1200" height="630" fill="#11151d"/>
+  <g fill="none" stroke="#465268" stroke-width="3"><path d="M150 390H1050"/><circle cx="150" cy="390" r="22"/><rect x="353" y="368" width="44" height="44" stroke="#d89a58"/><circle cx="600" cy="390" r="22" stroke="#6ea8f7"/><rect x="778" y="368" width="44" height="44" transform="rotate(45 800 390)" stroke="#6ea8f7"/><circle cx="1050" cy="390" r="22" stroke="#76c8a2"/></g>
+  <g fill="#f1f5fb" font-family="Arial, sans-serif"><text x="150" y="170" font-size="88" font-weight="700">vcskill</text><text x="150" y="255" font-size="42">Compile intent into accountable execution.</text></g>
+  <g fill="#aab5c6" font-family="monospace" font-size="23"><text x="120" y="465">compile</text><text x="355" y="465">policy</text><text x="555" y="465">execute</text><text x="730" y="465">checkpoint</text><text x="1015" y="465">proof</text></g>
+</svg>

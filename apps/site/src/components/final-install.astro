@@ -1,0 +1,21 @@
+---
+import { siteFacts } from "../content/marketing-facts";
+---
+<section id="install" class="install-section" data-site-section aria-labelledby="install-title">
+  <div><h2 id="install-title">Start with an inspectable route.</h2><p>Install anonymously, then choose a workflow whose authority matches the task.</p></div>
+  <div class="install-actions">
+    <div class="install-command-list install-command-list-final" aria-label="Install commands">
+      {siteFacts.installCommands.map(({ id, label, command }) => (
+        <div class="command-option">
+          <span class="command-label">{label}</span>
+          <div class="command-line command-line-final">
+            <code id={`final-${id}-install-command`} tabindex="0">{command}</code>
+            <button type="button" data-copy-target={`final-${id}-install-command`} aria-describedby="copy-status" hidden>Copy</button>
+          </div>
+        </div>
+      ))}
+    </div>
+    <p id="copy-status" class="copy-status" aria-live="polite">Select and copy the command if automatic copy is unavailable.</p>
+    <a class="text-link" href={siteFacts.docsUrl}>Open first-run docs</a>
+  </div>
+</section>

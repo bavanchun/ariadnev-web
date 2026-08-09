@@ -1,0 +1,41 @@
+<section id="execution-map" class="execution-section" data-site-section aria-labelledby="execution-title">
+  <div class="section-entry">
+    <p class="section-kicker">Execution topology</p>
+    <h2 id="execution-title">One route. Five inspectable states.</h2>
+    <p>The final path is already present. The enhancer only moves emphasis through it.</p>
+  </div>
+  <div class="execution-map" data-execution-map>
+    <svg class="map-diagram map-diagram-horizontal" viewBox="0 0 1000 260" role="img" aria-labelledby="map-title-horizontal map-description-horizontal">
+      <title id="map-title-horizontal">vcskill execution route</title>
+      <desc id="map-description-horizontal">Compile moves through policy, execute, checkpoint, and proof in that order.</desc>
+      <path class="map-edge" data-map-edge="0" d="M120 130H280" /><path class="map-edge map-edge-gated" data-map-edge="1" d="M320 130H480" />
+      <path class="map-edge" data-map-edge="2" d="M520 130H680" /><path class="map-edge" data-map-edge="3" d="M720 130H880" />
+      <g class="map-node" transform="translate(80 130)"><circle r="28" /><text y="4">C</text></g>
+      <g class="map-node map-gate" transform="translate(300 130)"><rect x="-28" y="-28" width="56" height="56" /><text y="4">P</text></g>
+      <g class="map-node" transform="translate(500 130)"><circle r="28" /><text y="4">E</text></g>
+      <g class="map-node map-checkpoint" transform="translate(700 130)"><rect x="-24" y="-24" width="48" height="48" transform="rotate(45)" /><text y="4">C</text></g>
+      <g class="map-node map-proof" transform="translate(920 130)"><circle r="28" /><text y="4">P</text></g>
+      <g class="map-labels" aria-hidden="true"><text x="80" y="205">compile</text><text x="300" y="205">policy</text><text x="500" y="205">execute</text><text x="700" y="205">checkpoint</text><text x="920" y="205">proof</text></g>
+    </svg>
+    <svg class="map-diagram map-diagram-vertical" viewBox="0 0 320 760" role="img" aria-labelledby="map-title-vertical map-description-vertical">
+      <title id="map-title-vertical">vcskill execution route</title>
+      <desc id="map-description-vertical">Compile moves vertically through policy, execute, checkpoint, and proof in that order.</desc>
+      <path class="map-edge" data-map-edge="0" d="M80 108V202" /><path class="map-edge map-edge-gated" data-map-edge="1" d="M80 258V352" />
+      <path class="map-edge" data-map-edge="2" d="M80 408V502" /><path class="map-edge" data-map-edge="3" d="M80 558V652" />
+      <g class="map-node" transform="translate(80 80)"><circle r="28" /><text y="4">C</text></g>
+      <g class="map-node map-gate" transform="translate(80 230)"><rect x="-28" y="-28" width="56" height="56" /><text y="4">P</text></g>
+      <g class="map-node" transform="translate(80 380)"><circle r="28" /><text y="4">E</text></g>
+      <g class="map-node map-checkpoint" transform="translate(80 530)"><rect x="-24" y="-24" width="48" height="48" transform="rotate(45)" /><text y="4">C</text></g>
+      <g class="map-node map-proof" transform="translate(80 680)"><circle r="28" /><text y="4">P</text></g>
+      <g class="map-labels map-labels-vertical" aria-hidden="true"><text x="140" y="86">compile</text><text x="140" y="236">policy</text><text x="140" y="386">execute</text><text x="140" y="536">checkpoint</text><text x="140" y="686">proof</text></g>
+    </svg>
+    <ol class="map-steps" aria-label="Execution states">
+      <li id="map-state-compile"><a href="#map-state-compile" data-map-node="0"><strong>Compile</strong><span>Resolve intent into a bounded workflow.</span></a></li>
+      <li id="map-state-policy"><a href="#map-state-policy" data-map-node="1"><strong>Policy</strong><span>Hold work that exceeds granted authority.</span></a></li>
+      <li id="map-state-execute"><a href="#map-state-execute" data-map-node="2"><strong>Execute</strong><span>Run only the permitted operations.</span></a></li>
+      <li id="map-state-checkpoint"><a href="#map-state-checkpoint" data-map-node="3"><strong>Checkpoint</strong><span>Retain a state that recovery can revisit.</span></a></li>
+      <li id="map-state-proof"><a href="#map-state-proof" data-map-node="4"><strong>Proof</strong><span>Attach evidence and caveats to the outcome.</span></a></li>
+    </ol>
+  </div>
+</section>
+<script src="../scripts/execution-map-enhancer.ts"></script>

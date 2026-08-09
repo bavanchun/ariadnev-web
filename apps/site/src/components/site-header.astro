@@ -1,0 +1,13 @@
+---
+import { siteFacts } from "../content/marketing-facts";
+---
+<header class="site-header">
+  <a class="brand" href="/" aria-label="vcskill home">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM9 14h6v6H9z" /><path d="M10 7h4M17 10v4M12 10v4" /></svg>
+    <span>vcskill</span>
+  </a>
+  <nav aria-label="Primary navigation">
+    <a href="#execution-map">Map</a><a href="#workflows">Workflows</a><a href="#evidence">See proof</a><a href={siteFacts.docsUrl}>Docs</a>
+  </nav>
+  <a class="header-install" href={siteFacts.installUrl}>Install</a>
+</header>

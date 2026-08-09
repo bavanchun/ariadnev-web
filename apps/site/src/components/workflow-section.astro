@@ -1,0 +1,19 @@
+---
+import { siteFacts } from "../content/marketing-facts";
+---
+<section id="workflows" class="workflow-section" data-site-section aria-labelledby="workflows-title">
+  <div class="workflow-heading"><h2 id="workflows-title">Three routes define the work.</h2><p>Each route states what may change, where execution stops, and how recovery resumes.</p></div>
+  <ol class="workflow-lanes">
+    {siteFacts.workflows.map((workflow) => (
+      <li>
+        <code>{workflow.id}</code><h3>{workflow.purpose}</h3>
+        <dl>
+          <div><dt>Authority</dt><dd>{workflow.authority}</dd></div>
+          <div><dt>Recovery</dt><dd>{workflow.recovery}</dd></div>
+          <div><dt>Source</dt><dd><a href={workflow.sourceUrl}>{workflow.sourceLabel}</a></dd></div>
+          <div><dt>Caveat</dt><dd>{workflow.caveat}</dd></div>
+        </dl>
+      </li>
+    ))}
+  </ol>
+</section>
