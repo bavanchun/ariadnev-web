@@ -1,0 +1,23 @@
+name = "vcskill-edge-combined-production"
+main = "src/index.js"
+compatibility_date = "2026-08-08"
+workers_dev = false
+preview_urls = false
+
+routes = [
+  { pattern = "vcskill.vchun.dev", custom_domain = true },
+  { pattern = "vcskill.vchun.dev/install*", zone_name = "vchun.dev" },
+  { pattern = "vcskill.vchun.dev/install.ps1*", zone_name = "vchun.dev" },
+  { pattern = "vcskill.vchun.dev/version*", zone_name = "vchun.dev" },
+  { pattern = "vcskill.vchun.dev/download/*", zone_name = "vchun.dev" },
+]
+
+[vars]
+TOPOLOGY_MODE = "combined"
+ALLOWED_HOSTS = "vcskill.vchun.dev"
+
+[assets]
+directory = "../../apps/site/dist"
+binding = "ASSETS"
+run_worker_first = true
+not_found_handling = "none"

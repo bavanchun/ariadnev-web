@@ -1,0 +1,22 @@
+name = "vcskill-edge-spike-staging"
+main = "src/index.js"
+compatibility_date = "2026-08-08"
+workers_dev = false
+preview_urls = false
+
+routes = [
+  { pattern = "staging.vcskill.vchun.dev/install*", zone_name = "vchun.dev" },
+  { pattern = "staging.vcskill.vchun.dev/install.ps1*", zone_name = "vchun.dev" },
+  { pattern = "staging.vcskill.vchun.dev/version*", zone_name = "vchun.dev" },
+  { pattern = "staging.vcskill.vchun.dev/download/*", zone_name = "vchun.dev" },
+]
+
+[vars]
+TOPOLOGY_MODE = "combined"
+ALLOWED_HOSTS = "staging.vcskill.vchun.dev"
+
+[assets]
+directory = "./test/fixtures/site-dist"
+binding = "ASSETS"
+run_worker_first = true
+not_found_handling = "none"

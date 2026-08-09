@@ -1,0 +1,18 @@
+name = "vcskill-site-staging"
+main = "src/site-fixture.js"
+compatibility_date = "2026-08-08"
+workers_dev = false
+preview_urls = false
+
+routes = [
+  { pattern = "staging.vcskill.vchun.dev", custom_domain = true }
+]
+
+[vars]
+ALLOWED_HOSTS = "staging.vcskill.vchun.dev"
+
+[assets]
+directory = "./test/fixtures/site-dist"
+binding = "ASSETS"
+run_worker_first = true
+not_found_handling = "none"
