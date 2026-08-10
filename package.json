@@ -10,7 +10,7 @@
   },
   "scripts": {
     "test": "pnpm run test:native && vitest run",
-    "test:native": "node --test tests/contracts/public-edge-contract.test.mjs landing-consistency.test.mjs scripts/edge-ingress-rule.test.mjs workers/edge/src/index.test.mjs",
+    "test:native": "node --test tests/contracts/public-edge-contract.test.mjs landing-consistency.test.mjs scripts/edge-ingress-rule.test.mjs workers/edge/src/index.test.mjs tests/deployment/deployment-control-plane.test.mjs tests/tokens/token-contract.test.mjs tests/tokens/font-contract.test.mjs tests/tokens/generated-css.test.mjs",
     "test:qualification": "pnpm run contracts && pnpm run typecheck && pnpm run build && pnpm run test",
     "typecheck": "tsc --build --force",
     "build": "pnpm -r --workspace-concurrency=1 run build",

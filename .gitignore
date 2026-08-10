@@ -9,6 +9,11 @@ dist/
 .vercel/
 apps/*/dist/
 packages/*/dist/
+# ...except the generated token stylesheets, which are committed so a drift test
+# can compare them against a fresh build. Compiled JS and declarations stay out.
+!packages/tokens/dist/
+packages/tokens/dist/*
+!packages/tokens/dist/*.css
 
 # Wrangler
 .wrangler/

@@ -9,14 +9,21 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./tokens.css": "./dist/tokens.css"
+    "./site.css": "./dist/site.css",
+    "./docs.css": "./dist/docs.css",
+    "./font-manifest.json": "./src/font-manifest.json",
+    "./assets/*": "./assets/*"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist",
+    "assets",
+    "src/font-manifest.json"
+  ],
   "scripts": {
-    "build": "tsc --build",
-    "check": "tsc --build --force",
-    "test": "vitest run"
+    "build": "node scripts/build-tokens.mjs && tsc --build",
+    "check": "node scripts/build-tokens.mjs --check && tsc --build --force",
+    "test": "node --test ../../tests/tokens/*.test.mjs"
   }
 }
