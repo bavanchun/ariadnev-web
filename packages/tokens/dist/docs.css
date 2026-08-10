@@ -1,0 +1,136 @@
+/*
+ * Generated from packages/tokens/src/tokens.json by scripts/build-tokens.mjs.
+ * Do not edit. Run `pnpm --filter @vcskill-web/tokens run build` instead.
+ */
+
+@font-face {
+  font-family: "Be Vietnam Pro";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../assets/fonts/display-vietnamese.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("../assets/fonts/body-vietnamese.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("../assets/fonts/mono-vietnamese.woff2") format("woff2");
+}
+
+:root {
+  --vcs-color-ink-700: oklch(0.27 0.022 264);
+  --vcs-color-ink-800: oklch(0.21 0.020 264);
+  --vcs-color-ink-900: oklch(0.16 0.018 264);
+  --vcs-color-graphite-400: oklch(0.70 0.010 264);
+  --vcs-color-graphite-500: oklch(0.56 0.012 264);
+  --vcs-color-graphite-600: oklch(0.44 0.014 264);
+  --vcs-color-cool-100: oklch(0.97 0.004 264);
+  --vcs-color-cool-200: oklch(0.93 0.006 264);
+  --vcs-color-cool-300: oklch(0.86 0.008 264);
+  --vcs-color-spectral-400: oklch(0.76 0.130 252);
+  --vcs-color-spectral-500: oklch(0.65 0.165 252);
+  --vcs-color-spectral-600: oklch(0.55 0.170 252);
+  --vcs-color-copper-400: oklch(0.79 0.105 58);
+  --vcs-color-copper-500: oklch(0.68 0.135 58);
+  --vcs-color-copper-600: oklch(0.56 0.130 58);
+  --vcs-color-signal-pass: oklch(0.72 0.150 155);
+  --vcs-color-signal-fail: oklch(0.68 0.180 25);
+  --vcs-color-signal-blocked: oklch(0.79 0.105 58);
+  --vcs-surface-canvas: var(--vcs-color-ink-900);
+  --vcs-surface-raised: var(--vcs-color-ink-800);
+  --vcs-surface-overlay: var(--vcs-color-ink-700);
+  --vcs-surface-border: var(--vcs-color-graphite-600);
+  --vcs-surface-border-strong: var(--vcs-color-graphite-500);
+  --vcs-text-primary: var(--vcs-color-cool-100);
+  --vcs-text-secondary: var(--vcs-color-cool-300);
+  --vcs-text-muted: var(--vcs-color-graphite-400);
+  --vcs-text-accent: var(--vcs-color-spectral-400);
+  --vcs-text-gate: var(--vcs-color-copper-400);
+  --vcs-text-on-accent: var(--vcs-color-ink-900);
+  --vcs-topology-node: var(--vcs-color-ink-700);
+  --vcs-topology-node-active: var(--vcs-color-spectral-600);
+  --vcs-topology-edge: var(--vcs-color-graphite-600);
+  --vcs-topology-edge-active: var(--vcs-color-spectral-500);
+  --vcs-topology-gate: var(--vcs-color-copper-500);
+  --vcs-topology-checkpoint: var(--vcs-color-cool-300);
+  --vcs-topology-witness: var(--vcs-color-spectral-400);
+  --vcs-font-family-display: "Be Vietnam Pro", system-ui, sans-serif;
+  --vcs-font-family-body: Inter, system-ui, sans-serif;
+  --vcs-font-family-mono: "JetBrains Mono", ui-monospace, monospace;
+  --vcs-font-weight-regular: 400;
+  --vcs-font-weight-bold: 700;
+  --vcs-font-size-xs: 0.75rem;
+  --vcs-font-size-sm: 0.875rem;
+  --vcs-font-size-md: 1rem;
+  --vcs-font-size-lg: 1.25rem;
+  --vcs-font-size-xl: 1.5625rem;
+  --vcs-font-size-2xl: 1.953rem;
+  --vcs-font-size-3xl: 2.441rem;
+  --vcs-font-size-4xl: 3.052rem;
+  --vcs-font-line-height-tight: 1.15;
+  --vcs-font-line-height-snug: 1.35;
+  --vcs-font-line-height-normal: 1.6;
+  --vcs-font-line-height-relaxed: 1.75;
+  --vcs-font-tracking-tight: -0.02em;
+  --vcs-font-tracking-normal: 0em;
+  --vcs-font-tracking-wide: 0.06em;
+  --vcs-space-0: 0rem;
+  --vcs-space-1: 0.25rem;
+  --vcs-space-2: 0.5rem;
+  --vcs-space-3: 0.75rem;
+  --vcs-space-4: 1rem;
+  --vcs-space-5: 1.5rem;
+  --vcs-space-6: 2rem;
+  --vcs-space-7: 3rem;
+  --vcs-space-8: 4rem;
+  --vcs-space-9: 6rem;
+  --vcs-space-10: 8rem;
+  --vcs-size-touch-target: 2.75rem;
+  --vcs-size-content-max: 72rem;
+  --vcs-size-prose-max: 38rem;
+  --vcs-border-width-hairline: 1px;
+  --vcs-border-width-thick: 2px;
+  --vcs-border-radius-none: 0rem;
+  --vcs-border-radius-sm: 0.125rem;
+  --vcs-border-radius-md: 0.25rem;
+  --vcs-border-radius-lg: 0.5rem;
+  --vcs-border-radius-pill: 999rem;
+  --vcs-focus-width: 2px;
+  --vcs-focus-offset: 2px;
+  --vcs-focus-color: var(--vcs-color-spectral-400);
+  --vcs-focus-color-on-light: var(--vcs-color-spectral-600);
+  --vcs-motion-duration-instant: 80ms;
+  --vcs-motion-duration-fast: 150ms;
+  --vcs-motion-duration-normal: 240ms;
+  --vcs-motion-duration-slow: 400ms;
+  --vcs-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --vcs-motion-easing-enter: cubic-bezier(0, 0, 0, 1);
+  --vcs-motion-easing-exit: cubic-bezier(0.3, 0, 1, 1);
+  --vcs-elevation-raised: 0rem 0.0625rem 0.125rem 0rem oklch(0.10 0.02 264 / 0.45);
+  --vcs-elevation-overlay: 0rem 0.5rem 1.5rem 0rem oklch(0.10 0.02 264 / 0.55);
+
+  /* docs surface aliases */
+  --vcs-app-background: var(--vcs-surface-canvas);
+  --vcs-app-foreground: var(--vcs-text-primary);
+  --vcs-app-measure: var(--vcs-size-prose-max);
+  --vcs-app-leading: var(--vcs-font-line-height-relaxed);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --vcs-motion-duration-instant: 0ms;
+    --vcs-motion-duration-fast: 0ms;
+    --vcs-motion-duration-normal: 0ms;
+    --vcs-motion-duration-slow: 0ms;
+  }
+}
