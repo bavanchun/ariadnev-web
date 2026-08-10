@@ -1,0 +1,19 @@
+---
+// Compact banner. No disclosure menu and no mobile drawer: at 320 CSS pixels the
+// two links still fit, so there is nothing to hide behind an interaction. That
+// keeps install and docs one interaction from first paint at every viewport.
+import { SITE } from "../data/marketing-facts";
+---
+
+<header class="site-header">
+  <div class="shell site-header__bar">
+    <a class="site-header__mark" href="/" aria-label={`${SITE.name} home`}>
+      <span aria-hidden="true">▚</span>
+      <span>{SITE.name}</span>
+    </a>
+    <nav class="site-header__nav" aria-label="Primary">
+      <a class="action" href={SITE.docsEntry}>Docs</a>
+      <a class="action action--primary" href="#install">Install</a>
+    </nav>
+  </div>
+</header>

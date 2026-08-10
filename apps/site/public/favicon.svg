@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="vcskill">
+  <!-- Two nodes and the edge between them: the smallest possible execution map.
+       Colours are the ink ground and spectral accent from the token palette,
+       written literally because an SVG asset cannot read CSS custom properties
+       from the page that references it. -->
+  <rect width="32" height="32" rx="4" fill="#090d15"/>
+  <path d="M11 16h10" stroke="#71b5ff" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="9" cy="16" r="3.5" fill="#71b5ff"/>
+  <circle cx="23" cy="16" r="3.5" fill="none" stroke="#d58138" stroke-width="2"/>
+</svg>

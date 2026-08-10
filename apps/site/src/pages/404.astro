@@ -1,0 +1,38 @@
+---
+// A physical 404 page. Cloudflare's `not_found_handling = "404-page"` serves
+// this file with a real 404 status, so an unknown path never masquerades as
+// successful content — which also keeps a mistyped machine route from looking
+// like a valid response to a script.
+import BaseLayout from "../layouts/base-layout.astro";
+import SiteHeader from "../components/site-header.astro";
+import { SITE, INSTALL } from "../data/marketing-facts";
+import InstallCommand from "../components/install-command.astro";
+---
+
+<BaseLayout
+  title={`Not found — ${SITE.name}`}
+  description="This path does not exist on the vcskill site."
+  path="/404"
+  noindex={true}
+>
+  <SiteHeader />
+
+  <main id="main" class="shell">
+    <div class="not-found">
+      <p class="eyebrow">404</p>
+      <h1>This path does not exist</h1>
+      <p class="lede">
+        Nothing is served here. If you followed a link to a release asset or an installer path, it either moved or was
+        never published — the site does not substitute a page for a missing file.
+      </p>
+
+      <InstallCommand id="not-found-install-unix" label={INSTALL.unixLabel} command={INSTALL.unixCommand} />
+
+      <div class="action-row">
+        <a class="action action--primary" href="/">Back to the start</a>
+        <a class="action" href={SITE.docsEntry}>Documentation</a>
+        <a class="action" href={`${SITE.repository}/releases`}>Releases</a>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

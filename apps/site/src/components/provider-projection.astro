@@ -1,0 +1,33 @@
+---
+// Section 4 — provider adaptation, as a projection.
+//
+// The exhaustive provider x artifact matrix is generated from source in the kit
+// and would be wrong here within one release. This section states the principle
+// and links the generated authority instead of copying it.
+import { PROVIDERS, PROVIDER_PRINCIPLE, SITE } from "../data/marketing-facts";
+---
+
+<section class="shell section" id="providers" aria-labelledby="providers-heading">
+  <div class="section__head">
+    <p class="eyebrow">Provider adaptation</p>
+    <h2 id="providers-heading">One kit, written only where the path is known</h2>
+    <p class="lede">{PROVIDER_PRINCIPLE.claim}</p>
+  </div>
+
+  <ul class="providers">
+    {
+      PROVIDERS.map((provider) => (
+        <li class="provider">
+          <span class="provider__id"><code>{provider.id}</code></span>
+          <span class="provider__note">{provider.note}</span>
+        </li>
+      ))
+    }
+  </ul>
+
+  <p class="note">
+    {PROVIDER_PRINCIPLE.caveat} The generated matrix lives in{" "}
+    <a href={PROVIDER_PRINCIPLE.source}>{PROVIDER_PRINCIPLE.sourceLabel}</a>, and the installation guide is in the{" "}
+    <a href={SITE.docsEntry}>documentation</a>.
+  </p>
+</section>

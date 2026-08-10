@@ -1,0 +1,74 @@
+---
+// Document shell: metadata, token styles, landmarks, and the skip link.
+//
+// Fonts are self-hosted and referenced only by the generated token stylesheet,
+// which Vite fingerprints into the build output. No stylesheet, script, font, or
+// image is fetched from a third-party origin, and the content security policy
+// declared in `public/_headers` is written to make that a hard rule rather than
+// a convention.
+import { SITE } from "../data/marketing-facts";
+import "../styles/site.css";
+
+// The display face sets the largest text on the page, so it is preloaded by
+// URL: discovering it through the generated `@font-face` rules costs a second
+// round trip, which shows up as a late swap and a layout shift. Importing it
+// here yields the same fingerprinted URL Vite emits for the stylesheet, so
+// nothing is duplicated in the output.
+//
+// The body face is deliberately NOT preloaded. It is the largest asset on the
+// page, and promoting it to the critical path delays the largest contentful
+// paint by more than the swap it would avoid.
+import displayFont from "@vcskill-web/tokens/assets/fonts/display-vietnamese.woff2?url";
+
+interface Props {
+  readonly title: string;
+  readonly description: string;
+  /** Path of this page, used to build the canonical URL. */
+  readonly path: string;
+  /** Excluded from indexing — used only by the 404 page. */
+  readonly noindex?: boolean;
+}
+
+const { title, description, path, noindex = false } = Astro.props;
+const canonical = new URL(path, SITE.origin).href;
+---
+
+<!doctype html>
+<html lang={SITE.locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preload" href={displayFont} as="font" type="font/woff2" crossorigin />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content={new URL("/social-card.png", SITE.origin).href} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="vcskill — a local execution control plane for coding agents" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL("/social-card.png", SITE.origin).href} />
+
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#090d15" />
+
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <slot />
+  </body>
+</html>

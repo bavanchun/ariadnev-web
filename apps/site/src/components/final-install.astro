@@ -1,0 +1,32 @@
+---
+// Section 6 — the final action.
+//
+// Both platform commands and the two links a reader needs next. Copy feedback
+// lives inside each command block rather than once at the foot of the section,
+// so the confirmation appears where the reader just clicked.
+import { INSTALL, SITE } from "../data/marketing-facts";
+import InstallCommand from "./install-command.astro";
+---
+
+<section class="shell section final" id="install" aria-labelledby="install-heading">
+  <div class="section__head">
+    <p class="eyebrow">Install</p>
+    <h2 id="install-heading">One command, then pick your providers</h2>
+    <p class="lede">{INSTALL.note}</p>
+  </div>
+
+  <div class="command-list">
+    <InstallCommand id="final-install-unix" label={INSTALL.unixLabel} command={INSTALL.unixCommand} />
+    <InstallCommand id="final-install-windows" label={INSTALL.windowsLabel} command={INSTALL.windowsCommand} />
+  </div>
+
+  <div class="action-row">
+    <a class="action action--primary" href={SITE.docsEntry}>First-run guide</a>
+    <a class="action" href={SITE.repository}>Source on GitHub</a>
+  </div>
+
+  <p class="note">
+    Prefer to read the script before running it? Open{" "}
+    <a href="/install">{SITE.origin}/install</a> — it is the same anonymous path the command above fetches.
+  </p>
+</section>

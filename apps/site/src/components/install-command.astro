@@ -1,0 +1,37 @@
+---
+// One install command, rendered as selectable text.
+//
+// The copy button ships with `hidden` and is revealed by the page enhancer only
+// when a Clipboard API is actually available. Without JavaScript, or with the
+// clipboard denied, there is no dead control on the page — just the literal
+// command, which a reader can select and copy by hand.
+//
+// The command is authored static text. Nothing from the URL or the query string
+// is ever interpolated into it.
+interface Props {
+  readonly label: string;
+  readonly command: string;
+  readonly id: string;
+}
+
+const { label, command, id } = Astro.props;
+---
+
+<div class="command">
+  <span class="command__label" id={`${id}-label`}>{label}</span>
+  <code class="command__text" id={id}>{command}</code>
+  <button
+    class="action command__copy"
+    type="button"
+    hidden
+    data-copy-for={id}
+    data-copy-status-for={`${id}-status`}
+    aria-labelledby={`${id}-copy-label ${id}-label`}
+  >
+    <span id={`${id}-copy-label`}>Copy</span>
+  </button>
+  <!-- Feedback sits beside the control that produced it: one shared region at
+       the foot of the page announces correctly to a screen reader but leaves a
+       sighted reader who copied from the hero with no visible confirmation. -->
+  <p class="copy-status" role="status" aria-live="polite" id={`${id}-status`}></p>
+</div>

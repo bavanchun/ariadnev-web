@@ -1,0 +1,58 @@
+---
+// The marketing page: six sections, in this order, and nothing else.
+//
+// Structured data is limited to what can be verified from the repository — a
+// name, a description, the source URL, the licence, and the platforms the
+// installer supports. No rating, no price, no review, no download count.
+import BaseLayout from "../layouts/base-layout.astro";
+import SiteHeader from "../components/site-header.astro";
+import PromiseSection from "../components/promise-section.astro";
+import ExecutionMap from "../components/execution-map.astro";
+import WorkflowSection from "../components/workflow-section.astro";
+import ProviderProjection from "../components/provider-projection.astro";
+import EvidenceLedger from "../components/evidence-ledger.astro";
+import FinalInstall from "../components/final-install.astro";
+import { SITE } from "../data/marketing-facts";
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: SITE.name,
+  applicationCategory: "DeveloperApplication",
+  operatingSystem: "macOS, Linux, Windows",
+  description: SITE.description,
+  url: SITE.origin,
+  codeRepository: SITE.repository,
+  license: "https://github.com/bavanchun/vcskill/blob/main/LICENSE",
+};
+---
+
+<BaseLayout title={SITE.title} description={SITE.description} path="/">
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(structuredData)} slot="head" />
+
+  <SiteHeader />
+
+  <main id="main">
+    <PromiseSection />
+    <ExecutionMap />
+    <WorkflowSection />
+    <ProviderProjection />
+    <EvidenceLedger />
+    <FinalInstall />
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell">
+      <p>vcskill is local-first and open source. There is no hosted control plane and no telemetry endpoint.</p>
+      <ul>
+        <li><a href={SITE.docsEntry}>Documentation</a></li>
+        <li><a href={SITE.repository}>Source</a></li>
+        <li><a href={`${SITE.repository}/releases`}>Releases</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script>
+    import "../scripts/page-enhancer";
+  </script>
+</BaseLayout>
