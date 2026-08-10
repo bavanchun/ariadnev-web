@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-08-10T01:15:50Z",
+  "purpose": "Durable pointer to the retained version-aware staging edge that Phases 9-12 depend on. Phase 9 release synchronization and Phase 11/12 qualification must resolve this exact endpoint, never a preview URL or a moving alias.",
+  "selectedTopology": "candidate-b",
+  "endpoint": {
+    "baseUrl": "https://staging.vcskill.vchun.dev",
+    "isExplicit": true,
+    "isPreviewAlias": false
+  },
+  "deployments": {
+    "edge": {
+      "workerName": "vcskill-edge-combined-staging",
+      "workerVersionId": "87e90807-1de5-4c71-b95d-b451468c0fca",
+      "deployedAtUtc": "2026-08-09T07:04:38Z",
+      "deploymentMessage": "Harden edge streaming and error isolation",
+      "profile": "workers/edge/wrangler.combined.toml",
+      "attachedBy": "zone routes",
+      "routePatterns": [
+        "staging.vcskill.vchun.dev/install*",
+        "staging.vcskill.vchun.dev/install.ps1*",
+        "staging.vcskill.vchun.dev/version*",
+        "staging.vcskill.vchun.dev/download/*"
+      ],
+      "secretNamesPresent": ["GH_TOKEN"],
+      "secretValuesRecorded": false,
+      "sharesSecretNamespaceWithLegacy": false
+    },
+    "site": {
+      "workerName": "vcskill-site-staging",
+      "workerVersionId": "3081658f-1ecc-454c-95f5-84d4453c4f80",
+      "deployedAtUtc": "2026-08-09T06:28:47Z",
+      "deploymentMessage": "Final reverse-binding evidence",
+      "attachedBy": "custom domain",
+      "hostname": "staging.vcskill.vchun.dev",
+      "secretNamesPresent": []
+    }
+  },
+  "productionRollbackTarget": {
+    "workerName": "vcskill",
+    "workerVersionId": "e91ff904-f7b7-4293-a033-dee7e5cc3fe2",
+    "versionTag": "vcskill-0.11.0",
+    "deployedAtUtc": "2026-08-08T15:24:38Z",
+    "hostname": "vcskill.vchun.dev",
+    "attachedBy": "custom domain + zone route vcskill.vchun.dev/*",
+    "secretNamesPresent": ["GH_TOKEN"],
+    "credentialMutationFrozen": true,
+    "freezeReleasedBy": "Phase 12 rollback window closure",
+    "unchangedByPhase3": true
+  },
+  "ownership": {
+    "rollbackOwner": "bavanchun",
+    "expiryOwner": "bavanchun",
+    "expiryCondition": "Remove only after the Phase 12 production cutover no longer depends on this endpoint. Phases 9-11 must not delete it."
+  },
+  "openGates": [
+    {
+      "id": "raw-path-ingress-guard",
+      "status": "blocked",
+      "detail": "The zone custom rule from workers/edge/rules/raw-download-path-guard.json is not present. Applying it needs a Cloudflare API token with Zone -> WAF -> Edit; the available OAuth credential is rejected with an authentication error.",
+      "evidence": "docs/decisions/edge-routing-reprobe.json rows raw-traversal-literal and raw-dot-segment"
+    },
+    {
+      "id": "held-draft-token-permission",
+      "status": "blocked",
+      "detail": "No fine-grained PAT limited to bavanchun/vcskill with Contents read + Actions write exists in this environment. The principal role gate passed; the token permission gate did not.",
+      "evidence": "docs/decisions/edge-routing-observations.json draftAccessPreflight"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "run": 3,
+  "routeId": "marketing-home",
+  "url": "https://vcskill.vchun.dev/",
+  "observedAtUtc": "2026-08-08T19:48:23.686Z",
+  "valid": true,
+  "tool": { "name": "chrome-devtools-mcp performance trace", "version": "1.6.0", "chrome": "151.0.7922.76" },
+  "profile": { "network": "Fast 4G", "cpuSlowdownMultiplier": 4, "viewport": { "width": 390, "height": 844, "deviceScaleFactor": 1 }, "browserCache": "new isolated context with ignoreCache navigation", "runnerRegion": "local-asia-ho-chi-minh" },
+  "metrics": { "lcpMs": 1104, "cls": 0, "inpMs": 41, "inpSource": "Chrome performance trace" },
+  "interactions": { "installCtaNavigation": "pass", "marketingGraphKeyboardTraversal": "pass", "finalHash": "#proof", "focusInsideDocument": true },
+  "transfer": { "totalBytes": 17803, "documentBytes": 16173, "cssBytes": 1324, "scriptBytes": 0, "fontBytes": 0, "imageBytes": 0, "versionFetchBytes": 306 },
+  "cdn": { "cfRay": "a28109cfe992cdf9-SIN", "cfCacheStatus": null, "age": null }
+}

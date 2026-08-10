@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "runner": {
+    "region": "local-asia-ho-chi-minh",
+    "timeZone": "Asia/Ho_Chi_Minh",
+    "cdnPoPEvidence": "Record the landing document cf-ray suffix for every retained run."
+  },
+  "tools": {
+    "chrome": "151.0.7922.76",
+    "chromeDevtoolsMcp": "1.6.0",
+    "playwright": "1.55.0",
+    "node": "26.0.0",
+    "lighthouse": "13.4.0"
+  },
+  "profile": {
+    "network": "Fast 4G",
+    "cpuSlowdownMultiplier": 4,
+    "viewport": { "width": 390, "height": 844, "deviceScaleFactor": 1 },
+    "browserCache": "new isolated context with ignoreCache navigation",
+    "cdnCache": "shared production cache cannot be purged; record cf-cache-status and age without discarding a valid run"
+  },
+  "runOrderSeed": "vcskill-flagship-fixed-seed-v1",
+  "qualificationRunOrder": [
+    "marketing-home#1", "docs-en-installation#1", "docs-vi-installation#1",
+    "marketing-home#2", "docs-en-installation#2", "docs-vi-installation#2",
+    "marketing-home#3", "docs-en-installation#3", "docs-vi-installation#3",
+    "marketing-home#4", "docs-en-installation#4", "docs-vi-installation#4",
+    "marketing-home#5", "docs-en-installation#5", "docs-vi-installation#5"
+  ],
+  "legacyBaselineRunOrder": [
+    "marketing-home#1",
+    "marketing-home#2",
+    "marketing-home#3",
+    "marketing-home#4",
+    "marketing-home#5"
+  ],
+  "warmupPolicy": "No hidden warm samples. Each declared run starts in a new isolated browser context with ignoreCache navigation and is retained.",
+  "invalidEnvironmentPolicy": "Retain the failed record with a reason, then rerun only when profile or runner validation proves the environment invalid.",
+  "perRouteAggregation": {
+    "requiredValidSamples": 5,
+    "gate": "median",
+    "report": ["median", "maximum"]
+  },
+  "routes": [
+    {
+      "id": "marketing-home",
+      "path": "/",
+      "surface": "marketing",
+      "legacyBaseline": "observable",
+      "legacyReason": "The legacy production landing is the directly observable marketing route."
+    },
+    {
+      "id": "docs-en-installation",
+      "path": "/en/stable/get-started/installation/",
+      "surface": "docs",
+      "legacyBaseline": "not-observable",
+      "legacyReason": "The legacy production topology returns its generic unknown-route response because no docs product is deployed."
+    },
+    {
+      "id": "docs-vi-installation",
+      "path": "/vi/stable/get-started/installation/",
+      "surface": "docs",
+      "legacyBaseline": "not-observable",
+      "legacyReason": "The legacy production topology returns its generic unknown-route response because no Vietnamese docs product is deployed."
+    }
+  ],
+  "interactions": [
+    {
+      "id": "install-cta-navigation",
+      "routeId": "marketing-home",
+      "legacyBaseline": "observable",
+      "legacyReason": "The legacy landing exposes and browser-observes this keyboard interaction.",
+      "timeoutMs": 10000,
+      "steps": [
+        { "action": "focus", "target": "role=link[name='Install vcskill']" },
+        { "action": "press", "key": "Enter" }
+      ],
+      "oracle": "location.hash equals #install and the Unix install command is visible",
+      "metric": "inp"
+    },
+    {
+      "id": "marketing-graph-keyboard-traversal",
+      "routeId": "marketing-home",
+      "legacyBaseline": "observable",
+      "legacyReason": "The legacy landing exposes and browser-observes this keyboard interaction.",
+      "timeoutMs": 10000,
+      "steps": [
+        { "action": "focus", "target": "role=link[name='See proof']" },
+        { "action": "press", "key": "Enter" },
+        { "action": "press", "key": "Tab" }
+      ],
+      "oracle": "the proof landmark is visible and focus remains within the document",
+      "metric": "inp"
+    },
+    {
+      "id": "docs-search-open-type-select",
+      "routeId": "docs-en-installation",
+      "legacyBaseline": "not-observable",
+      "legacyReason": "The legacy route has no docs shell or static search control to exercise.",
+      "timeoutMs": 10000,
+      "steps": [
+        { "action": "press", "key": "/" },
+        { "action": "type", "text": "installation" },
+        { "action": "press", "key": "ArrowDown" },
+        { "action": "press", "key": "Enter" }
+      ],
+      "oracle": "the stable English installation route is selected from a non-empty static result set",
+      "metric": "inp"
+    },
+    {
+      "id": "docs-locale-version-switch",
+      "routeId": "docs-en-installation",
+      "legacyBaseline": "not-observable",
+      "legacyReason": "The legacy route has no docs locale or version controls to exercise.",
+      "timeoutMs": 10000,
+      "steps": [
+        { "action": "activate", "target": "role=button[name='Language']" },
+        { "action": "activate", "target": "role=menuitem[name='Tiếng Việt']" },
+        { "action": "activate", "target": "role=button[name='Version']" },
+        { "action": "activate", "target": "role=menuitem[name='Previous stable']" }
+      ],
+      "oracle": "the route preserves installation identity while locale and release segments both change",
+      "metric": "inp"
+    }
+  ]
+}

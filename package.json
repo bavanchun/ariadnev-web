@@ -1,0 +1,44 @@
+{
+  "name": "vcskill-web",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Public web surface for vcskill: Astro marketing site, static Fumadocs documentation, and the release edge Worker.",
+  "type": "module",
+  "packageManager": "pnpm@10.33.2",
+  "engines": {
+    "node": "24.15.0"
+  },
+  "scripts": {
+    "test": "pnpm run test:native && vitest run",
+    "test:native": "node --test tests/contracts/public-edge-contract.test.mjs landing-consistency.test.mjs scripts/edge-ingress-rule.test.mjs workers/edge/src/index.test.mjs",
+    "test:qualification": "pnpm run contracts && pnpm run typecheck && pnpm run build && pnpm run test",
+    "typecheck": "tsc --build --force",
+    "build": "pnpm -r --workspace-concurrency=1 run build",
+    "contracts": "vitest run tests/compatibility tests/deployment packages/contracts",
+    "sync:release": "node scripts/deploy/validate-deployment-input.mjs",
+    "deploy:units": "node scripts/deploy/deploy-units.mjs",
+    "rollback:units": "node scripts/deploy/rollback-units.mjs",
+    "verify:convergence": "node scripts/deploy/verify-convergence.mjs",
+    "verify:soak": "node scripts/deploy/verify-soak.mjs",
+    "verify:environment": "node scripts/deploy/verify-production-environment.mjs",
+    "site": "pnpm --filter @vcskill-web/site",
+    "docs": "pnpm --filter @vcskill-web/docs",
+    "edge": "pnpm --filter @vcskill-web/edge",
+    "contracts:pkg": "pnpm --filter @vcskill-web/contracts",
+    "tokens": "pnpm --filter @vcskill-web/tokens"
+  },
+  "devDependencies": {
+    "@types/node": "26.2.0",
+    "lighthouse": "13.4.1",
+    "playwright": "1.62.1",
+    "typescript": "7.0.2",
+    "vitest": "4.1.10"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp",
+      "workerd"
+    ]
+  }
+}

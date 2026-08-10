@@ -1,0 +1,21 @@
+{
+  "name": "@vcskill-web/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Trusted docs-bundle manifest schema, archive policy, and verify-first atomic extractor. Depends on no application framework.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist", "schemas"],
+  "scripts": {
+    "build": "tsc --build",
+    "check": "tsc --build --force",
+    "test": "vitest run"
+  }
+}

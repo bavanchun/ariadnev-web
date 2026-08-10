@@ -1,0 +1,286 @@
+{
+  "observedOnLocal": "2026-08-09",
+  "source": {
+    "productionOrigin": "https://vcskill.vchun.dev",
+    "localCanonicalLanding": "landing.html",
+    "canonicalCore": {
+      "repository": "bavanchun/vcskill",
+      "commitSha": "0b7852372f7b2eadff1e50ad74e75152e74dbc39",
+      "paths": [
+        "kit/workflows/bugfix-delivery.json",
+        "kit/workflows/read-only-delivery.json",
+        "kit/workflows/safe-change-delivery.json"
+      ]
+    }
+  },
+  "release": {
+    "versionRoute": "0.11.0",
+    "landingRelease": "0.11.0",
+    "binaries": 5,
+    "checksums": [
+      {
+        "asset": "vcskill-darwin-arm64",
+        "sha256": "8f60d45cf0fdfcf8f2c8391531a717c507c798d5000691a054739c2944b40e59"
+      },
+      {
+        "asset": "vcskill-darwin-x64",
+        "sha256": "1a6a7a8b586da22d8e877138700a842c493cafa963fd44bc92b399d1c83d712e"
+      },
+      {
+        "asset": "vcskill-linux-x64",
+        "sha256": "79e8bca2ecb54439da645fdb32d0954319fb0886344505fa78210075bb2ff1e7"
+      },
+      {
+        "asset": "vcskill-linux-arm64",
+        "sha256": "b1f89343fa2a0f5c19c942b66a04fd9ff0d36d5e2ebe1c4922e998de271660da"
+      },
+      {
+        "asset": "vcskill-windows-x64.exe",
+        "sha256": "a442b897dccc109de66a9e80d614b1bdce25a3acc821da3c8b8c6f98d84032d7"
+      }
+    ]
+  },
+  "inventory": {
+    "skills": [
+      "brainstorm",
+      "plan",
+      "cook",
+      "fix",
+      "code-review",
+      "test",
+      "ship",
+      "review-pr",
+      "scout",
+      "git",
+      "ask",
+      "pm",
+      "bootstrap",
+      "research",
+      "predict",
+      "scenario",
+      "security-scan",
+      "problem-solving",
+      "sequential-thinking",
+      "docs",
+      "docs-seeker",
+      "journal",
+      "handoff",
+      "worktree",
+      "skill-creator",
+      "obsidian-second-brain-note"
+    ],
+    "commands": [
+      {
+        "name": "install",
+        "args": " [--provider a,b] [--global]",
+        "description": "Install the kit to selected targets and write a receipt for health checks."
+      },
+      {
+        "name": "run",
+        "args": " <workflow> [--runtime codex|claude-code] [--json]",
+        "description": "Validate or execute a versioned graph; resume, status, and cancel keep durable runs operable."
+      },
+      {
+        "name": "doctor",
+        "args": " [--fix]",
+        "description": "Run the scored 0-100 health audit and print the exact repair for each finding."
+      },
+      {
+        "name": "eval",
+        "args": " [--skill <name>]",
+        "description": "Score skill quality with the static tier, plus an opt-in LLM judge when configured."
+      },
+      {
+        "name": "coverage",
+        "args": " [--skill <name>]",
+        "description": "Check classified upstream claims against distilled skill content."
+      },
+      {
+        "name": "query",
+        "args": " [installs|doctor|history]",
+        "description": "Read local install, doctor, update, and command history."
+      },
+      {
+        "name": "contract",
+        "args": " [--json]",
+        "description": "Print the provider by artifact capability matrix for people or machines."
+      },
+      {
+        "name": "update",
+        "args": " [--check]",
+        "description": "Check or install the latest SHA-256-verified binary release."
+      },
+      {
+        "name": "validate",
+        "args": " [--check]",
+        "description": "Lint frontmatter, size, references, provenance, and claim coverage."
+      },
+      {
+        "name": "list",
+        "args": "",
+        "description": "Show kit contents and per-target install state."
+      },
+      {
+        "name": "backups",
+        "args": " restore <ts>",
+        "description": "Restore a timestamped backup after preserving the current state."
+      },
+      {
+        "name": "telemetry",
+        "args": " status",
+        "description": "Show anonymous telemetry state. Nothing is sent unless configured."
+      },
+      {
+        "name": "add-skill",
+        "args": " <name>",
+        "description": "Scaffold a canonical skill in a source checkout."
+      },
+      {
+        "name": "uninstall",
+        "args": " [--provider a,b]",
+        "description": "Remove managed files while preserving user-modified content."
+      },
+      {
+        "name": "migrate",
+        "args": "",
+        "description": "Relocate installed files when target path conventions change."
+      }
+    ],
+    "workflows": [
+      "bugfix-delivery",
+      "read-only-delivery",
+      "safe-change-delivery"
+    ],
+    "providers": [
+      {
+        "name": "claude-code",
+        "support": {
+          "skill": 1,
+          "agent": 1,
+          "command": 1,
+          "rules": 1,
+          "scripts": 1,
+          "env": 1,
+          "hook": 1
+        }
+      },
+      {
+        "name": "codex",
+        "support": {
+          "skill": 1,
+          "agent": 1,
+          "command": 1,
+          "rules": 1,
+          "scripts": 1,
+          "env": 1,
+          "hook": 0
+        }
+      },
+      {
+        "name": "cursor",
+        "support": {
+          "skill": 1,
+          "agent": 1,
+          "command": 1,
+          "rules": 1,
+          "scripts": 1,
+          "env": 1,
+          "hook": 0
+        }
+      },
+      {
+        "name": "antigravity",
+        "support": {
+          "skill": 1,
+          "agent": 0,
+          "command": 0,
+          "rules": 1,
+          "scripts": 1,
+          "env": 1,
+          "hook": 0
+        }
+      },
+      {
+        "name": "opencode",
+        "support": {
+          "skill": 1,
+          "agent": 1,
+          "command": 1,
+          "rules": 1,
+          "scripts": 1,
+          "env": 1,
+          "hook": 0
+        }
+      },
+      {
+        "name": "generic",
+        "support": {
+          "skill": 1,
+          "agent": 0,
+          "command": 0,
+          "rules": 1,
+          "scripts": 1,
+          "env": 1,
+          "hook": 0
+        }
+      }
+    ]
+  },
+  "counts": {
+    "skills": 26,
+    "agents": 13,
+    "hooks": 6,
+    "targets": 6,
+    "commands": 15,
+    "providers": 6,
+    "workflows": 3
+  },
+  "proofFacts": {
+    "behavioral": {
+      "skillsPassed": 26,
+      "skillsTotal": 26,
+      "goldenTasks": 14
+    },
+    "static": {
+      "claimCoverage": {
+        "passed": 8,
+        "total": 8
+      },
+      "provenance": {
+        "pinned": 25,
+        "original": 1
+      }
+    },
+    "graph": {
+      "workflows": 3,
+      "canonicalNodes": 7,
+      "canonicalEdges": 12
+    },
+    "recovery": {
+      "passed": true,
+      "duplicateEffects": 0
+    },
+    "performance": {
+      "p95NodeBudgetMs": 200,
+      "passed": true
+    },
+    "context": {
+      "retrievalGainPoints": 26.7656,
+      "taskSuccessGainPoints": 38.4615,
+      "tokenDelta": 0
+    },
+    "runtime": {
+      "adapters": 2,
+      "evidence": "pinned-capability-gated"
+    },
+    "release": {
+      "binaries": 5,
+      "checksums": true
+    }
+  },
+  "proofBoundary": "Graph lint is static; behavioral and recovery results use deterministic fixtures; live-provider evidence is pinned and capability-gated. Public execution is read-only, and workspace-changing execution remains policy-denied. These gates do not establish general provider parity or safe arbitrary mutation.",
+  "installers": {
+    "unixRouteSha256": "b4e21956d93d2236cbda5bfe96679375f14e73947899ff34b7332dc63aa30e9c",
+    "windowsRouteSha256": "73335b620c40ae6431f8dd33da20b4c569bb7e2182f37348b95fe01854331745"
+  }
+}

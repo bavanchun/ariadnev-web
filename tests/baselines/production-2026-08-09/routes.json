@@ -1,0 +1,324 @@
+[
+  {
+    "id": "landing-root",
+    "method": "GET",
+    "path": "/",
+    "status": 200,
+    "headers": {
+      "cache-control": "public, max-age=300",
+      "content-type": "text/html; charset=utf-8"
+    },
+    "redirected": false,
+    "body": {
+      "class": "landing-html",
+      "bytes": 53493,
+      "sha256": "89ee7d50395dc5d69e17d8992c155f164469faf3ae166dfee4a6de0581aa459f",
+      "bodyStreamPresent": true,
+      "bodyReadMode": "bounded-web-stream-reader",
+      "preview": "<!doctype html> <html lang=\"en\"> <head> <meta charset=\"utf-8\" /> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" /> <title>vcskill | graph-native workflows across agents</title> <meta name=\"description\" content=\"Install "
+    }
+  },
+  {
+    "id": "landing-index",
+    "method": "GET",
+    "path": "/index.html",
+    "status": 200,
+    "headers": {
+      "cache-control": "public, max-age=300",
+      "content-type": "text/html; charset=utf-8"
+    },
+    "redirected": false,
+    "body": {
+      "class": "landing-html",
+      "bytes": 53493,
+      "sha256": "89ee7d50395dc5d69e17d8992c155f164469faf3ae166dfee4a6de0581aa459f",
+      "bodyStreamPresent": true,
+      "bodyReadMode": "bounded-web-stream-reader",
+      "preview": "<!doctype html> <html lang=\"en\"> <head> <meta charset=\"utf-8\" /> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" /> <title>vcskill | graph-native workflows across agents</title> <meta name=\"description\" content=\"Install "
+    }
+  },
+  {
+    "id": "install-root",
+    "method": "GET",
+    "path": "/install",
+    "status": 200,
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "text/x-shellscript; charset=utf-8",
+      "content-length": "3011"
+    },
+    "redirected": false,
+    "body": {
+      "class": "installer-shell",
+      "bytes": 3011,
+      "sha256": "b4e21956d93d2236cbda5bfe96679375f14e73947899ff34b7332dc63aa30e9c",
+      "bodyStreamPresent": true,
+      "bodyReadMode": "bounded-web-stream-reader"
+    }
+  },
+  {
+    "id": "install-alias",
+    "method": "GET",
+    "path": "/install.sh",
+    "status": 200,
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "text/x-shellscript; charset=utf-8",
+      "content-length": "3011"
+    },
+    "redirected": false,
+    "body": {
+      "class": "installer-shell",
+      "bytes": 3011,
+      "sha256": "b4e21956d93d2236cbda5bfe96679375f14e73947899ff34b7332dc63aa30e9c",
+      "bodyStreamPresent": true,
+      "bodyReadMode": "bounded-web-stream-reader"
+    }
+  },
+  {
+    "id": "install-ps1",
+    "method": "GET",
+    "path": "/install.ps1",
+    "status": 200,
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "text/plain; charset=utf-8"
+    },
+    "redirected": false,
+    "body": {
+      "class": "installer-powershell",
+      "bytes": 2401,
+      "sha256": "73335b620c40ae6431f8dd33da20b4c569bb7e2182f37348b95fe01854331745",
+      "bodyStreamPresent": true,
+      "bodyReadMode": "bounded-web-stream-reader"
+    }
+  },
+  {
+    "id": "version",
+    "method": "GET",
+    "path": "/version",
+    "status": 200,
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "text/plain",
+      "content-length": "6"
+    },
+    "redirected": false,
+    "body": {
+      "class": "version-text",
+      "bytes": 6,
+      "sha256": "f2508f9695caf8408b3257fd890587d4581439ca75efc65ab59c968fab9dbda7",
+      "bodyStreamPresent": true,
+      "bodyReadMode": "bounded-web-stream-reader",
+      "preview": "0.11.0"
+    }
+  },
+  {
+    "id": "version-head",
+    "method": "HEAD",
+    "path": "/version",
+    "status": 200,
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "text/plain"
+    },
+    "redirected": false,
+    "body": {
+      "class": "empty-head",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bodyStreamPresent": false,
+      "bodyReadMode": "none"
+    }
+  },
+  {
+    "id": "version-options",
+    "method": "OPTIONS",
+    "path": "/version",
+    "status": 200,
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "text/plain",
+      "content-length": "6"
+    },
+    "redirected": false,
+    "body": {
+      "class": "version-text",
+      "bytes": 6,
+      "sha256": "f2508f9695caf8408b3257fd890587d4581439ca75efc65ab59c968fab9dbda7",
+      "bodyStreamPresent": true,
+      "bodyReadMode": "bounded-web-stream-reader",
+      "preview": "0.11.0"
+    }
+  },
+  {
+    "id": "download-checksums",
+    "method": "GET",
+    "path": "/download/checksums.txt",
+    "status": 200,
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "application/octet-stream",
+      "content-disposition": "attachment; filename=\"checksums.txt\"",
+      "content-length": "432"
+    },
+    "redirected": false,
+    "body": {
+      "class": "download-stream",
+      "bytes": 432,
+      "sha256": "95127e8fc149ae91a7a017fabf3b991133afcbcfdc26f5f3bdf484599d051e93",
+      "bodyStreamPresent": true,
+      "bodyReadMode": "bounded-web-stream-reader"
+    }
+  },
+  {
+    "id": "download-query",
+    "method": "GET",
+    "path": "/download/checksums.txt?source=landing",
+    "status": 200,
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "application/octet-stream",
+      "content-disposition": "attachment; filename=\"checksums.txt\"",
+      "content-length": "432"
+    },
+    "redirected": false,
+    "body": {
+      "class": "download-stream",
+      "bytes": 432,
+      "sha256": "95127e8fc149ae91a7a017fabf3b991133afcbcfdc26f5f3bdf484599d051e93",
+      "bodyStreamPresent": true,
+      "bodyReadMode": "bounded-web-stream-reader"
+    }
+  },
+  {
+    "id": "download-encoded",
+    "method": "GET",
+    "path": "/download/checksums%2Etxt",
+    "status": 200,
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "application/octet-stream",
+      "content-disposition": "attachment; filename=\"checksums.txt\"",
+      "content-length": "432"
+    },
+    "redirected": false,
+    "body": {
+      "class": "download-stream",
+      "bytes": 432,
+      "sha256": "95127e8fc149ae91a7a017fabf3b991133afcbcfdc26f5f3bdf484599d051e93",
+      "bodyStreamPresent": true,
+      "bodyReadMode": "bounded-web-stream-reader"
+    }
+  },
+  {
+    "id": "unknown-route",
+    "method": "GET",
+    "path": "/unknown",
+    "status": 404,
+    "headers": {
+      "content-type": "text/plain"
+    },
+    "redirected": false,
+    "body": {
+      "class": "plain-install-hint",
+      "bytes": 74,
+      "sha256": "da485532a92fdbea098c0d72e98831aa1f242cb04f422377cd0350d37095d3bf",
+      "bodyStreamPresent": true,
+      "bodyReadMode": "bounded-web-stream-reader",
+      "preview": "vcskill — install: curl -fsSL https://vcskill.vchun.dev/install | bash"
+    }
+  },
+  {
+    "id": "install-trailing-slash",
+    "method": "GET",
+    "path": "/install/",
+    "status": 404,
+    "headers": {
+      "content-type": "text/plain"
+    },
+    "redirected": false,
+    "body": {
+      "class": "plain-install-hint",
+      "bytes": 74,
+      "sha256": "da485532a92fdbea098c0d72e98831aa1f242cb04f422377cd0350d37095d3bf",
+      "bodyStreamPresent": true,
+      "bodyReadMode": "bounded-web-stream-reader",
+      "preview": "vcskill — install: curl -fsSL https://vcskill.vchun.dev/install | bash"
+    }
+  },
+  {
+    "id": "malformed-download",
+    "method": "GET",
+    "path": "/download/%E0%A4%A",
+    "status": 400,
+    "headers": {
+      "cache-control": "private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0",
+      "content-type": "text/html; charset=UTF-8"
+    },
+    "redirected": false,
+    "body": {
+      "class": "html-error",
+      "bytes": 155,
+      "sha256": "efca0895b4d88b27a94249f8e7ac0083eff0a4ff3ac37c2841b3f6d7e11c1905",
+      "bodyStreamPresent": true,
+      "bodyReadMode": "bounded-web-stream-reader",
+      "preview": "<html> <head><title>400 Bad Request</title></head> <body> <center><h1>400 Bad Request</h1></center> <hr><center>cloudflare</center> </body> </html>"
+    }
+  },
+  {
+    "id": "install-query",
+    "method": "GET",
+    "path": "/install?from=docs",
+    "status": 200,
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "text/x-shellscript; charset=utf-8",
+      "content-length": "3011"
+    },
+    "redirected": false,
+    "body": {
+      "class": "installer-shell",
+      "bytes": 3011,
+      "sha256": "b4e21956d93d2236cbda5bfe96679375f14e73947899ff34b7332dc63aa30e9c",
+      "bodyStreamPresent": true,
+      "bodyReadMode": "bounded-web-stream-reader"
+    }
+  },
+  {
+    "id": "legacy-docs-en-installation",
+    "method": "GET",
+    "path": "/en/stable/get-started/installation/",
+    "status": 404,
+    "headers": {
+      "content-type": "text/plain"
+    },
+    "redirected": false,
+    "body": {
+      "class": "plain-install-hint",
+      "bytes": 74,
+      "sha256": "da485532a92fdbea098c0d72e98831aa1f242cb04f422377cd0350d37095d3bf",
+      "bodyStreamPresent": true,
+      "bodyReadMode": "bounded-web-stream-reader",
+      "preview": "vcskill — install: curl -fsSL https://vcskill.vchun.dev/install | bash"
+    }
+  },
+  {
+    "id": "legacy-docs-vi-installation",
+    "method": "GET",
+    "path": "/vi/stable/get-started/installation/",
+    "status": 404,
+    "headers": {
+      "content-type": "text/plain"
+    },
+    "redirected": false,
+    "body": {
+      "class": "plain-install-hint",
+      "bytes": 74,
+      "sha256": "da485532a92fdbea098c0d72e98831aa1f242cb04f422377cd0350d37095d3bf",
+      "bodyStreamPresent": true,
+      "bodyReadMode": "bounded-web-stream-reader",
+      "preview": "vcskill — install: curl -fsSL https://vcskill.vchun.dev/install | bash"
+    }
+  }
+]

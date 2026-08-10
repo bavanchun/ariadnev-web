@@ -1,0 +1,37 @@
+# Candidate A — edge-only profile.
+#
+# The edge Worker owns ONLY the protected release routes. Everything else is
+# served by a separate site deployment bound to the same host as a Custom
+# Domain, so the two can be deployed and rolled back independently.
+#
+# Route-pattern caveat (empirically tested by scripts/verify-edge-routing-spike.mjs):
+# Cloudflare matches route patterns against the full URL including the query
+# string, and a pattern may not itself contain a query. Admitting `/install?from=docs`
+# therefore requires a terminal wildcard, which also captures suffix lookalikes
+# such as `/installer`. The handler exact-classifies the path, but a captured
+# lookalike still lands on the edge instead of the site — that is the Candidate A
+# gate, not a configuration detail.
+
+name = "vcskill-edge-staging"
+main = "src/index.js"
+compatibility_date = "2026-07-20"
+
+# Secret (set out of band, never committed):
+#   wrangler secret put GH_TOKEN --config workers/edge/wrangler.edge.toml
+# A fine-grained PAT scoped to bavanchun/vcskill.
+
+routes = [
+  { pattern = "staging.vcskill.vchun.dev/install*", zone_name = "vchun.dev" },
+  { pattern = "staging.vcskill.vchun.dev/version*", zone_name = "vchun.dev" },
+  { pattern = "staging.vcskill.vchun.dev/download/*", zone_name = "vchun.dev" },
+]
+
+[observability]
+enabled = true
+
+# Production instance stays disabled until the qualified Phase 12 cutover.
+# The retained legacy Worker at the repository root is the production runtime
+# and rollback target through Phase 12.
+[env.production]
+name = "vcskill-edge"
+routes = []

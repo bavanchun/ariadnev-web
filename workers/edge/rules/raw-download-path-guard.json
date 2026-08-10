@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "raw-download-path-guard",
+  "purpose": "Reject literal and percent-encoded dot segments inside /download/ before Cloudflare normalizes the request path, so the Worker never sees an already-collapsed traversal attempt.",
+  "rationale": "Cloudflare normalizes RFC 3986 dot segments before a Worker reads Request.url. In-Worker validation alone therefore cannot observe the raw traversal form, so Candidate B requires this zone-level ingress control in addition to assertSafeAssetName().",
+  "phase": 3,
+  "zoneName": "vchun.dev",
+  "rulesetPhase": "http_request_firewall_custom",
+  "environments": {
+    "staging": {
+      "hostname": "staging.vcskill.vchun.dev",
+      "enabled": true
+    },
+    "production": {
+      "hostname": "vcskill.vchun.dev",
+      "enabled": false,
+      "enabledBy": "Phase 12 production cutover only"
+    }
+  },
+  "rule": {
+    "action": "block",
+    "description": "vcskill edge: block raw dot segments in /download/",
+    "expressionTemplate": "(http.host eq \"{{hostname}}\" and starts_with(raw.http.request.uri.path, \"/download/\") and (raw.http.request.uri.path contains \"/../\" or raw.http.request.uri.path contains \"/./\" or raw.http.request.uri.path contains \"%2e%2e\" or raw.http.request.uri.path contains \"%2E%2E\" or raw.http.request.uri.path contains \"%2f\" or raw.http.request.uri.path contains \"%2F\" or ends_with(raw.http.request.uri.path, \"/..\") or ends_with(raw.http.request.uri.path, \"/.\")))"
+  },
+  "mustBlock": [
+    "/download/../secrets.txt",
+    "/download/./checksums.txt",
+    "/download/nested/../checksums.txt",
+    "/download/%2e%2e%2fchecksums.txt",
+    "/download/%2E%2E/checksums.txt",
+    "/download/sub%2Fchecksums.txt",
+    "/download/..",
+    "/download/."
+  ],
+  "mustAllow": [
+    "/download/checksums.txt",
+    "/download/checksums%2Etxt",
+    "/download/vcskill-darwin-arm64",
+    "/download/vcskill-windows-x64.exe",
+    "/download/docs-bundle.tar.gz",
+    "/download/manifest.json.sha256",
+    "/version",
+    "/install",
+    "/install.sh",
+    "/install.ps1",
+    "/",
+    "/installer",
+    "/versioning"
+  ]
+}

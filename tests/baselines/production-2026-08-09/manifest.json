@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "generatedForDirectory": "production-2026-08-09",
+  "generatedAtUtc": "2026-08-08T20:12:34.000Z",
+  "observedDateUtc": "2026-08-08",
+  "observedDateLocal": "2026-08-09",
+  "observedTimeZone": "Asia/Ho_Chi_Minh",
+  "baseUrl": "https://vcskill.vchun.dev",
+  "tool": {
+    "script": "scripts/capture-production-baseline.mjs",
+    "node": "v26.0.0"
+  },
+  "files": {
+    "routes.json": {
+      "bytes": 9707,
+      "sha256": "5c48944c04c5afd883441651aec007606460bb3b26561c4d84829c6c93455f81"
+    },
+    "inventory.json": {
+      "bytes": 7421,
+      "sha256": "371f3559f5f4fdc76530b52541d1a03bf1494407d3f2368a21f952e9db2192c8"
+    },
+    "findability.json": {
+      "bytes": 7151,
+      "sha256": "454aa4c721d21c3458711408980bdc736f2b6e57a1fdf578772e9e0c3c986c0f"
+    },
+    "performance-coverage.json": {
+      "bytes": 3329,
+      "sha256": "33606a9ddb4cb67efc1213d3ffa643285513b9491545660fd43f640c7b529679"
+    }
+  },
+  "artifacts": [
+    {
+      "path": "lighthouse/desktop/lighthouse.report.json",
+      "bytes": 162931,
+      "sha256": "134fa0363571f8a66417cb140a5306b71feac7d331d6fe93fe9ae030032cbcad"
+    },
+    {
+      "path": "lighthouse/mobile/lighthouse.report.json",
+      "bytes": 162865,
+      "sha256": "1923bfe7c97d10570b5209f5c4c569fa6a78754033f8e843e8a71901f74ac76a"
+    },
+    {
+      "path": "lighthouse/performance-run-1.json",
+      "bytes": 1051,
+      "sha256": "70a2a286878f279d4cc93d40722c7858bbc47566cdaa23ec7e1764f23612552e"
+    },
+    {
+      "path": "lighthouse/performance-run-2.json",
+      "bytes": 1012,
+      "sha256": "3ecdc3a0022ff29dd6c241246e003b52c8f840de438fe33bcc8a6e5eae8e0d72"
+    },
+    {
+      "path": "lighthouse/performance-run-3.json",
+      "bytes": 1012,
+      "sha256": "dbefc707d3180f838711cc2210bdb5081361a96cdfde6793ae33249906a445f9"
+    },
+    {
+      "path": "lighthouse/performance-run-4.json",
+      "bytes": 1012,
+      "sha256": "435c558cf295f53dfedbb2c14961b64e4cf2f0b13427c4ee11b893a74cbfc3e6"
+    },
+    {
+      "path": "lighthouse/performance-run-5.json",
+      "bytes": 1012,
+      "sha256": "7f87fc4452c12eee7d6ff1d3ab547fc39d57bf348e95418c03eb680c7e3a5bf9"
+    },
+    {
+      "path": "lighthouse/performance-summary.json",
+      "bytes": 2031,
+      "sha256": "78b068b90d392bc3dd648feae5c013f2e924b60dfdb12e022dea39cc2757dcb3"
+    },
+    {
+      "path": "viewports/desktop-1280.json",
+      "bytes": 833,
+      "sha256": "a8b93a97232606e305897d5cd1166e0d0e34cc882fd33fbf851170f53fa56f13"
+    },
+    {
+      "path": "viewports/desktop-1280.png",
+      "bytes": 979154,
+      "sha256": "45b98e7f7c7189545124a78a1b5f9220ae1c890a5a74356cbc10052d5cc473fe"
+    },
+    {
+      "path": "viewports/desktop-1440.json",
+      "bytes": 834,
+      "sha256": "0e9f2682a98ade24a3379b2c80d7ebbd8dd1fade730225bdc6bd53efa2c42c59"
+    },
+    {
+      "path": "viewports/desktop-1440.png",
+      "bytes": 998010,
+      "sha256": "02fd27adc57cf095cbfc1c71c2bfb121004fa809555b3186a0cdb0ff27ee124d"
+    },
+    {
+      "path": "viewports/findability-observations.json",
+      "bytes": 5498,
+      "sha256": "160ed7dd5f681dfb0fb1e518a0f86926221b734210ee59bf10dbeab29858fafe"
+    },
+    {
+      "path": "viewports/findability-workflow-authority-failure.png",
+      "bytes": 126598,
+      "sha256": "0c7dedde8703cef1d1a4871d2dbc6f106c9c39beef034fdbc96d115785451764"
+    },
+    {
+      "path": "viewports/mobile-320.json",
+      "bytes": 831,
+      "sha256": "7b46d6e5920ebded0f09124aefae23f2f0cc7c1166ee4d13d6948df6bd466733"
+    },
+    {
+      "path": "viewports/mobile-320.png",
+      "bytes": 877801,
+      "sha256": "d77448e2a3a07036d25ec8e01a607a0f999df7560842af462abc9a9aedfc8881"
+    },
+    {
+      "path": "viewports/mobile-375.json",
+      "bytes": 831,
+      "sha256": "954a18a5b977e39d919de61e4258bd10d7ccd5c9304acb7cb645185232e95213"
+    },
+    {
+      "path": "viewports/mobile-375.png",
+      "bytes": 889197,
+      "sha256": "2db228280870a34bba074f57fb6eb2be50c3c03e34f857fb92c45310ac58c22a"
+    },
+    {
+      "path": "viewports/mobile-390.json",
+      "bytes": 831,
+      "sha256": "abe4252efe9e1ad2582f2c647f5ce45b1f2987eedd44b8324ea75a2b800ce2ca"
+    },
+    {
+      "path": "viewports/mobile-390.png",
+      "bytes": 890342,
+      "sha256": "f067a4eb630191184d80d44151ebd84eaf70918b80253f739539ca64c2467a75"
+    },
+    {
+      "path": "viewports/tablet-768.json",
+      "bytes": 830,
+      "sha256": "0cf97aa9ff66d52c94c8fb868a6f9ac9112456bd66cd0e5402c831d674739e88"
+    },
+    {
+      "path": "viewports/tablet-768.png",
+      "bytes": 917090,
+      "sha256": "8180bf7dd7366c7d8e2901fa41040c6d8105107eefc382d47545dcd1395f53ce"
+    }
+  ],
+  "pendingArtifacts": [],
+  "warnings": []
+}

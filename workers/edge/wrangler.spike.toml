@@ -1,0 +1,25 @@
+# Topology probe config — the site stand-in. Fixture-bound and throwaway.
+#
+# This is an assets-only deployment with no Worker script, so it behaves like
+# the Phase 6 static site will: it answers every path from the fixture and has
+# no knowledge of the protected release routes. Candidate A precedence is
+# therefore observable directly — a protected path that reaches this deployment
+# returns fixture HTML instead of the edge contract.
+#
+# Every Worker created from this profile is deleted in step 10. Evidence rows
+# generated here are labeled with their own deployment provenance and are never
+# relabeled as the final selected Worker version.
+
+name = "vcskill-site-spike"
+compatibility_date = "2026-07-20"
+
+routes = [
+  { pattern = "staging.vcskill.vchun.dev", custom_domain = true }
+]
+
+[assets]
+directory = "test/fixtures/site-dist"
+not_found_handling = "404-page"
+
+[observability]
+enabled = true

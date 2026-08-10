@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "routeId": "marketing-home",
+  "validRuns": 5,
+  "artifacts": [
+    "lighthouse/performance-run-1.json",
+    "lighthouse/performance-run-2.json",
+    "lighthouse/performance-run-3.json",
+    "lighthouse/performance-run-4.json",
+    "lighthouse/performance-run-5.json"
+  ],
+  "profile": {
+    "network": "Fast 4G",
+    "cpuSlowdownMultiplier": 4,
+    "viewport": {
+      "width": 390,
+      "height": 844,
+      "deviceScaleFactor": 1
+    },
+    "browserCache": "new isolated context with ignoreCache navigation",
+    "cdnCache": "shared production cache cannot be purged; record cf-cache-status and age without discarding a valid run",
+    "runnerRegion": "local-asia-ho-chi-minh",
+    "cdnPoP": "SIN"
+  },
+  "aggregation": {
+    "lcpMs": {
+      "samples": [
+        1032,
+        1048,
+        1104,
+        1058,
+        1085
+      ],
+      "median": 1058,
+      "maximum": 1104
+    },
+    "cls": {
+      "samples": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "median": 0,
+      "maximum": 0
+    },
+    "inpMs": {
+      "samples": [
+        40,
+        42,
+        41,
+        47,
+        40
+      ],
+      "median": 41,
+      "maximum": 47
+    },
+    "totalTransferBytes": {
+      "samples": [
+        17803,
+        17810,
+        17803,
+        17803,
+        17803
+      ],
+      "median": 17803,
+      "maximum": 17810
+    },
+    "scriptTransferBytes": {
+      "samples": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "median": 0,
+      "maximum": 0
+    },
+    "cssTransferBytes": {
+      "samples": [
+        1324,
+        1324,
+        1324,
+        1324,
+        1324
+      ],
+      "median": 1324,
+      "maximum": 1324
+    },
+    "fontTransferBytes": {
+      "samples": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "median": 0,
+      "maximum": 0
+    },
+    "imageTransferBytes": {
+      "samples": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "median": 0,
+      "maximum": 0
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "source": "chrome-devtools-mcp",
+  "observedAtUtc": "2026-08-08T19:41:37.286Z",
+  "url": "https://vcskill.vchun.dev/",
+  "title": "vcskill | graph-native workflows across agents",
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+  "viewport": { "width": 1280, "height": 960, "devicePixelRatio": 1 },
+  "screenshot": { "source": "playwright", "version": "1.55.0", "channel": "chrome", "fullPage": true, "pixelWidth": 1280, "pixelHeight": 8224 },
+  "document": { "clientWidth": 1265, "scrollWidth": 1265, "scrollHeight": 8225, "horizontalOverflow": false },
+  "checks": { "installCommandVisible": true, "primarySectionsVisible": true, "visibleHeadingCount": 9 },
+  "console": { "errors": [], "unhandledRejections": [] }
+}

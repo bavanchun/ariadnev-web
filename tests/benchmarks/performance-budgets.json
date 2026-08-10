@@ -1,0 +1,201 @@
+{
+  "schemaVersion": 1,
+  "methodology": {
+    "coldCacheRuns": 5,
+    "networkProfile": "Fast 4G",
+    "cpuSlowdownMultiplier": 4,
+    "matrixRef": "tests/benchmarks/performance-matrix.json",
+    "aggregation": {
+      "primary": "median",
+      "secondary": "max"
+    },
+    "rerunPolicy": "Only rerun recorded invalid environments; never discard valid slow results.",
+    "capChangePolicy": "Any cap increase requires an explicit reviewed update to the frozen-cap assertion."
+  },
+  "budgets": [
+    {
+      "id": "marketing-lcp",
+      "metric": "lcp",
+      "unit": "ms",
+      "cap": 1800,
+      "rationale": "Accepted flagship marketing target.",
+      "baseline": {
+        "status": "observed",
+        "currentObserved": 1058,
+        "evidence": "tests/baselines/production-2026-08-09/lighthouse/performance-summary.json"
+      }
+    },
+    {
+      "id": "docs-lcp",
+      "metric": "lcp",
+      "unit": "ms",
+      "cap": 1000,
+      "rationale": "Accepted docs target for the static docs surface.",
+      "baseline": {
+        "status": "not-observable-on-legacy-topology",
+        "reason": "The legacy production topology has no docs product route; measuring its fallback would not describe the planned docs surface."
+      }
+    },
+    {
+      "id": "cls",
+      "metric": "cls",
+      "unit": "score",
+      "cap": 0.02,
+      "rationale": "Accepted dimensionless cumulative layout shift ceiling.",
+      "baseline": {
+        "status": "observed",
+        "currentObserved": 0,
+        "evidence": "tests/baselines/production-2026-08-09/lighthouse/performance-summary.json"
+      }
+    },
+    {
+      "id": "inp",
+      "metric": "inp",
+      "unit": "ms",
+      "cap": 150,
+      "rationale": "Accepted interaction threshold for tested journeys.",
+      "baseline": {
+        "status": "observed",
+        "currentObserved": 41,
+        "evidence": "tests/baselines/production-2026-08-09/lighthouse/performance-summary.json"
+      }
+    },
+    {
+      "id": "marketing-total-transfer-compressed",
+      "metric": "transfer",
+      "unit": "bytes",
+      "cap": 450000,
+      "rationale": "Keeps the future marketing route materially leaner than common framework defaults.",
+      "baseline": {
+        "status": "observed",
+        "currentObserved": 17803,
+        "evidence": "tests/baselines/production-2026-08-09/lighthouse/performance-summary.json"
+      }
+    },
+    {
+      "id": "marketing-js-compressed",
+      "metric": "transfer",
+      "unit": "bytes",
+      "cap": 90000,
+      "rationale": "Caps client JavaScript for the marketing route to preserve fast LCP and INP.",
+      "baseline": {
+        "status": "observed",
+        "currentObserved": 0,
+        "evidence": "tests/baselines/production-2026-08-09/lighthouse/performance-summary.json"
+      }
+    },
+    {
+      "id": "marketing-css-compressed",
+      "metric": "transfer",
+      "unit": "bytes",
+      "cap": 25000,
+      "rationale": "Caps CSS transfer for a highly branded but static marketing surface.",
+      "baseline": {
+        "status": "observed",
+        "currentObserved": 1324,
+        "evidence": "tests/baselines/production-2026-08-09/lighthouse/performance-summary.json"
+      }
+    },
+    {
+      "id": "marketing-fonts-compressed",
+      "metric": "transfer",
+      "unit": "bytes",
+      "cap": 180000,
+      "rationale": "Allows expressive typography while forcing font subsetting and format discipline.",
+      "baseline": {
+        "status": "observed",
+        "currentObserved": 0,
+        "evidence": "tests/baselines/production-2026-08-09/lighthouse/performance-summary.json"
+      }
+    },
+    {
+      "id": "marketing-images-compressed",
+      "metric": "transfer",
+      "unit": "bytes",
+      "cap": 200000,
+      "rationale": "Allows hero imagery only when it remains bounded and optimized.",
+      "baseline": {
+        "status": "observed",
+        "currentObserved": 0,
+        "evidence": "tests/baselines/production-2026-08-09/lighthouse/performance-summary.json"
+      }
+    },
+    {
+      "id": "docs-total-transfer-compressed",
+      "metric": "transfer",
+      "unit": "bytes",
+      "cap": 300000,
+      "rationale": "Docs routes must remain lighter than marketing to preserve search and findability speed.",
+      "baseline": {
+        "status": "not-observable-on-legacy-topology",
+        "reason": "The legacy production topology has no docs product route or docs transfer graph."
+      }
+    },
+    {
+      "id": "docs-js-compressed",
+      "metric": "transfer",
+      "unit": "bytes",
+      "cap": 140000,
+      "rationale": "Caps docs client JavaScript while leaving room for static search and version navigation.",
+      "baseline": {
+        "status": "not-observable-on-legacy-topology",
+        "reason": "The legacy production topology ships no docs application JavaScript."
+      }
+    },
+    {
+      "id": "docs-css-compressed",
+      "metric": "transfer",
+      "unit": "bytes",
+      "cap": 50000,
+      "rationale": "Prevents design-system CSS growth from dominating docs route transfer.",
+      "baseline": {
+        "status": "not-observable-on-legacy-topology",
+        "reason": "The legacy production topology ships no docs application CSS."
+      }
+    },
+    {
+      "id": "docs-fonts-compressed",
+      "metric": "transfer",
+      "unit": "bytes",
+      "cap": 180000,
+      "rationale": "Allows bilingual typography while still forcing font asset discipline.",
+      "baseline": {
+        "status": "not-observable-on-legacy-topology",
+        "reason": "The legacy production topology ships no bilingual docs font assets."
+      }
+    },
+    {
+      "id": "docs-images-compressed",
+      "metric": "transfer",
+      "unit": "bytes",
+      "cap": 120000,
+      "rationale": "Installation docs should not rely on large image transfer for core understanding.",
+      "baseline": {
+        "status": "not-observable-on-legacy-topology",
+        "reason": "The legacy production topology ships no docs image surface."
+      }
+    },
+    {
+      "id": "search-index-en-compressed",
+      "metric": "transfer",
+      "unit": "bytes",
+      "cap": 120000,
+      "rationale": "English search partition stays bounded enough for static client loading.",
+      "baseline": {
+        "status": "not-observable-on-legacy-topology",
+        "reason": "No English static docs search partition exists in the legacy release."
+      }
+    },
+    {
+      "id": "search-index-vi-compressed",
+      "metric": "transfer",
+      "unit": "bytes",
+      "cap": 120000,
+      "rationale": "Vietnamese search partition is frozen separately to avoid silent growth.",
+      "baseline": {
+        "status": "not-observable-on-legacy-topology",
+        "reason": "No Vietnamese static docs search partition exists in the legacy release."
+      }
+    }
+  ]
+}

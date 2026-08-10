@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-08-10T01:15:50Z",
+  "scope": "Phase 3 edge routing spike — sanitized observation source of record",
+  "provenanceRules": [
+    "Every observation names the deployment it was actually taken from.",
+    "Controlled-failure deployments, binding transitions, and production read-only observations are never relabeled as the final selected Worker version.",
+    "No account identifiers, zone identifiers, secret values, signed URLs, or preview hostnames appear in this file."
+  ],
+  "deploymentTimeline": [
+    {
+      "label": "spike:controlled-transition",
+      "workerName": "vcskill-edge-combined-staging",
+      "workerVersionId": "c1bc147d-ed40-4974-95e9-66862a813b9d",
+      "observedAtUtc": "2026-08-09T06:10:58Z",
+      "deploymentMessage": "Prepare controlled route transfer",
+      "role": "Route-transfer rehearsal. Not the final selected version."
+    },
+    {
+      "label": "spike:controlled-failure",
+      "workerName": "vcskill-edge-combined-staging",
+      "observedAtUtc": "2026-08-09T06:13:32Z",
+      "deploymentMessage": "Controlled missing-binding observation",
+      "role": "Deliberate missing-binding failure used to prove protected routes fail closed instead of falling through to site assets. Not the final selected version."
+    },
+    {
+      "label": "spike:reverse-binding",
+      "workerName": "vcskill-site-staging",
+      "workerVersionId": "3081658f-1ecc-454c-95f5-84d4453c4f80",
+      "observedAtUtc": "2026-08-09T06:28:47Z",
+      "deploymentMessage": "Final reverse-binding evidence",
+      "role": "Reverse binding of the staging custom domain. Establishes the staging half of composite rollback."
+    },
+    {
+      "label": "retained-candidate-b",
+      "workerName": "vcskill-edge-combined-staging",
+      "workerVersionId": "87e90807-1de5-4c71-b95d-b451468c0fca",
+      "observedAtUtc": "2026-08-09T07:04:38Z",
+      "deploymentMessage": "Harden edge streaming and error isolation",
+      "role": "The retained selected staging edge. All rows in edge-routing-reprobe.json carry this version id."
+    },
+    {
+      "label": "incident:site-spike-domain-takeover",
+      "workerName": "vcskill-site-spike",
+      "workerVersionId": "a082f442-48e9-483c-8b11-046cc890d2b2",
+      "observedAtUtc": "2026-08-10T00:57:00Z",
+      "role": "A fixture-bound site stand-in deployed during Phase 3 source reconstruction. It took the staging custom domain from vcskill-site-staging.",
+      "resolution": "The custom domain was detached and reattached to vcskill-site-staging, and vcskill-site-spike was deleted. Post-restoration probes match the pre-incident behavior. Recorded here because the transition is part of this endpoint's real provenance, not a clean history."
+    }
+  ],
+  "bindingTransitions": [
+    {
+      "id": "staging-custom-domain-reverse-and-restore",
+      "from": "vcskill-site-spike",
+      "to": "vcskill-site-staging",
+      "observedAtUtc": "2026-08-10T01:05:00Z",
+      "mechanism": "detach custom domain, then reattach to the prior owner",
+      "result": "pass",
+      "detail": "Staging binding reversal succeeded and the endpoint returned to its retained behavior: site HTML at /, edge contract on the four protected route patterns."
+    }
+  ],
+  "productionObservations": [
+    {
+      "id": "legacy-production-read-only-compatibility",
+      "workerName": "vcskill",
+      "workerVersionId": "e91ff904-f7b7-4293-a033-dee7e5cc3fe2",
+      "observedAtUtc": "2026-08-10T01:05:00Z",
+      "mode": "read-only",
+      "observations": [
+        { "path": "/", "status": 200, "contentTypeClass": "html" },
+        { "path": "/version", "status": 200, "contentTypeClass": "text/plain" },
+        { "path": "/install", "status": 200, "contentTypeClass": "text/x-shellscript" }
+      ],
+      "mutated": false,
+      "detail": "Production stayed healthy under its existing credential context throughout Phase 3. No production route, domain, Worker, or secret was changed."
+    }
+  ],
+  "failedProbesRetained": [
+    {
+      "id": "legacy-source-with-consolidated-credential",
+      "status": "failed",
+      "observedStatus": 401,
+      "detail": "The exact legacy source returned 401 for /install when rehearsed on staging under the new consolidated credential, while the unchanged production legacy deployment continued to return 200 under its own credential context.",
+      "doesNotSatisfy": "rollback",
+      "reason": "Preserved explicitly. A failed staging probe is never counted as rollback success; composite rollback proof requires staging binding reversal plus read-only production compatibility."
+    }
+  ],
+  "draftAccessPreflight": {
+    "observedAtUtc": "2026-08-10T00:50:00Z",
+    "principalRoleGate": {
+      "result": "pass",
+      "repository": "bavanchun/vcskill",
+      "repositoryVisibility": "private",
+      "principalHasPushAccess": true,
+      "detail": "Draft releases are visible only to a principal with push access; that role requirement is satisfied."
+    },
+    "tokenPermissionGate": {
+      "result": "fail",
+      "required": "one fine-grained PAT scoped only to bavanchun/vcskill with Contents read and Actions write, and without Contents/release/administration write",
+      "observed": "no such token exists in this environment; the available credential is a broad classic OAuth token whose scope exceeds the approved consolidation",
+      "detail": "This consolidation was operator-approved as an exception and must not be represented as least privilege. It is not provisioned yet."
+    },
+    "draftCreated": false,
+    "releasesVisible": 10,
+    "draftReleasesVisible": 0,
+    "deferredTo": "Phase 9 must prove actual held-draft visibility before release synchronization. Phase 3 records the permission gate only."
+  },
+  "candidateGateResults": {
+    "candidateA": {
+      "selected": false,
+      "reason": "Route patterns are matched against the full URL including the query string and cannot themselves contain a query, so admitting /install?from=docs requires the terminal wildcard /install*. That wildcard also captures the unprotected lookalike /installer. Under a pure Candidate A split the captured lookalike would reach an edge Worker with no way to return the frozen site behavior through a non-recursive site path, so the gate fails."
+    },
+    "candidateB": {
+      "selected": true,
+      "reason": "One combined Worker owns the protected routes and delegates every unprotected path, including wildcard-captured lookalikes, to its ASSETS binding. Exact route classification happens before any decoding or fallback, so a colliding static file cannot pre-empt a protected route and a protected error never reaches the asset layer."
+    }
+  },
+  "matrixSource": "docs/decisions/edge-routing-reprobe.json",
+  "matrixSummary": { "total": 26, "passed": 24, "failed": 2 },
+  "openFailures": [
+    {
+      "rowIds": ["raw-traversal-literal", "raw-dot-segment"],
+      "cause": "The source-owned raw dot-segment ingress rule is not applied to the zone.",
+      "impact": "Cloudflare normalizes dot segments before the Worker reads Request.url, so /download/./checksums.txt resolves to a real asset and /download/../secrets.txt resolves to a site 404. Neither reaches the Worker in its raw form, and in-Worker validation therefore cannot observe or reject the raw shape.",
+      "blockedBy": "a Cloudflare API token with Zone -> WAF -> Edit",
+      "remediation": "node scripts/manage-edge-ingress-rule.mjs apply staging"
+    }
+  ]
+}

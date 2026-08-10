@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "browser": {
+    "source": "chrome-devtools-mcp",
+    "version": "Chrome 151.0.0.0",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+    "observedAtUtc": "2026-08-08T19:44:28.443Z",
+    "url": "https://vcskill.vchun.dev/",
+    "viewport": { "width": 1440, "height": 1024, "devicePixelRatio": 1 },
+    "consoleErrors": [],
+    "unhandledRejections": [],
+    "interactions": [
+      {
+        "task": "install-windows",
+        "action": "click the Windows install tab",
+        "selectedTab": "Windows",
+        "windowsCommandVisible": true
+      }
+    ],
+    "primaryNavigation": [
+      { "text": "Proof", "href": "https://vcskill.vchun.dev/#proof" },
+      { "text": "Graph", "href": "https://vcskill.vchun.dev/#graph" },
+      { "text": "Playbook", "href": "https://vcskill.vchun.dev/#playbook" },
+      { "text": "Commands", "href": "https://vcskill.vchun.dev/#commands" },
+      { "text": "Install", "href": "https://vcskill.vchun.dev/#install" }
+    ]
+  },
+  "tasks": [
+    {
+      "id": "install-unix",
+      "status": "observed-pass",
+      "actionCount": 0,
+      "reason": "The default install panel visibly contains the exact curl command.",
+      "evidence": { "artifact": "viewports/findability-observations.json", "fact": "unixInstall=true" }
+    },
+    {
+      "id": "install-windows",
+      "status": "observed-pass",
+      "actionCount": 1,
+      "reason": "Clicking the Windows tab selected it and exposed the exact PowerShell command.",
+      "evidence": { "artifact": "viewports/findability-observations.json", "fact": "windowsCommandVisible=true" }
+    },
+    {
+      "id": "prerequisites",
+      "status": "observed-pass",
+      "actionCount": 0,
+      "reason": "The install panel states that the standalone CLI needs no Node.",
+      "evidence": { "artifact": "viewports/desktop-1440.png", "fact": "prerequisites=true" }
+    },
+    {
+      "id": "first-provider",
+      "status": "observed-pass",
+      "actionCount": 1,
+      "reason": "The Graph navigation target exposes all six named provider columns.",
+      "evidence": { "artifact": "viewports/desktop-1440.png", "fact": "providers=true" }
+    },
+    {
+      "id": "first-read-only-run",
+      "status": "observed-pass",
+      "actionCount": 1,
+      "reason": "The Graph section exposes the exact read-only validation command.",
+      "evidence": { "artifact": "viewports/desktop-1440.png", "fact": "readOnlyRun=true" }
+    },
+    {
+      "id": "status",
+      "status": "observed-pass",
+      "actionCount": 1,
+      "reason": "The Commands section says status keeps durable runs operable.",
+      "evidence": { "artifact": "viewports/desktop-1440.png", "fact": "durableOperations=true" }
+    },
+    {
+      "id": "resume",
+      "status": "observed-pass",
+      "actionCount": 1,
+      "reason": "The Commands section says resume keeps durable runs operable.",
+      "evidence": { "artifact": "viewports/desktop-1440.png", "fact": "durableOperations=true" }
+    },
+    {
+      "id": "cancel",
+      "status": "observed-pass",
+      "actionCount": 1,
+      "reason": "The Commands section says cancel keeps durable runs operable.",
+      "evidence": { "artifact": "viewports/desktop-1440.png", "fact": "durableOperations=true" }
+    },
+    {
+      "id": "update-backup-uninstall",
+      "status": "observed-pass",
+      "actionCount": 1,
+      "reason": "The Commands section visibly lists update, backups, and uninstall commands.",
+      "evidence": { "artifact": "viewports/desktop-1440.png", "fact": "updateBackupUninstall=true" }
+    },
+    {
+      "id": "exact-cli-syntax",
+      "status": "observed-pass",
+      "actionCount": 1,
+      "reason": "The Commands section exposes the exact run syntax and arguments.",
+      "evidence": { "artifact": "viewports/desktop-1440.png", "fact": "exactCliSyntax=true" }
+    },
+    {
+      "id": "workflow-authority",
+      "status": "observed-fail",
+      "actionCount": 2,
+      "reason": "The primary navigation and workflow copy expose no explicit canonical workflow authority entry point or route.",
+      "evidence": { "artifact": "viewports/findability-workflow-authority-failure.png", "fact": "workflowAuthorityEntry=false" }
+    },
+    {
+      "id": "skill-lookup",
+      "status": "observed-pass",
+      "actionCount": 1,
+      "reason": "The playbook and skill inventory identify the release count and enumerate the available skills.",
+      "evidence": { "artifact": "viewports/desktop-1440.png", "fact": "skillInventory=true" }
+    },
+    {
+      "id": "provider-support",
+      "status": "observed-pass",
+      "actionCount": 1,
+      "reason": "The Graph section visibly renders the provider-by-artifact capability matrix.",
+      "evidence": { "artifact": "viewports/desktop-1440.png", "fact": "providerMatrix=true" }
+    },
+    {
+      "id": "security-proof-boundary",
+      "status": "observed-pass",
+      "actionCount": 1,
+      "reason": "The Proof section visibly states the read-only and policy-denied boundary.",
+      "evidence": { "artifact": "viewports/desktop-1440.png", "fact": "proofBoundary=true" }
+    },
+    {
+      "id": "release-integrity",
+      "status": "observed-pass",
+      "actionCount": 1,
+      "reason": "The install explanation states that SHA-256 is checked against checksums.txt before execution.",
+      "evidence": { "artifact": "viewports/desktop-1440.png", "fact": "releaseIntegrity=true" }
+    }
+  ]
+}

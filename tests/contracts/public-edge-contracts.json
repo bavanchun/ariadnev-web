@@ -1,0 +1,425 @@
+{
+  "schemaVersion": 1,
+  "observation": {
+    "observedDateUtc": "2026-08-08",
+    "observedDateLocal": "2026-08-09",
+    "timeZone": "Asia/Ho_Chi_Minh"
+  },
+  "productionBaseUrl": "https://vcskill.vchun.dev",
+  "approvedHosts": [
+    "vcskill.vchun.dev"
+  ],
+  "allowedResponseHeaders": [
+    "cache-control",
+    "content-type",
+    "content-disposition",
+    "content-length"
+  ],
+  "knownHappyPathAsset": "checksums.txt",
+  "canonicalEvidence": {
+    "source": {
+      "repository": "bavanchun/vcskill",
+      "commitSha": "0b7852372f7b2eadff1e50ad74e75152e74dbc39",
+      "paths": [
+        "kit/workflows/bugfix-delivery.json",
+        "kit/workflows/read-only-delivery.json",
+        "kit/workflows/safe-change-delivery.json"
+      ]
+    },
+    "commandCount": 15,
+    "providerCount": 6,
+    "workflows": [
+      "bugfix-delivery",
+      "read-only-delivery",
+      "safe-change-delivery"
+    ]
+  },
+  "globalBehavior": {
+    "methodCoverage": {
+      "productionSafeMethods": [
+        "GET",
+        "HEAD",
+        "OPTIONS"
+      ],
+      "unsafeLiveMethodPolicy": "POST is asserted against the unchanged local Worker adapter but is not sent to production by the read-only capture."
+    },
+    "missingSecret": {
+      "status": 500,
+      "bodyText": "worker misconfigured: GH_TOKEN unset"
+    },
+    "malformedDownloadDecode": {
+      "localErrorName": "URIError",
+      "localCause": "decodeURIComponent is unguarded in /download/<asset>",
+      "publicAuthority": "production-ingress",
+      "productionObservedStatus": 400,
+      "productionObservedBodyClass": "html-error",
+      "productionObservedNote": "Cloudflare rejects invalid percent-encoding before the Worker executes."
+    }
+  },
+  "scenarios": [
+    {
+      "id": "landing-root",
+      "mode": "local-and-production",
+      "request": {
+        "method": "GET",
+        "path": "/"
+      },
+      "expected": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/html; charset=utf-8",
+          "cache-control": "public, max-age=300"
+        },
+        "body": {
+          "class": "landing-html"
+        },
+        "machinePathMayBecomeHtml200": true
+      }
+    },
+    {
+      "id": "landing-index",
+      "mode": "local-and-production",
+      "request": {
+        "method": "GET",
+        "path": "/index.html"
+      },
+      "expected": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/html; charset=utf-8",
+          "cache-control": "public, max-age=300"
+        },
+        "body": {
+          "class": "landing-html"
+        },
+        "machinePathMayBecomeHtml200": true
+      }
+    },
+    {
+      "id": "install-root",
+      "mode": "local-and-production",
+      "request": {
+        "method": "GET",
+        "path": "/install"
+      },
+      "expected": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/x-shellscript; charset=utf-8",
+          "cache-control": "no-store"
+        },
+        "body": {
+          "class": "installer-shell"
+        },
+        "machinePathMayBecomeHtml200": false
+      }
+    },
+    {
+      "id": "install-alias",
+      "mode": "local-and-production",
+      "request": {
+        "method": "GET",
+        "path": "/install.sh"
+      },
+      "expected": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/x-shellscript; charset=utf-8",
+          "cache-control": "no-store"
+        },
+        "body": {
+          "class": "installer-shell"
+        },
+        "machinePathMayBecomeHtml200": false
+      }
+    },
+    {
+      "id": "install-query",
+      "mode": "local-and-production",
+      "request": {
+        "method": "GET",
+        "path": "/install?from=docs"
+      },
+      "expected": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/x-shellscript; charset=utf-8",
+          "cache-control": "no-store"
+        },
+        "body": {
+          "class": "installer-shell"
+        },
+        "machinePathMayBecomeHtml200": false
+      }
+    },
+    {
+      "id": "install-trailing-slash",
+      "mode": "local-and-production",
+      "request": {
+        "method": "GET",
+        "path": "/install/"
+      },
+      "expected": {
+        "status": 404,
+        "headers": {
+          "content-type": "text/plain"
+        },
+        "body": {
+          "class": "plain-install-hint"
+        },
+        "machinePathMayBecomeHtml200": false
+      }
+    },
+    {
+      "id": "install-ps1",
+      "mode": "local-and-production",
+      "request": {
+        "method": "GET",
+        "path": "/install.ps1"
+      },
+      "expected": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/plain; charset=utf-8",
+          "cache-control": "no-store"
+        },
+        "body": {
+          "class": "installer-powershell"
+        },
+        "machinePathMayBecomeHtml200": false
+      }
+    },
+    {
+      "id": "version",
+      "mode": "local-and-production",
+      "request": {
+        "method": "GET",
+        "path": "/version"
+      },
+      "expected": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/plain",
+          "cache-control": "no-store"
+        },
+        "body": {
+          "class": "version-text",
+          "text": "0.11.0"
+        },
+        "machinePathMayBecomeHtml200": false
+      }
+    },
+    {
+      "id": "download-checksums",
+      "mode": "local-and-production",
+      "request": {
+        "method": "GET",
+        "path": "/download/checksums.txt"
+      },
+      "expected": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/octet-stream",
+          "content-disposition": "attachment; filename=\"checksums.txt\"",
+          "cache-control": "no-store"
+        },
+        "body": {
+          "class": "download-stream"
+        },
+        "machinePathMayBecomeHtml200": false
+      }
+    },
+    {
+      "id": "download-query",
+      "mode": "local-and-production",
+      "request": {
+        "method": "GET",
+        "path": "/download/checksums.txt?source=landing"
+      },
+      "expected": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/octet-stream",
+          "content-disposition": "attachment; filename=\"checksums.txt\"",
+          "cache-control": "no-store"
+        },
+        "body": {
+          "class": "download-stream"
+        },
+        "machinePathMayBecomeHtml200": false
+      }
+    },
+    {
+      "id": "download-encoded",
+      "mode": "local-and-production",
+      "request": {
+        "method": "GET",
+        "path": "/download/checksums%2Etxt"
+      },
+      "expected": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/octet-stream",
+          "content-disposition": "attachment; filename=\"checksums.txt\"",
+          "cache-control": "no-store"
+        },
+        "body": {
+          "class": "download-stream"
+        },
+        "machinePathMayBecomeHtml200": false
+      }
+    },
+    {
+      "id": "version-post",
+      "mode": "local-only",
+      "productionEvidenceReason": "POST is not a safe read-only production probe; the unchanged local Worker adapter executes the exact handler behavior instead.",
+      "request": {
+        "method": "POST",
+        "path": "/version"
+      },
+      "expected": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/plain",
+          "cache-control": "no-store"
+        },
+        "body": {
+          "class": "version-text",
+          "text": "0.11.0"
+        },
+        "machinePathMayBecomeHtml200": false
+      }
+    },
+    {
+      "id": "version-options",
+      "mode": "local-and-production",
+      "request": {
+        "method": "OPTIONS",
+        "path": "/version"
+      },
+      "expected": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/plain",
+          "cache-control": "no-store"
+        },
+        "body": {
+          "class": "version-text",
+          "text": "0.11.0"
+        },
+        "machinePathMayBecomeHtml200": false
+      }
+    },
+    {
+      "id": "version-head",
+      "mode": "production-only",
+      "request": {
+        "method": "HEAD",
+        "path": "/version"
+      },
+      "expected": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/plain",
+          "cache-control": "no-store"
+        },
+        "body": {
+          "class": "empty-head"
+        },
+        "machinePathMayBecomeHtml200": false
+      }
+    },
+    {
+      "id": "unknown-route",
+      "mode": "local-and-production",
+      "request": {
+        "method": "GET",
+        "path": "/unknown"
+      },
+      "expected": {
+        "status": 404,
+        "headers": {
+          "content-type": "text/plain"
+        },
+        "body": {
+          "class": "plain-install-hint",
+          "text": "vcskill — install:  curl -fsSL https://vcskill.vchun.dev/install | bash\n"
+        },
+        "machinePathMayBecomeHtml200": false
+      }
+    }
+  ],
+  "localMockCases": {
+    "releaseLookupFailure": {
+      "request": {
+        "method": "GET",
+        "path": "/download/checksums.txt"
+      },
+      "expected": {
+        "status": 502,
+        "bodyText": "release lookup failed"
+      }
+    },
+    "downloadMissingAsset": {
+      "request": {
+        "method": "GET",
+        "path": "/download/not-real.txt"
+      },
+      "expected": {
+        "status": 404,
+        "bodyText": "asset not found: not-real.txt"
+      }
+    },
+    "versionLookupFailure": {
+      "request": {
+        "method": "GET",
+        "path": "/version"
+      },
+      "expected": {
+        "status": 502,
+        "bodyText": ""
+      }
+    },
+    "installUpstreamFailure": {
+      "request": {
+        "method": "GET",
+        "path": "/install"
+      },
+      "expected": {
+        "status": 404,
+        "headers": {
+          "content-type": "text/x-shellscript; charset=utf-8",
+          "cache-control": "no-store"
+        }
+      }
+    },
+    "powershellUpstreamFailure": {
+      "request": {
+        "method": "GET",
+        "path": "/install.ps1"
+      },
+      "expected": {
+        "status": 500,
+        "headers": {
+          "content-type": "text/plain; charset=utf-8",
+          "cache-control": "no-store"
+        }
+      }
+    },
+    "assetUpstreamFailure": {
+      "request": {
+        "method": "GET",
+        "path": "/download/checksums.txt"
+      },
+      "expected": {
+        "status": 503,
+        "headers": {
+          "content-type": "application/octet-stream",
+          "content-disposition": "attachment; filename=\"checksums.txt\"",
+          "cache-control": "no-store"
+        },
+        "bodyText": "asset upstream unavailable"
+      }
+    }
+  }
+}

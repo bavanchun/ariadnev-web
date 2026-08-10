@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "journeys": [
+    {
+      "id": "keyboard-install-copy",
+      "goal": "Complete the installation copy flow with keyboard-only navigation.",
+      "startPath": "/",
+      "state": {
+        "locale": "en",
+        "version": "stable",
+        "javascript": "enabled",
+        "reducedMotion": "no-preference",
+        "inputModality": "keyboard"
+      },
+      "maxActions": 4,
+      "timeoutMs": 10000,
+      "actions": [
+        "Focus the terminal tabs.",
+        "Switch between Unix and Windows tabs.",
+        "Focus the copy button.",
+        "Trigger copy and observe status feedback."
+      ],
+      "oracle": {
+        "passCondition": "Both install commands remain reachable and the copy-status region updates without pointer input."
+      },
+      "failureArtifact": {
+        "kind": "screenshot-and-console-log",
+        "pathTemplate": "qualification/keyboard-install-copy-failure"
+      }
+    },
+    {
+      "id": "no-javascript-install-retrieval",
+      "goal": "Retrieve installation guidance when client JavaScript is disabled.",
+      "startPath": "/",
+      "state": {
+        "locale": "en",
+        "version": "stable",
+        "javascript": "disabled",
+        "reducedMotion": "no-preference",
+        "inputModality": "keyboard"
+      },
+      "maxActions": 2,
+      "timeoutMs": 10000,
+      "actions": [
+        "Load the landing page with JavaScript disabled.",
+        "Read the visible install command and direct machine routes."
+      ],
+      "oracle": {
+        "passCondition": "Unix install guidance and machine route hints remain visible without script execution."
+      },
+      "failureArtifact": {
+        "kind": "full-page-screenshot",
+        "pathTemplate": "qualification/no-javascript-install-retrieval-failure"
+      }
+    },
+    {
+      "id": "reduced-motion-landing",
+      "goal": "Use the landing page with reduced motion enabled.",
+      "startPath": "/",
+      "state": {
+        "locale": "en",
+        "version": "stable",
+        "javascript": "enabled",
+        "reducedMotion": "reduce",
+        "inputModality": "keyboard"
+      },
+      "maxActions": 2,
+      "timeoutMs": 10000,
+      "actions": [
+        "Enable prefers-reduced-motion: reduce.",
+        "Load the landing page and inspect essential content."
+      ],
+      "oracle": {
+        "passCondition": "Essential content remains visible without motion-dependent reveal timing."
+      },
+      "failureArtifact": {
+        "kind": "screenshot",
+        "pathTemplate": "qualification/reduced-motion-landing-failure"
+      }
+    },
+    {
+      "id": "locale-switch-installation-docs",
+      "goal": "Switch between English and Vietnamese installation docs.",
+      "startPath": "/en/stable/get-started/installation/",
+      "state": {
+        "locale": "en",
+        "version": "stable",
+        "javascript": "enabled",
+        "reducedMotion": "no-preference",
+        "inputModality": "keyboard"
+      },
+      "maxActions": 3,
+      "timeoutMs": 10000,
+      "actions": [
+        "Open the locale switcher.",
+        "Select Vietnamese.",
+        "Confirm the route changes to the VI installation page."
+      ],
+      "oracle": {
+        "passCondition": "The switched page preserves release identity and equivalent installation content."
+      },
+      "failureArtifact": {
+        "kind": "screenshot-and-route-log",
+        "pathTemplate": "qualification/locale-switch-installation-docs-failure"
+      }
+    },
+    {
+      "id": "version-switch-installation-docs",
+      "goal": "Switch between current stable and previous stable installation docs.",
+      "startPath": "/en/stable/get-started/installation/",
+      "state": {
+        "locale": "en",
+        "version": "stable",
+        "javascript": "enabled",
+        "reducedMotion": "no-preference",
+        "inputModality": "keyboard"
+      },
+      "maxActions": 3,
+      "timeoutMs": 10000,
+      "actions": [
+        "Open the version switcher.",
+        "Select previous stable.",
+        "Confirm the route and release badge update."
+      ],
+      "oracle": {
+        "passCondition": "The page changes to previous stable without broken links or stale release facts."
+      },
+      "failureArtifact": {
+        "kind": "screenshot-and-route-log",
+        "pathTemplate": "qualification/version-switch-installation-docs-failure"
+      }
+    },
+    {
+      "id": "failed-clipboard-recovery",
+      "goal": "Recover when clipboard writes are denied.",
+      "startPath": "/",
+      "state": {
+        "locale": "en",
+        "version": "stable",
+        "javascript": "enabled",
+        "reducedMotion": "no-preference",
+        "inputModality": "keyboard"
+      },
+      "maxActions": 3,
+      "timeoutMs": 10000,
+      "actions": [
+        "Stub clipboard write failure.",
+        "Trigger the copy action.",
+        "Confirm a readable fallback status is announced."
+      ],
+      "oracle": {
+        "passCondition": "The user sees the copy failure and can still manually read the command."
+      },
+      "failureArtifact": {
+        "kind": "console-log-and-live-region-capture",
+        "pathTemplate": "qualification/failed-clipboard-recovery-failure"
+      }
+    },
+    {
+      "id": "search-recovery-installation",
+      "goal": "Recover from a bad search query and then find installation docs.",
+      "startPath": "/en/stable/get-started/installation/",
+      "state": {
+        "locale": "en",
+        "version": "stable",
+        "javascript": "enabled",
+        "reducedMotion": "no-preference",
+        "inputModality": "keyboard"
+      },
+      "maxActions": 4,
+      "timeoutMs": 10000,
+      "actions": [
+        "Open site search.",
+        "Enter a failing query.",
+        "Clear or recover from the empty result.",
+        "Find and select installation."
+      ],
+      "oracle": {
+        "passCondition": "Search recovery remains keyboard-operable and lands on the stable EN installation route."
+      },
+      "failureArtifact": {
+        "kind": "search-state-dump",
+        "pathTemplate": "qualification/search-recovery-installation-failure"
+      }
+    },
+    {
+      "id": "agentic-discovery-proof-boundary",
+      "goal": "An agentic user finds the proof boundary without browsing private sources.",
+      "startPath": "/",
+      "state": {
+        "locale": "en",
+        "version": "stable",
+        "javascript": "enabled",
+        "reducedMotion": "no-preference",
+        "inputModality": "agentic"
+      },
+      "maxActions": 2,
+      "timeoutMs": 10000,
+      "actions": [
+        "Search the public site for proof boundary language.",
+        "Return the canonical quoted boundary from the public experience."
+      ],
+      "oracle": {
+        "passCondition": "The agent returns the public proof boundary from the site itself and does not cite private sources."
+      },
+      "failureArtifact": {
+        "kind": "navigation-log",
+        "pathTemplate": "qualification/agentic-discovery-proof-boundary-failure"
+      }
+    }
+  ]
+}

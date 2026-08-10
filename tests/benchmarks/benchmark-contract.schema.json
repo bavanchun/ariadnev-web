@@ -1,0 +1,386 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vcskill.vchun.dev/schemas/benchmark-contract-v1.json",
+  "title": "vcskill flagship benchmark contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["findability", "behavioralTier2", "viewportMatrix", "performanceBudgets", "performanceMatrix"],
+  "properties": {
+    "findability": { "$ref": "#/$defs/findability" },
+    "behavioralTier2": { "$ref": "#/$defs/behavioralTier2" },
+    "viewportMatrix": { "$ref": "#/$defs/viewportMatrix" },
+    "performanceBudgets": { "$ref": "#/$defs/performanceBudgets" },
+    "performanceMatrix": { "$ref": "#/$defs/performanceMatrix" }
+  },
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "pathTemplate": { "type": "string", "pattern": "^[A-Za-z0-9._/-]+$" },
+    "failureArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "pathTemplate"],
+      "properties": {
+        "kind": { "$ref": "#/$defs/nonEmptyString" },
+        "pathTemplate": { "$ref": "#/$defs/pathTemplate" }
+      }
+    },
+    "findabilityTask": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "criticality", "startUrl", "startState", "userQuestion", "canonicalExpectedFactSource", "maxActions", "oracle", "failureArtifact"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "criticality": { "enum": ["critical", "high", "medium"] },
+        "startUrl": { "type": "string", "pattern": "^https://vcskill\\.vchun\\.dev/" },
+        "startState": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["locale", "release", "javascript"],
+          "properties": {
+            "locale": { "enum": ["en", "vi"] },
+            "release": { "$ref": "#/$defs/nonEmptyString" },
+            "javascript": { "enum": ["enabled", "disabled"] }
+          }
+        },
+        "userQuestion": { "$ref": "#/$defs/nonEmptyString" },
+        "canonicalExpectedFactSource": { "$ref": "#/$defs/nonEmptyString" },
+        "maxActions": { "type": "integer", "minimum": 1, "maximum": 6 },
+        "oracle": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mustFind", "evidenceType"],
+          "properties": {
+            "mustFind": { "$ref": "#/$defs/nonEmptyString" },
+            "evidenceType": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        },
+        "failureArtifact": { "$ref": "#/$defs/failureArtifact" }
+      }
+    },
+    "findability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "metadata", "tasks"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["observedLegacyProof", "futureBenchmark"],
+          "properties": {
+            "observedLegacyProof": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["release", "goldenTasksClaimed", "observedOn"],
+              "properties": {
+                "release": { "$ref": "#/$defs/nonEmptyString" },
+                "goldenTasksClaimed": { "type": "integer", "minimum": 1, "maximum": 15 },
+                "observedOn": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+              }
+            },
+            "futureBenchmark": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["goldenTasksTarget", "notes"],
+              "properties": {
+                "goldenTasksTarget": { "const": 15 },
+                "notes": { "$ref": "#/$defs/nonEmptyString" }
+              }
+            }
+          }
+        },
+        "tasks": {
+          "type": "array",
+          "minItems": 15,
+          "maxItems": 15,
+          "items": { "$ref": "#/$defs/findabilityTask" }
+        }
+      }
+    },
+    "browserState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["locale", "version", "javascript", "reducedMotion", "inputModality"],
+      "properties": {
+        "locale": { "enum": ["en", "vi"] },
+        "version": { "enum": ["stable", "previous-stable"] },
+        "javascript": { "enum": ["enabled", "disabled"] },
+        "reducedMotion": { "enum": ["reduce", "no-preference"] },
+        "inputModality": { "enum": ["keyboard", "mouse", "agentic"] }
+      }
+    },
+    "journey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "goal", "startPath", "state", "maxActions", "timeoutMs", "actions", "oracle", "failureArtifact"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "goal": { "$ref": "#/$defs/nonEmptyString" },
+        "startPath": { "type": "string", "pattern": "^/" },
+        "state": { "$ref": "#/$defs/browserState" },
+        "maxActions": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "timeoutMs": { "type": "integer", "minimum": 1000, "maximum": 30000 },
+        "actions": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/nonEmptyString" } },
+        "oracle": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["passCondition"],
+          "properties": { "passCondition": { "$ref": "#/$defs/nonEmptyString" } }
+        },
+        "failureArtifact": { "$ref": "#/$defs/failureArtifact" }
+      }
+    },
+    "behavioralTier2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "journeys"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "journeys": { "type": "array", "minItems": 8, "items": { "$ref": "#/$defs/journey" } }
+      }
+    },
+    "viewportMatrix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "viewports"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "viewports": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "width", "height", "invariants"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+              "width": { "type": "integer", "minimum": 320, "maximum": 1440 },
+              "height": { "type": "integer", "minimum": 800, "maximum": 1200 },
+              "invariants": { "type": "array", "minItems": 3, "items": { "$ref": "#/$defs/nonEmptyString" } }
+            }
+          }
+        }
+      }
+    },
+    "baseline": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "currentObserved", "evidence"],
+          "properties": {
+            "status": { "const": "observed" },
+            "currentObserved": { "type": "number" },
+            "evidence": { "$ref": "#/$defs/pathTemplate" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "reason"],
+          "properties": {
+            "status": { "const": "not-observable-on-legacy-topology" },
+            "reason": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        }
+      ]
+    },
+    "performanceBudgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "methodology", "budgets"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "methodology": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["coldCacheRuns", "networkProfile", "cpuSlowdownMultiplier", "matrixRef", "aggregation", "rerunPolicy", "capChangePolicy"],
+          "properties": {
+            "coldCacheRuns": { "const": 5 },
+            "networkProfile": { "const": "Fast 4G" },
+            "cpuSlowdownMultiplier": { "const": 4 },
+            "matrixRef": { "const": "tests/benchmarks/performance-matrix.json" },
+            "aggregation": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["primary", "secondary"],
+              "properties": {
+                "primary": { "const": "median" },
+                "secondary": { "const": "max" }
+              }
+            },
+            "rerunPolicy": { "$ref": "#/$defs/nonEmptyString" },
+            "capChangePolicy": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        },
+        "budgets": {
+          "type": "array",
+          "minItems": 16,
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "metric", "unit", "cap", "rationale", "baseline"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+              "metric": { "$ref": "#/$defs/nonEmptyString" },
+              "unit": { "enum": ["bytes", "ms", "score"] },
+              "cap": { "type": "number", "exclusiveMinimum": 0 },
+              "rationale": { "$ref": "#/$defs/nonEmptyString" },
+              "baseline": { "$ref": "#/$defs/baseline" }
+            }
+          }
+        }
+      }
+    },
+    "interactionStep": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action", "target"],
+          "properties": {
+            "action": { "const": "focus" },
+            "target": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action", "key"],
+          "properties": {
+            "action": { "const": "press" },
+            "key": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action", "text"],
+          "properties": {
+            "action": { "const": "type" },
+            "text": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action", "target"],
+          "properties": {
+            "action": { "const": "activate" },
+            "target": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        }
+      ]
+    },
+    "performanceMatrix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "runner", "tools", "profile", "runOrderSeed", "qualificationRunOrder", "legacyBaselineRunOrder", "warmupPolicy", "invalidEnvironmentPolicy", "perRouteAggregation", "routes", "interactions"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "runner": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["region", "timeZone", "cdnPoPEvidence"],
+          "properties": {
+            "region": { "const": "local-asia-ho-chi-minh" },
+            "timeZone": { "const": "Asia/Ho_Chi_Minh" },
+            "cdnPoPEvidence": { "const": "Record the landing document cf-ray suffix for every retained run." }
+          }
+        },
+        "tools": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["chrome", "chromeDevtoolsMcp", "playwright", "node", "lighthouse"],
+          "properties": {
+            "chrome": { "const": "151.0.7922.76" },
+            "chromeDevtoolsMcp": { "const": "1.6.0" },
+            "playwright": { "const": "1.55.0" },
+            "node": { "const": "26.0.0" },
+            "lighthouse": { "const": "13.4.0" }
+          }
+        },
+        "profile": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["network", "cpuSlowdownMultiplier", "viewport", "browserCache", "cdnCache"],
+          "properties": {
+            "network": { "const": "Fast 4G" },
+            "cpuSlowdownMultiplier": { "const": 4 },
+            "viewport": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["width", "height", "deviceScaleFactor"],
+              "properties": {
+                "width": { "const": 390 },
+                "height": { "const": 844 },
+                "deviceScaleFactor": { "const": 1 }
+              }
+            },
+            "browserCache": { "const": "new isolated context with ignoreCache navigation" },
+            "cdnCache": { "const": "shared production cache cannot be purged; record cf-cache-status and age without discarding a valid run" }
+          }
+        },
+        "runOrderSeed": { "const": "vcskill-flagship-fixed-seed-v1" },
+        "qualificationRunOrder": { "type": "array", "minItems": 15, "maxItems": 15, "items": { "type": "string", "pattern": "^(marketing-home|docs-en-installation|docs-vi-installation)#[1-5]$" } },
+        "legacyBaselineRunOrder": { "type": "array", "minItems": 5, "maxItems": 5, "items": { "type": "string", "pattern": "^marketing-home#[1-5]$" } },
+        "warmupPolicy": { "const": "No hidden warm samples. Each declared run starts in a new isolated browser context with ignoreCache navigation and is retained." },
+        "invalidEnvironmentPolicy": { "const": "Retain the failed record with a reason, then rerun only when profile or runner validation proves the environment invalid." },
+        "perRouteAggregation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["requiredValidSamples", "gate", "report"],
+          "properties": {
+            "requiredValidSamples": { "const": 5 },
+            "gate": { "const": "median" },
+            "report": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": { "enum": ["median", "maximum"] }
+            }
+          }
+        },
+        "routes": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "path", "surface", "legacyBaseline", "legacyReason"],
+            "properties": {
+              "id": { "enum": ["marketing-home", "docs-en-installation", "docs-vi-installation"] },
+              "path": { "type": "string", "pattern": "^/" },
+              "surface": { "enum": ["marketing", "docs"] },
+              "legacyBaseline": { "enum": ["observable", "not-observable"] },
+              "legacyReason": { "$ref": "#/$defs/nonEmptyString" }
+            }
+          }
+        },
+        "interactions": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "routeId", "legacyBaseline", "legacyReason", "timeoutMs", "steps", "oracle", "metric"],
+            "properties": {
+              "id": { "enum": ["install-cta-navigation", "marketing-graph-keyboard-traversal", "docs-search-open-type-select", "docs-locale-version-switch"] },
+              "routeId": { "enum": ["marketing-home", "docs-en-installation", "docs-vi-installation"] },
+              "legacyBaseline": { "enum": ["observable", "not-observable"] },
+              "legacyReason": { "$ref": "#/$defs/nonEmptyString" },
+              "timeoutMs": { "type": "integer", "minimum": 1000, "maximum": 30000 },
+              "steps": { "type": "array", "minItems": 2, "maxItems": 4, "items": { "$ref": "#/$defs/interactionStep" } },
+              "oracle": { "$ref": "#/$defs/nonEmptyString" },
+              "metric": { "const": "inp" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

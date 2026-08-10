@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "viewports": [
+    {
+      "id": "mobile-320",
+      "width": 320,
+      "height": 900,
+      "invariants": [
+        "No horizontal overflow.",
+        "Install command is visible.",
+        "Primary sections remain readable without hidden essential content."
+      ]
+    },
+    {
+      "id": "mobile-375",
+      "width": 375,
+      "height": 900,
+      "invariants": [
+        "No horizontal overflow.",
+        "Install command is visible.",
+        "Primary sections remain readable without hidden essential content."
+      ]
+    },
+    {
+      "id": "mobile-390",
+      "width": 390,
+      "height": 900,
+      "invariants": [
+        "No horizontal overflow.",
+        "Install command is visible.",
+        "Primary sections remain readable without hidden essential content."
+      ]
+    },
+    {
+      "id": "tablet-768",
+      "width": 768,
+      "height": 1024,
+      "invariants": [
+        "No horizontal overflow.",
+        "Install command is visible.",
+        "Primary sections remain readable without hidden essential content."
+      ]
+    },
+    {
+      "id": "desktop-1280",
+      "width": 1280,
+      "height": 960,
+      "invariants": [
+        "No horizontal overflow.",
+        "Install command is visible.",
+        "Primary sections remain readable without hidden essential content."
+      ]
+    },
+    {
+      "id": "desktop-1440",
+      "width": 1440,
+      "height": 1024,
+      "invariants": [
+        "No horizontal overflow.",
+        "Install command is visible.",
+        "Primary sections remain readable without hidden essential content."
+      ]
+    }
+  ]
+}

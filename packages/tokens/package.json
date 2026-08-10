@@ -1,0 +1,22 @@
+{
+  "name": "@vcskill-web/tokens",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared design tokens consumed by both apps. Implementation arrives in Phase 5; the package boundary, exports, and scripts are pinned here so Phase 5 needs no lockfile edit.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./tokens.css": "./dist/tokens.css"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc --build",
+    "check": "tsc --build --force",
+    "test": "vitest run"
+  }
+}
