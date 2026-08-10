@@ -1,0 +1,33 @@
+# Candidate B — production identity profile. NOT deployed in Phase 3.
+#
+# This profile exists so the production topology is source-controlled and
+# dry-run validated ahead of the Phase 12 cutover. It uses a Worker identity and
+# secret namespace deliberately separate from the retained legacy `vcskill`
+# Worker, so provisioning this Worker's PAT cannot mutate the first-cutover
+# rollback target.
+#
+# It is fail-closed until the real Astro output exists: `directory` points at
+# the Phase 6 build output, which is absent today, so a `deploy` cannot succeed
+# by accident. Dry-run validation overrides the directory explicitly:
+#   wrangler deploy --dry-run --config workers/edge/wrangler.combined.production.toml \
+#     --assets test/fixtures/site-dist
+#
+# No Phase 3 command deploys this profile and no production route is attached
+# here; Phase 12 owns attaching `vcskill.vchun.dev`.
+
+name = "vcskill-edge-combined"
+main = "src/index.js"
+compatibility_date = "2026-07-20"
+
+# Intentionally empty. The production Custom Domain stays bound to the retained
+# legacy Worker until the qualified Phase 12 cutover moves it.
+routes = []
+
+[assets]
+directory = "../../dist/site"
+binding = "ASSETS"
+run_worker_first = true
+not_found_handling = "404-page"
+
+[observability]
+enabled = true

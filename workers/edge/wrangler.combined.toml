@@ -1,0 +1,38 @@
+# Candidate B — combined edge + site profile (staging).
+#
+# One Worker owns the protected release routes and delegates every unprotected
+# path to the `ASSETS` binding. `run_worker_first = true` guarantees the handler
+# classifies the route before the static asset layer can answer, so a physical
+# `/version` or `/download/<asset>` file can never pre-empt a protected route.
+#
+# `not_found_handling = "404-page"` gives explicit physical-404 behavior. SPA
+# fallback is deliberately disabled: an unknown path must be a real 404, never a
+# 200 HTML page standing in for a machine route.
+#
+# Candidate B also requires the source-controlled zone custom rule in
+# rules/raw-download-path-guard.json, because Cloudflare normalizes RFC 3986 dot
+# segments before the Worker sees `Request.url`.
+
+name = "vcskill-edge-combined-staging"
+main = "src/index.js"
+compatibility_date = "2026-07-20"
+
+# Secret (set out of band, never committed):
+#   wrangler secret put GH_TOKEN --config workers/edge/wrangler.combined.toml
+# This Worker uses its own secret namespace, separate from the retained legacy
+# `vcskill` Worker, so provisioning or rotating this PAT cannot invalidate the
+# first-cutover rollback target.
+
+routes = [
+  { pattern = "staging.vcskill.vchun.dev", custom_domain = true }
+]
+
+[assets]
+# Phase 6 replaces this fixture with the real Astro output contract.
+directory = "test/fixtures/site-dist"
+binding = "ASSETS"
+run_worker_first = true
+not_found_handling = "404-page"
+
+[observability]
+enabled = true
