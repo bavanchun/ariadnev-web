@@ -1,0 +1,50 @@
+---
+// Section 3 — the three canonical workflows.
+//
+// Exactly the three identifiers that exist in `kit/workflows/`. Each one is
+// described by where its authority stops, where a human holds it, and how it
+// ends when something goes wrong — not by listing its nodes. A step catalog
+// would go stale on the next graph edit; an authority boundary will not.
+import { WORKFLOWS, WORKFLOW_SOURCE } from "../data/marketing-facts";
+---
+
+<section class="shell section" id="workflows" aria-labelledby="workflows-heading">
+  <div class="section__head">
+    <p class="eyebrow">Canonical workflows</p>
+    <h2 id="workflows-heading">Three graphs, three authority boundaries</h2>
+    <p class="lede">
+      These are the workflows that ship in the kit. What matters is not how many steps each one has, but what it is
+      permitted to do and where it stops for you.
+    </p>
+  </div>
+
+  <div class="workflows">
+    {
+      WORKFLOWS.map((workflow) => (
+        <article class="workflow" aria-labelledby={`workflow-${workflow.id}`}>
+          <p class="workflow__id"><code>{workflow.id}</code></p>
+          <h3 id={`workflow-${workflow.id}`}>{workflow.title}</h3>
+          <dl class="workflow__facets">
+            <div class="workflow__facet">
+              <dt>Authority</dt>
+              <dd>{workflow.authority}</dd>
+            </div>
+            <div class="workflow__facet workflow__facet--gate">
+              <dt>Gate — held for a human</dt>
+              <dd>{workflow.gate}</dd>
+            </div>
+            <div class="workflow__facet">
+              <dt>Recovery</dt>
+              <dd>{workflow.recovery}</dd>
+            </div>
+          </dl>
+          <p class="workflow__availability">{workflow.availability}</p>
+        </article>
+      ))
+    }
+  </div>
+
+  <p class="note">
+    Source: <a href={WORKFLOW_SOURCE.source}>{WORKFLOW_SOURCE.sourceLabel}</a>. {WORKFLOW_SOURCE.caveat}
+  </p>
+</section>

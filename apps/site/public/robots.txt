@@ -1,0 +1,15 @@
+# Production crawl policy for https://vcskill.vchun.dev
+#
+# The marketing site is meant to be indexed. The machine routes served by the
+# edge Worker are not documents and are excluded so a crawler does not fetch an
+# installer script or a release asset as if it were a page.
+
+User-agent: *
+Allow: /
+Disallow: /install
+Disallow: /install.sh
+Disallow: /install.ps1
+Disallow: /version
+Disallow: /download/
+
+Sitemap: https://vcskill.vchun.dev/sitemap.xml

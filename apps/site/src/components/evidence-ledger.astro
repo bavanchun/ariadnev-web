@@ -1,0 +1,41 @@
+---
+// Section 5 — the evidence ledger.
+//
+// Three kinds of row, and the kind is stated in words as well as colour:
+//
+//   measured  — something was executed and observed
+//   contract  — something is machine-checked as a static property
+//   boundary  — something is deliberately not claimed or not yet permitted
+//
+// Every row links a source a reader can open, and every row names its limit.
+// There are no testimonials, customer names, ratings, usage totals, or
+// benchmark rankings here, because none of those exist as verifiable facts.
+import { EVIDENCE } from "../data/marketing-facts";
+---
+
+<section class="shell section" id="evidence" aria-labelledby="evidence-heading">
+  <div class="section__head">
+    <p class="eyebrow">Evidence ledger</p>
+    <h2 id="evidence-heading">What is proven, and where the proof stops</h2>
+    <p class="lede">
+      Each row states a claim, links the source it comes from, and says what it does not establish. A claim without a
+      caveat is a claim nobody has checked.
+    </p>
+  </div>
+
+  <ul class="ledger">
+    {
+      EVIDENCE.map((entry) => (
+        <li class="ledger__row">
+          <span class="ledger__kind" data-kind={entry.kind}>{entry.kind}</span>
+          <div>
+            <p>{entry.statement}</p>
+            <p class="ledger__caveat">
+              Limit: {entry.caveat} · Source: <a href={entry.source}>{entry.sourceLabel}</a>
+            </p>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+</section>

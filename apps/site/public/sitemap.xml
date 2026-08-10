@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Authored, not generated: the site has exactly one indexable route, and adding
+  a sitemap integration would mean editing the frozen package manifest and the
+  shared lockfile. tests/site/static-output.test.ts asserts that this file
+  still matches the built route set, so it cannot drift silently.
+
+  The 404 page is intentionally absent: it is noindex and is not a destination.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://vcskill.vchun.dev/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>

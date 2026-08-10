@@ -1,0 +1,13 @@
+{
+  "name": "vcskill",
+  "short_name": "vcskill",
+  "description": "A local execution control plane for coding agents.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "browser",
+  "background_color": "#090d15",
+  "theme_color": "#090d15",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

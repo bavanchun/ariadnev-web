@@ -1,0 +1,32 @@
+# Static response policy for the marketing surface.
+#
+# This file is the Candidate A declaration. The selected topology is Candidate B,
+# where the combined edge Worker generates the asset responses itself and
+# `_headers` is NOT applied to them — so the same policy is implemented in code
+# at workers/edge/src/static-response-policy.js, and tests/site asserts the two
+# stay in agreement. Neither file is allowed to drift from the other.
+#
+# The CSP hashes below cover the inline JSON-LD block and the inlined stylesheet
+# in the built pages. tests/site/static-output.test.ts recomputes both from
+# dist/ and fails if either changes without the hash here being updated, so a
+# stale allowance can never ship as a silently broken policy.
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), interest-cohort=(), magnetometer=(), microphone=(), payment=(), usb=()
+  Content-Security-Policy: default-src 'none'; script-src 'self' 'sha256-W5aYfVlUD2074LTLGeIeaF1zbq9IHqokVaSiD9MZGXA='; style-src 'self' 'sha256-perEkhTRO3VNV3XDMcriiAYRUypKZhE3nlNnNwVNQrI='; img-src 'self'; font-src 'self'; manifest-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests
+  Cache-Control: public, max-age=300
+
+# Astro fingerprints everything under /_astro/, so those URLs are immutable by
+# construction: a changed file gets a new URL rather than a new body.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# The 404 body must never be cached as if it were content. Under Candidate B the
+# equivalent rule is keyed on the response status rather than the path, because
+# the Worker knows the status and a path pattern cannot.
+/404.html
+  Cache-Control: no-store

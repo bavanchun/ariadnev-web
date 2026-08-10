@@ -1,0 +1,37 @@
+# Candidate A — assets-only site Worker.
+#
+# The selected topology is Candidate B (see ../../deployment/topology.json and
+# ../../docs/decisions/edge-routing-topology.md): the combined edge Worker owns
+# the protected release routes and serves this same `dist` through its `ASSETS`
+# binding. This configuration is the Candidate A counterpart, kept because the
+# Phase 3 decision record requires the rejected topology to stay reproducible
+# and because it is the source of the header policy that `public/_headers`
+# declares and the combined Worker's response policy must reproduce.
+#
+# It is not referenced by deployment/topology.json and is never deployed by the
+# deploy control plane. Nothing here may contain an account id, zone id, or
+# secret.
+
+name = "vcskill-site-staging"
+compatibility_date = "2026-07-20"
+
+# No `main`: this is an assets-only Worker. Under Candidate A the site answers
+# static requests directly and the protected release routes live in a separate
+# Worker that wins on more specific route patterns.
+
+[assets]
+directory = "dist"
+# `not_found_handling = "404-page"` serves the physical 404.html with a real 404
+# status. Single-page-app fallback is deliberately not used: an unknown path
+# must never resolve to a 200 HTML page standing in for a machine route.
+not_found_handling = "404-page"
+
+[env.production]
+name = "vcskill-site"
+
+[env.production.assets]
+directory = "dist"
+not_found_handling = "404-page"
+
+[observability]
+enabled = true
