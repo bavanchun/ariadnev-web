@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "selected": "candidate-b",
+  "decisionRecord": "docs/decisions/edge-routing-topology.md",
+  "note": "Single authority for deploy and rollback order. Phase 3 selected Candidate B; no later phase may switch this silently. Changing `selected` requires a new Phase 3 decision record.",
+  "ingressRule": {
+    "policy": "workers/edge/rules/raw-download-path-guard.json",
+    "manager": "scripts/manage-edge-ingress-rule.mjs",
+    "required": true
+  },
+  "environments": {
+    "staging": {
+      "baseUrl": "https://staging.vcskill.vchun.dev",
+      "docsBaseUrl": "https://staging.docs.vcskill.vchun.dev",
+      "legacyWorker": null
+    },
+    "production": {
+      "baseUrl": "https://vcskill.vchun.dev",
+      "docsBaseUrl": "https://docs.vcskill.vchun.dev",
+      "legacyWorker": {
+        "name": "vcskill",
+        "hostname": "vcskill.vchun.dev",
+        "route": "vcskill.vchun.dev/*",
+        "secretNames": ["GH_TOKEN"],
+        "credentialMutationFrozenUntil": "rollback-window-close",
+        "note": "Retained first-cutover rollback target. Its secret namespace is separate from every unit below and must never be written by a deploy or rollback workflow."
+      }
+    }
+  },
+  "units": [
+    {
+      "id": "docs",
+      "order": 1,
+      "kind": "worker-with-assets",
+      "workerName": { "staging": "vcskill-docs-staging", "production": "vcskill-docs" },
+      "wranglerConfig": "apps/docs/wrangler.docs.toml",
+      "output": "apps/docs/out",
+      "ownedByPhase": 7,
+      "smokeRoutes": ["/", "/en", "/llms.txt"],
+      "note": "Deployed first so the marketing site never links at a documentation host that does not answer yet."
+    },
+    {
+      "id": "edge",
+      "order": 2,
+      "kind": "worker-with-assets",
+      "workerName": { "staging": "vcskill-edge-combined-staging", "production": "vcskill-edge-combined" },
+      "wranglerConfig": {
+        "staging": "workers/edge/wrangler.combined.toml",
+        "production": "workers/edge/wrangler.combined.production.toml"
+      },
+      "output": "apps/site/dist",
+      "ownedByPhase": 6,
+      "secretNames": ["GH_TOKEN"],
+      "smokeRoutes": ["/version", "/install", "/install.sh", "/install.ps1", "/download/checksums.txt"],
+      "note": "Candidate B: this unit owns both the protected release routes and the marketing site assets, so it is deployed last and is the unit that takes the apex hostname at cutover."
+    }
+  ],
+  "rollbackOrder": ["edge", "docs"],
+  "firstCutover": {
+    "restoresLegacyBinding": true,
+    "removesDocsHostname": true,
+    "note": "First-cutover rollback is not a Worker-version rollback. It restores the captured legacy custom-domain and route binding map and removes or reassigns the new documentation hostname."
+  }
+}

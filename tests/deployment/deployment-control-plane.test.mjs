@@ -1,0 +1,413 @@
+// Shared operational contract gate for the deployment control plane.
+//
+// Everything here runs against fixtures and mocks; no test touches Cloudflare,
+// GitHub, or a real deployment. The point is that the rules the operators rely
+// on are enforced by code rather than by discipline.
+
+import assert from "node:assert/strict";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import test from "node:test";
+
+import {
+  configPathFor,
+  loadTopology,
+  resolveUnits,
+  validateDeploymentInput,
+  workerNameFor,
+} from "../../scripts/deploy/validate-deployment-input.mjs";
+import { deployUnits, smokeRoute } from "../../scripts/deploy/deploy-units.mjs";
+import { rollbackOrder, rollbackUnits, validateRollbackPlan } from "../../scripts/deploy/rollback-units.mjs";
+import { findSecrets, validateCutoverRecord, writeCutoverRecord } from "../../scripts/deploy/write-cutover-record.mjs";
+import { verifyConvergence } from "../../scripts/deploy/verify-convergence.mjs";
+import { REQUIRED_WINDOW_HOURS, verifySoak } from "../../scripts/deploy/verify-soak.mjs";
+import { assessEnvironment, redact, verifyProductionEnvironment } from "../../scripts/deploy/verify-production-environment.mjs";
+
+const PRODUCT_SHA = "1".repeat(40);
+const EVIDENCE_SHA = "2".repeat(40);
+const CORE_SHA = "3".repeat(40);
+const digest = (seed) => `sha256:${seed.repeat(64).slice(0, 64)}`;
+
+function baseInput(overrides = {}) {
+  return {
+    schemaVersion: 1,
+    environment: "staging",
+    topology: "candidate-b",
+    productSha: PRODUCT_SHA,
+    qualificationEvidenceSha: EVIDENCE_SHA,
+    release: { tag: "vcskill@0.12.0", version: "0.12.0", coreSha: CORE_SHA },
+    digests: { docsBundle: digest("a"), docsManifest: digest("b"), docsSchema: digest("c"), checksums: digest("d") },
+    units: ["docs", "edge"],
+    ingressPolicyDigest: digest("e"),
+    ...overrides,
+  };
+}
+
+// ---------------------------------------------------------------- input gate
+
+test("a fully pinned deployment input is accepted", () => {
+  assert.equal(validateDeploymentInput(baseInput()).valid, true);
+});
+
+test("moving, partial, and drifted inputs are rejected", () => {
+  const cases = [
+    ["branch instead of a SHA", { productSha: "main" }],
+    ["short SHA", { productSha: "1".repeat(7) }],
+    ["evidence SHA equal to the product SHA", { qualificationEvidenceSha: PRODUCT_SHA }],
+    ["tag alias instead of an exact release tag", { release: { tag: "latest", version: "0.12.0", coreSha: CORE_SHA } }],
+    ["topology drift", { topology: "candidate-a" }],
+    ["empty unit set", { units: [] }],
+    ["undeclared unit", { units: ["docs", "marketing"] }],
+    ["duplicate units", { units: ["docs", "docs"] }],
+    ["missing digest map", { digests: { docsBundle: digest("a") } }],
+    ["missing ingress digest", { ingressPolicyDigest: undefined }],
+  ];
+  for (const [label, overrides] of cases) {
+    const input = baseInput(overrides);
+    if (overrides.ingressPolicyDigest === undefined && "ingressPolicyDigest" in overrides) delete input.ingressPolicyDigest;
+    assert.equal(validateDeploymentInput(input).valid, false, `${label} must be rejected`);
+  }
+});
+
+test("units resolve in the topology's declared order regardless of input order", () => {
+  const topology = loadTopology();
+  const resolved = resolveUnits(baseInput({ units: ["edge", "docs"] }), topology);
+  assert.deepEqual(resolved.map((unit) => unit.id), ["docs", "edge"]);
+});
+
+test("config path and worker name are environment-specific and never synthesized", () => {
+  const topology = loadTopology();
+  const edge = topology.units.find((unit) => unit.id === "edge");
+  assert.equal(configPathFor(edge, "staging"), "workers/edge/wrangler.combined.toml");
+  assert.equal(configPathFor(edge, "production"), "workers/edge/wrangler.combined.production.toml");
+  assert.notEqual(workerNameFor(edge, "staging"), workerNameFor(edge, "production"));
+});
+
+test("candidate B production uses a worker identity separate from the retained legacy worker", () => {
+  const topology = loadTopology();
+  const legacy = topology.environments.production.legacyWorker;
+  const productionNames = topology.units.map((unit) => workerNameFor(unit, "production"));
+  assert.ok(!productionNames.includes(legacy.name), "a unit must never deploy over the legacy rollback target");
+  assert.equal(legacy.credentialMutationFrozenUntil, "rollback-window-close");
+});
+
+// ------------------------------------------------------------------- deploy
+
+test("deploy halts before a later unit when an earlier unit fails", async () => {
+  const attempted = [];
+  const runner = (_command, args) => {
+    attempted.push(args.at(-1));
+    return { status: 1, stdout: "", stderr: "boom" };
+  };
+  await assert.rejects(
+    () => deployUnits(baseInput(), { dryRun: true, runner }),
+    /failed to deploy; halting/,
+  );
+  assert.equal(attempted.length, 1, "the second unit must never be attempted");
+});
+
+test("a machine route answering with HTML 200 fails its smoke check", async () => {
+  const html = async () => new Response("<!doctype html><p>site</p>", { status: 200, headers: { "content-type": "text/html; charset=utf-8" } });
+  const shadowed = await smokeRoute("https://example.test", "/version", "edge@v1", html);
+  assert.equal(shadowed.pass, false);
+
+  const plain = async () => new Response("0.12.0", { status: 200, headers: { "content-type": "text/plain", "cache-control": "no-store" } });
+  const healthy = await smokeRoute("https://example.test", "/version", "edge@v1", plain);
+  assert.equal(healthy.pass, true);
+  assert.equal(healthy.deploymentLabel, "edge@v1");
+});
+
+// ----------------------------------------------------------------- rollback
+
+test("a rollback plan requires an explicit worker version for every unit", () => {
+  const missing = { schemaVersion: 1, environment: "production", reason: "smoke failure", units: [{ id: "edge" }] };
+  assert.equal(validateRollbackPlan(missing).valid, false);
+
+  const explicit = {
+    schemaVersion: 1,
+    environment: "production",
+    reason: "smoke failure",
+    units: [{ id: "edge", targetWorkerVersionId: "0e2c9a6f-1111-4222-8333-444455556666" }],
+  };
+  assert.equal(validateRollbackPlan(explicit).valid, true);
+});
+
+test("first-cutover rollback demands the captured binding map and docs hostname removal", () => {
+  const base = {
+    schemaVersion: 1,
+    environment: "production",
+    reason: "cutover aborted",
+    firstCutover: true,
+    units: [{ id: "edge", targetWorkerVersionId: "0e2c9a6f-1111-4222-8333-444455556666" }],
+  };
+  assert.equal(validateRollbackPlan(base).valid, false, "a bare version rollback is not a first-cutover restore");
+
+  const complete = { ...base, legacyBindingMap: { "vcskill.vchun.dev": "vcskill" }, removeDocsHostname: true };
+  assert.equal(validateRollbackPlan(complete).valid, true);
+});
+
+test("a rollback that would mutate the retained legacy credential is rejected", () => {
+  const plan = {
+    schemaVersion: 1,
+    environment: "production",
+    reason: "recover",
+    mutateLegacyCredential: true,
+    units: [{ id: "edge", targetWorkerVersionId: "0e2c9a6f-1111-4222-8333-444455556666" }],
+  };
+  const { valid, errors } = validateRollbackPlan(plan);
+  assert.equal(valid, false);
+  assert.match(errors.join(" "), /never mutate the retained legacy credential/);
+});
+
+test("rollback runs units in the reverse of the deploy order", () => {
+  const plan = {
+    units: [
+      { id: "docs", targetWorkerVersionId: "aaaaaaaa-1111-4222-8333-444455556666" },
+      { id: "edge", targetWorkerVersionId: "bbbbbbbb-1111-4222-8333-444455556666" },
+    ],
+  };
+  assert.deepEqual(rollbackOrder(plan).map((entry) => entry.id), ["edge", "docs"]);
+});
+
+test("a version rollback never reports itself as a legacy binding restoration", () => {
+  const result = rollbackUnits(
+    {
+      schemaVersion: 1,
+      environment: "production",
+      reason: "regression",
+      units: [{ id: "edge", targetWorkerVersionId: "bbbbbbbb-1111-4222-8333-444455556666" }],
+    },
+    { dryRun: true },
+  );
+  assert.equal(result.restoredLegacyBinding, false);
+  assert.equal(result.removedDocsHostname, false);
+  assert.equal(result.legacyCredentialMutated, false);
+});
+
+// ------------------------------------------------------------ cutover record
+
+function baseRecord(overrides = {}) {
+  return {
+    schemaVersion: 1,
+    recordId: "cutover-0001",
+    environment: "production",
+    phase: "deploy",
+    input: { productSha: PRODUCT_SHA, qualificationEvidenceSha: EVIDENCE_SHA, topology: "candidate-b", units: ["docs", "edge"] },
+    startedAtUtc: "2026-08-10T00:00:00Z",
+    observations: [
+      { unit: "edge", route: "/version", status: 200, contentClass: "text/plain", deploymentLabel: "edge@v3", pass: true },
+    ],
+    ...overrides,
+  };
+}
+
+test("a well-formed record validates and writes", () => {
+  const dir = mkdtempSync(join(tmpdir(), "cutover-"));
+  try {
+    const out = join(dir, "record.json");
+    writeCutoverRecord(baseRecord(), out);
+    assert.equal(JSON.parse(readFileSync(out, "utf8")).recordId, "cutover-0001");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("secrets, tokens, and account identifiers are refused", () => {
+  assert.ok(findSecrets({ note: "ghp_abcdefghijklmnopqrstuvwxyz" }).length > 0);
+  assert.ok(findSecrets({ note: "Bearer abcdefghijklmnopqrstuvwx" }).length > 0);
+  assert.ok(findSecrets({ accountId: "0123456789abcdef0123456789abcdef" }).length > 0);
+  assert.ok(findSecrets({ url: "https://x.test/a?X-Amz-Signature=deadbeef" }).length > 0);
+  assert.equal(findSecrets({ workerVersionId: "0e2c9a6f-1111-4222-8333-444455556666" }).length, 0);
+});
+
+test("an observation with no deployment label is not evidence", () => {
+  const record = baseRecord({ observations: [{ unit: "edge", route: "/version", status: 200, deploymentLabel: "" }] });
+  assert.equal(validateCutoverRecord(record).valid, false);
+});
+
+test("lifecycle transitions only move forward and a rollback is terminal", () => {
+  const preflight = baseRecord({ phase: "preflight" });
+  assert.equal(validateCutoverRecord(baseRecord({ phase: "deploy" }), preflight).valid, true);
+  assert.equal(validateCutoverRecord(preflight, baseRecord({ phase: "deploy" })).valid, false);
+  assert.equal(
+    validateCutoverRecord(baseRecord({ phase: "deploy" }), baseRecord({ phase: "rollback", rollback: { reason: "x", restoredLegacyBinding: true, removedDocsHostname: true } })).valid,
+    false,
+  );
+});
+
+test("evidence may accumulate but may never change the deployed product", () => {
+  const previous = baseRecord({ phase: "preflight" });
+  const drifted = baseRecord({ phase: "deploy", input: { ...previous.input, productSha: "9".repeat(40) } });
+  const { valid, errors } = validateCutoverRecord(drifted, previous);
+  assert.equal(valid, false);
+  assert.match(errors.join(" "), /productSha changed/);
+});
+
+// --------------------------------------------------------------- convergence
+
+test("convergence passes only when the live release matches the declared input", async () => {
+  const responder = (version) => async (url) => {
+    if (String(url).includes("/version")) return new Response(version, { status: 200 });
+    return new Response("{}", { status: 200 });
+  };
+  const converged = await verifyConvergence(baseInput({ units: ["edge"] }), {
+    baseUrl: "https://staging.test",
+    fetchImpl: responder("0.12.0"),
+  });
+  assert.equal(converged.converged, true);
+
+  const drifted = await verifyConvergence(baseInput({ units: ["edge"] }), {
+    baseUrl: "https://staging.test",
+    fetchImpl: responder("0.11.0"),
+  });
+  assert.equal(drifted.converged, false);
+});
+
+// ---------------------------------------------------------------------- soak
+
+test("a soak is measured from the most recent reset, not the first start", () => {
+  const now = new Date("2026-08-11T00:00:00Z");
+  const reset = verifySoak(
+    baseRecord({ phase: "soak", soak: { windowHours: 24, startedAtUtc: "2026-08-01T00:00:00Z", lastResetAtUtc: "2026-08-10T20:00:00Z", resetTriggers: ["deploy"] } }),
+    now,
+  );
+  assert.equal(reset.satisfied, false, "a redeploy restarts the window");
+  assert.ok(reset.elapsedHours < REQUIRED_WINDOW_HOURS);
+
+  const complete = verifySoak(
+    baseRecord({ phase: "soak", soak: { windowHours: 24, startedAtUtc: "2026-08-09T00:00:00Z", resetTriggers: [] } }),
+    now,
+  );
+  assert.equal(complete.satisfied, true);
+});
+
+test("a failed observation inside the window defeats the soak", () => {
+  const record = baseRecord({
+    phase: "soak",
+    soak: { windowHours: 24, startedAtUtc: "2026-08-01T00:00:00Z", resetTriggers: [] },
+    observations: [{ unit: "edge", route: "/version", status: 502, deploymentLabel: "edge@v3", pass: false }],
+  });
+  assert.equal(verifySoak(record, new Date("2026-08-11T00:00:00Z")).satisfied, false);
+});
+
+// ----------------------------------------------- production environment gate
+
+test("a weak or absent environment is rejected", () => {
+  assert.deepEqual(assessEnvironment(null, "web-production"), ["web-production environment is absent"]);
+
+  const bypassable = {
+    protection_rules: [{ type: "required_reviewers", reviewers: [{ type: "User" }], prevent_self_review: false }],
+    can_admins_bypass: true,
+    deployment_branch_policy: { protected_branches: true },
+  };
+  const findings = assessEnvironment(bypassable, "web-production");
+  assert.match(findings.join(" "), /bypass required review/);
+  assert.match(findings.join(" "), /self-review/);
+
+  const strong = {
+    protection_rules: [{ type: "required_reviewers", reviewers: [{ type: "User" }], prevent_self_review: true }],
+    can_admins_bypass: false,
+    deployment_branch_policy: { protected_branches: true },
+  };
+  assert.deepEqual(assessEnvironment(strong, "web-production"), []);
+});
+
+test("the environment preflight fails closed on a missing immutable-release policy", async () => {
+  const strong = {
+    protection_rules: [{ type: "required_reviewers", reviewers: [{ type: "User" }], prevent_self_review: true }],
+    can_admins_bypass: false,
+    deployment_branch_policy: { protected_branches: true },
+  };
+  const fetchImpl = async (url) => {
+    const path = String(url);
+    if (path.includes("/environments/")) return Response.json(strong);
+    if (path.includes("/contents/")) return Response.json({ content: Buffer.from("name: finalize\n").toString("base64") });
+    return Response.json({ immutable_releases: false });
+  };
+  const result = await verifyProductionEnvironment({ token: "t", fetchImpl });
+  assert.equal(result.ready, false);
+  assert.match(result.findings.join(" "), /immutable releases/);
+});
+
+test("an unexpected finalizer workflow digest blocks the cutover", async () => {
+  const strong = {
+    protection_rules: [{ type: "required_reviewers", reviewers: [{ type: "User" }], prevent_self_review: true }],
+    can_admins_bypass: false,
+    deployment_branch_policy: { protected_branches: true },
+  };
+  const fetchImpl = async (url) => {
+    const path = String(url);
+    if (path.includes("/environments/")) return Response.json(strong);
+    if (path.includes("/contents/")) return Response.json({ content: Buffer.from("name: tampered\n").toString("base64") });
+    return Response.json({ immutable_releases: true });
+  };
+  const result = await verifyProductionEnvironment({ token: "t", fetchImpl, expectedFinalizerDigest: `sha256:${"0".repeat(64)}` });
+  assert.equal(result.ready, false);
+  assert.match(result.findings.join(" "), /does not match the expected/);
+});
+
+test("a missing token fails closed and errors stay redacted", async () => {
+  await assert.rejects(() => verifyProductionEnvironment({ fetchImpl: async () => Response.json({}) }), /GITHUB_TOKEN is not set/);
+  assert.equal(redact("failed with Bearer ghp_abcdefghijklmnopqrst"), "failed with Bearer [redacted]");
+});
+
+// ------------------------------------------------------- workflow permissions
+
+const workflow = (name) => readFileSync(join(import.meta.dirname, "..", "..", ".github", "workflows", name), "utf8");
+const usesRefs = (yaml) => [...yaml.matchAll(/^\s*-?\s*uses:\s*(\S+)\s*$/gm)].map((match) => match[1]);
+
+test("every workflow action is pinned to a full commit SHA", () => {
+  for (const name of ["deploy.yml", "rollback.yml"]) {
+    for (const ref of usesRefs(workflow(name))) {
+      assert.match(ref, /@[0-9a-f]{40}$/, `${name} uses an unpinned action: ${ref}`);
+    }
+  }
+});
+
+test("no workflow inherits write permission, and checkout never persists credentials", () => {
+  for (const name of ["deploy.yml", "rollback.yml"]) {
+    const yaml = workflow(name);
+    assert.match(yaml, /^permissions: \{\}$/m, `${name} must declare an empty top-level permission map`);
+    const checkouts = (yaml.match(/actions\/checkout@/g) ?? []).length;
+    const disabled = (yaml.match(/persist-credentials: false/g) ?? []).length;
+    assert.equal(disabled, checkouts, `${name} must disable persisted credentials on every checkout`);
+  }
+});
+
+test("no job grants itself contents write", () => {
+  for (const name of ["deploy.yml", "rollback.yml"]) {
+    assert.doesNotMatch(workflow(name), /contents:\s*write/, `${name} must not grant contents write`);
+  }
+});
+
+test("the consolidated core credential never reaches a build or deploy job", () => {
+  // The single-repository Contents-read/Actions-write PAT is admissible only in
+  // edge release reads, artifact retrieval, and protected dispatch. A web build
+  // or Cloudflare deploy job that could see it would exceed Phase 2's model.
+  const deploy = workflow("deploy.yml");
+  const buildJob = deploy.slice(deploy.indexOf("  build:"), deploy.indexOf("  deploy:"));
+  const deployJob = deploy.slice(deploy.indexOf("  deploy:"));
+  for (const [label, body] of [["build", buildJob], ["deploy", deployJob]]) {
+    assert.doesNotMatch(body, /CORE_POLICY_READ_TOKEN|CONSOLIDATED_PAT|GH_RELEASE_TOKEN/, `${label} job must not receive a core credential`);
+  }
+});
+
+test("the deploy workflow builds only the immutable product commit", () => {
+  const deploy = workflow("deploy.yml");
+  assert.match(deploy, /ref: \$\{\{ needs\.preflight\.outputs\.product_sha \}\}/);
+  // A branch or tag checkout would let the deployed bytes drift from the input.
+  assert.doesNotMatch(deploy, /ref:\s*(main|refs\/heads|\$\{\{ github\.ref)/);
+});
+
+test("deployments are serialized per environment and never cancelled midway", () => {
+  for (const name of ["deploy.yml", "rollback.yml"]) {
+    const yaml = workflow(name);
+    assert.match(yaml, /group: deploy-\$\{\{ inputs\.environment \}\}/);
+    assert.match(yaml, /cancel-in-progress: false/);
+  }
+});
+
+test("production deployment is gated on a protected GitHub environment", () => {
+  assert.match(workflow("deploy.yml"), /environment: \$\{\{ inputs\.environment == 'production' && 'web-production'/);
+});

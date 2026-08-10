@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vcskill.vchun.dev/schemas/cutover-record-v1.schema.json",
+  "title": "vcskill web cutover record v1",
+  "description": "Versioned, sanitized lifecycle evidence for one deployment attempt. Phase 11 rehearses this format, Phase 12 supplies live records, and Phase 13 consumes it read-only without inventing a new format.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "recordId", "environment", "phase", "input", "startedAtUtc", "observations"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "recordId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{7,63}$" },
+    "environment": { "enum": ["staging", "production"] },
+    "phase": {
+      "enum": ["preflight", "deploy", "rollback", "soak"],
+      "description": "Lifecycle stage. A record advances preflight -> deploy -> soak, or preflight -> deploy -> rollback."
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["productSha", "qualificationEvidenceSha", "topology", "units"],
+      "properties": {
+        "productSha": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "qualificationEvidenceSha": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "topology": { "enum": ["candidate-a", "candidate-b"] },
+        "units": { "type": "array", "minItems": 1, "items": { "enum": ["docs", "edge"] } }
+      }
+    },
+    "startedAtUtc": { "type": "string", "format": "date-time" },
+    "completedAtUtc": { "type": "string", "format": "date-time" },
+    "result": { "enum": ["pass", "fail", "rolled-back", "in-progress"] },
+    "observations": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 512,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["unit", "route", "status", "deploymentLabel"],
+        "properties": {
+          "unit": { "enum": ["docs", "edge"] },
+          "route": { "type": "string", "pattern": "^/[A-Za-z0-9._~/?=&%-]*$" },
+          "status": { "type": "integer", "minimum": 100, "maximum": 599 },
+          "contentClass": { "type": "string", "maxLength": 64 },
+          "cacheControl": { "type": "string", "maxLength": 128 },
+          "workerVersionId": { "type": "string", "pattern": "^[0-9a-f-]{36}$" },
+          "deploymentLabel": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "The deployment this row was actually observed under. Controlled-failure and legacy read-only rows keep their own label and are never relabeled as the final deployment."
+          },
+          "pass": { "type": "boolean" }
+        }
+      }
+    },
+    "soak": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["windowHours", "startedAtUtc", "resetTriggers"],
+      "properties": {
+        "windowHours": { "type": "number", "minimum": 24 },
+        "startedAtUtc": { "type": "string", "format": "date-time" },
+        "lastResetAtUtc": { "type": "string", "format": "date-time" },
+        "resetTriggers": {
+          "type": "array",
+          "items": { "enum": ["deploy", "rollback", "config-change", "smoke-failure", "manual"] }
+        }
+      }
+    },
+    "rollback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reason", "restoredLegacyBinding", "removedDocsHostname"],
+      "properties": {
+        "reason": { "type": "string", "maxLength": 512 },
+        "restoredLegacyBinding": { "type": "boolean" },
+        "removedDocsHostname": { "type": "boolean" },
+        "legacyCredentialMutated": {
+          "const": false,
+          "description": "Always false. Mutating the retained legacy credential while rollback is still an available recovery path invalidates the rollback target."
+        }
+      }
+    }
+  }
+}

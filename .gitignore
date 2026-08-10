@@ -1,2 +1,37 @@
-.wrangler/
+# Dependencies
 node_modules/
+
+# Build output
+dist/
+.astro/
+.next/
+.output/
+.vercel/
+apps/*/dist/
+packages/*/dist/
+
+# Wrangler
+.wrangler/
+.dev.vars
+.dev.vars.*
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Temporary extraction and spike scratch space
+.tmp/
+.spike-evidence/
+*.tmp
+
+# Test and tooling caches
+coverage/
+.vitest/
+node_modules/.cache/
+
+# OS noise
+.DS_Store
+
+# Release locks and lockfiles stay tracked on purpose:
+#   pnpm-lock.yaml, deployment/topology.json, docs/decisions/*.json

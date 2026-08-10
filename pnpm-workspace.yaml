@@ -1,0 +1,11 @@
+# Workspace graph for the vcskill public web surface.
+#
+# The Astro marketing site and the Next/Fumadocs documentation app keep
+# independent build graphs; they may share `packages/*` only, never framework
+# components. `workers/edge` holds the release edge extracted in Phase 3.
+packages:
+  - apps/site
+  - apps/docs
+  - workers/edge
+  - packages/contracts
+  - packages/tokens

@@ -1,58 +1,98 @@
 # vcskill-web
 
-The public edge + landing page for [**vcskill**](https://vcskill.vchun.dev) — a
-single Cloudflare Worker bound to `vcskill.vchun.dev`.
+The public web surface for [**vcskill**](https://vcskill.vchun.dev): an Astro
+marketing site, a static Fumadocs documentation product, and the Cloudflare
+Worker that serves the release routes.
 
-The vcskill source repo is private. This Worker is its **only public face**: it
-serves the landing page and proxies the private repo's GitHub Releases with a
-server-side token, so anyone can `curl … | bash` without touching GitHub.
+The vcskill source repository is private. This repository is its **only** public
+face: it proxies the private repository's GitHub Releases with a server-side
+token, so anyone can `curl … | bash` without touching GitHub.
 
 ```
-GET /                 → landing page (landing.html)
-GET /install          → install.sh          (proxied from private repo)
+GET /                 → marketing site
+GET /install          → install.sh          (proxied from the private repo)
+GET /install.sh       → install.sh
 GET /install.ps1      → install.ps1
-GET /version          → latest release tag
-GET /download/<asset> → release binary       (token-proxied)
+GET /version          → current release version   (?version=<semver> pins it)
+GET /download/<asset> → release asset             (?version=<semver> pins it)
 ```
 
-## Files
+`?version=<stable semver>` pins `/version` and `/download/<asset>` to one exact
+release identity. The installer routes deliberately ignore it and make no
+pinning claim — the installer they return resolves its own download targets at
+run time.
 
-| File | What |
+## Workspace
+
+A pinned pnpm workspace. Node and pnpm versions are fixed in `package.json`;
+every dependency is an exact version and `pnpm-lock.yaml` is committed.
+
+| Package | What |
 |---|---|
-| `worker.js` | The Worker: routing + GitHub token-proxy |
-| `landing.html` | Self-contained landing page, imported as a Text module, served at `/` |
-| `wrangler.toml` | Worker name `vcskill`, custom domain `vcskill.vchun.dev`, HTML text-module rule |
+| `apps/site` | Astro marketing site (Phase 6) |
+| `apps/docs` | Static Next/Fumadocs documentation (Phase 7) |
+| `packages/contracts` | Trusted docs-bundle schema, archive policy, verify-first atomic extractor |
+| `packages/tokens` | Shared design tokens (Phase 5) |
+| `workers/edge` | Release edge Worker: install, version, download |
 
-## Deploy
+```sh
+pnpm install --frozen-lockfile
 
-Requires the Cloudflare account that owns the `vchun.dev` zone.
-
-```bash
-npx wrangler login          # once
-npx wrangler deploy         # ships worker.js + landing.html to vcskill.vchun.dev
+pnpm run test               # vitest suites + the native contract suites
+pnpm run typecheck          # strict TypeScript across the workspace
+pnpm run build              # every package build
+pnpm run contracts          # compatibility, deployment, and contracts suites
+pnpm run test:qualification # the full gate a deploy runs
 ```
 
-The Worker needs one secret — a fine-grained GitHub PAT with **Contents: read**
-on the private `bavanchun/vcskill` repo (read releases + install scripts):
+## Topology
 
-```bash
-npx wrangler secret put GH_TOKEN
+Candidate B, decided in
+[`docs/decisions/edge-routing-topology.md`](docs/decisions/edge-routing-topology.md).
+
+One combined Worker owns the protected release routes and delegates every
+unprotected path to an `ASSETS` binding with `run_worker_first = true`, so a
+physical `/version` or `/download/<asset>` file in the site output can never
+pre-empt the handler. Documentation is a separate deployment.
+
+Candidate A was rejected: a route pattern is matched against the full URL
+including the query string and cannot itself contain a query, so admitting
+`/install?from=docs` requires a terminal wildcard that also captures the
+unprotected lookalike `/installer`.
+
+## Deploying
+
+`docs/operations/deployment-and-rollback.md` is the operator contract. In short:
+
+```sh
+node scripts/deploy/validate-deployment-input.mjs deployment/inputs/<name>.json
+gh workflow run deploy.yml -f environment=staging -f input_path=deployment/inputs/<name>.json
 ```
 
-The secret lives on the deployed Worker in Cloudflare, not in this repo or in
-source control. Rotating it: run `wrangler secret put GH_TOKEN` again with a new
-PAT, then `wrangler deploy`.
+Inputs are immutable — one `productSha`, one exact release tag, an explicit unit
+set. Branch names, tag aliases, and `latest` are not representable. Production
+approval comes from the `web-production` GitHub environment.
 
-## Editing the landing page
+`deployment/topology.json` is the single authority for unit order, Wrangler
+config paths, build outputs, and smoke routes.
 
-`landing.html` is fully self-contained (inline CSS/JS, Google Fonts via `<link>`).
-Edit it, then `wrangler deploy`. It is served at `/` with a 5-minute edge cache,
-so a change may take up to 5 minutes to appear on the bare path.
+## Secrets
 
-## Notes
+The edge Worker needs one secret: a fine-grained GitHub PAT with **Contents:
+read** on the private `bavanchun/vcskill` repository.
 
-- The Worker owns the whole `vcskill.vchun.dev` host. If the landing site grows
-  into a multi-page/build-tooled site, migrate to Cloudflare Pages + a Pages
-  Function for the install proxy (bigger change; not needed for a single page).
-- Release automation is unaffected: CI in the private repo publishes binaries to
-  its own GitHub Releases; this Worker just reads them.
+```sh
+wrangler secret put GH_TOKEN --config workers/edge/wrangler.combined.toml
+```
+
+Secrets live on the deployed Worker in Cloudflare, never in this repository.
+The combined Worker uses a secret namespace separate from the retained legacy
+Worker, so rotating one cannot invalidate the other.
+
+## Legacy runtime
+
+`worker.js`, `landing.html`, `wrangler.toml`, and `landing-consistency.test.mjs`
+are the **current production runtime and the first-cutover rollback target**.
+They stay in place, and their credential context stays frozen, until the
+production cutover completes and its rollback window closes. Do not modify or
+delete them before then.

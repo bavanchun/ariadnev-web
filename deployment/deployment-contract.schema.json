@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vcskill.vchun.dev/schemas/deployment-contract-v1.schema.json",
+  "title": "vcskill web deployment input v1",
+  "description": "Immutable input authority for a staging or production deployment. Every reference is a full commit SHA or a content digest; no branch name, tag alias, or 'latest' is representable.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "environment",
+    "topology",
+    "productSha",
+    "qualificationEvidenceSha",
+    "release",
+    "digests",
+    "units"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "environment": { "enum": ["staging", "production"] },
+    "topology": { "enum": ["candidate-a", "candidate-b"] },
+    "productSha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$",
+      "description": "The web commit whose build output is deployed. Builds and deploys resolve only this SHA."
+    },
+    "qualificationEvidenceSha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$",
+      "description": "A descendant commit carrying the evidence that attests productSha. It never changes what is built."
+    },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tag", "version", "coreSha"],
+      "properties": {
+        "tag": { "type": "string", "pattern": "^vcskill@[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$" },
+        "version": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$" },
+        "coreSha": { "type": "string", "pattern": "^[a-f0-9]{40}$" }
+      }
+    },
+    "digests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["docsBundle", "docsManifest", "docsSchema", "checksums"],
+      "properties": {
+        "docsBundle": { "$ref": "#/$defs/digest" },
+        "docsManifest": { "$ref": "#/$defs/digest" },
+        "docsSchema": { "$ref": "#/$defs/digest" },
+        "checksums": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "units": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": { "enum": ["docs", "edge"] },
+      "description": "Explicit unit set. An empty or implicit 'all units' input is not representable."
+    },
+    "ingressPolicyDigest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+  }
+}
