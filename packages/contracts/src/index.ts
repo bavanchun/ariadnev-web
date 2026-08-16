@@ -32,3 +32,24 @@ export {
   type ExtractOptions,
   type ExtractResult,
 } from "./extract-docs-bundle.js";
+
+export {
+  assertCommandContract,
+  CommandContractError,
+  deriveCanonicalSlug,
+  deriveLegacyAnchor,
+  resolveCommand,
+  type CommandContractRejection,
+  type CommandContractRejectionCode,
+  type CommandDescriptor,
+  type CommandRegistry,
+  type CommandRegistryEntry,
+  type RetiredRoute,
+  type RetiredRouteMap,
+  type SourceCommand,
+} from "./cli-command-contract.js";
+
+export {
+  DEFAULT_COMMAND_REGISTRY,
+  DEFAULT_RETIRED_ROUTES,
+} from "./cli-command-registry.js";
