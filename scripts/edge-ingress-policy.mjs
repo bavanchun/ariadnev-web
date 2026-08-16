@@ -48,7 +48,12 @@ function tokenize(expression) {
   return tokens;
 }
 
-function evaluate(expression, context) {
+/**
+ * Evaluate a Rules-language expression against a field context.
+ * Exported so other source-owned policies can verify their own corpus against
+ * the rendered expression rather than against a hand-written mirror of it.
+ */
+export function evaluate(expression, context) {
   const tokens = tokenize(expression);
   let position = 0;
   const peek = () => tokens[position];

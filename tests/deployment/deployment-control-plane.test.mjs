@@ -264,6 +264,29 @@ test("convergence passes only when the live release matches the declared input",
   assert.equal(drifted.converged, false);
 });
 
+test("a redirecting baseUrl fails convergence instead of validating the redirect target", async () => {
+  // Since the legacy host 302s to ariadnev.com, a redirect-following probe would
+  // report the interim bridge's answer as proof that the unit deployed at
+  // baseUrl converged. The pinned-selector check is the sharper hazard: the
+  // bridge ignores ?version= entirely, so a followed probe becomes a tautology
+  // that passes whenever latest happens to equal the expected version.
+  const redirectingHost = async (url, init) => {
+    assert.equal(init.redirect, "manual", `${url} must not follow redirects`);
+    return new Response(null, { status: 302, headers: { location: "https://ariadnev.com/version" } });
+  };
+
+  const result = await verifyConvergence(baseInput({ units: ["edge"] }), {
+    baseUrl: "https://vcskill.vchun.dev",
+    fetchImpl: redirectingHost,
+  });
+
+  assert.equal(result.converged, false);
+  for (const check of result.checks) {
+    assert.equal(check.pass, false, `${check.check} must not pass through a redirect`);
+    assert.match(check.reason, /redirects to https:\/\/ariadnev\.com/);
+  }
+});
+
 // ---------------------------------------------------------------------- soak
 
 test("a soak is measured from the most recent reset, not the first start", () => {

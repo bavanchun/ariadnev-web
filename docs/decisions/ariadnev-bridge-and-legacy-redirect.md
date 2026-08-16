@@ -8,9 +8,14 @@ Required by: Phase 12 (production cutover), legacy decommission
 Sources of record:
 
 - [`deployment/topology.json`](../../deployment/topology.json) — the `interim` block
-- [`rules/legacy-host-redirect.json`](../../rules/legacy-host-redirect.json) — the redirect policy
+- [`rules/legacy-host-redirect.json`](../../rules/legacy-host-redirect.json) — the redirect policy and its corpus
+- [`scripts/manage-legacy-host-redirect.mjs`](../../scripts/manage-legacy-host-redirect.mjs) — the reconciler
 - [`workers/bridge/wrangler.toml`](../../workers/bridge/wrangler.toml) — the interim Worker
 - `plans/260816-1255-ariadnev-domain-cutover-bridge-and-redirect/` — execution record
+
+**Cross-repo references.** Paths below prefixed `ariadnev-kit:` live in the
+private product repository `bavanchun/ariadnev-kit`, not here. This repository is
+only the public web surface.
 
 ## Decision
 
@@ -21,9 +26,9 @@ changes `topology.json`'s `selected: candidate-b`.
 
 ## Why this was urgent, not a preference
 
-`ariadnev@1.0.0` shipped and **could not be installed**. `install.sh:10` and
-`install.ps1` point at `https://ariadnev.com`, and
-`packages/cli/src/cli/update-command.ts:9` hardcodes the same host as
+`ariadnev@1.0.0` shipped and **could not be installed**. `ariadnev-kit:install.sh:10`
+and `ariadnev-kit:install.ps1` point at `https://ariadnev.com`, and
+`ariadnev-kit:packages/cli/src/cli/update-command.ts:9` hardcodes the same host as
 `const DOMAIN` with **no environment override**. So the domain was not a
 branding choice — fresh installs *and* `av update` on every already-installed
 copy were broken until that host answered. Standing it up was the fix.
@@ -72,8 +77,8 @@ rather than `1.0.0`, because the frozen Worker strips `^vcskill@`, which no
 longer matches the renamed tag. This is **not** worth unfreezing a file to fix:
 
 - The redirect now shadows the legacy host, so nothing reaches it in normal use.
-- `update-command.ts:26` strips `^ariadnev@` itself, so the value parses
-  correctly even unstripped.
+- `ariadnev-kit:packages/cli/src/cli/update-command.ts:26` strips `^ariadnev@`
+  itself, so the value parses correctly even unstripped.
 - The bridge strips `^ariadnev@`, so the canonical host is already correct.
 
 Recorded so a future reader does not mistake it for a regression introduced here.
@@ -101,6 +106,27 @@ is a manual reinstall from `https://ariadnev.com/install`.
 The practical consequence: redirect rollback protects the *legacy host binding*,
 but correct installs depend on the bridge staying up. Treat the bridge as
 production, not as scaffolding.
+
+## The redirect defanged a production gate — fixed
+
+`scripts/deploy/verify-convergence.mjs` probes
+`topology.environments.production.baseUrl`, which is `https://vcskill.vchun.dev`.
+It followed redirects. Once this rule went live, that gate stopped measuring what
+it claims to:
+
+- `checkVersionRoute` reported the **bridge's** answer as evidence that the unit
+  deployed at the production host had converged. A completely broken candidate-b
+  deploy would have passed.
+- `checkPinnedSelector` was worse. `preserve_query_string: true` carries
+  `?version=<v>` to the bridge, and the bridge has no selector support at all —
+  it always answers latest. The check became a tautology that could not fail
+  while latest equalled expected.
+
+Both probes now use `redirect: "manual"` and treat any 3xx as a hard failure with
+the target named in `reason`. A gate that cannot reach the unit it is measuring
+must say so, not resolve to something else. **Phase 12 must decide** whether
+production `baseUrl` becomes `ariadnev.com` at cutover, or whether the gate is
+pointed at the unit's own hostname; either is fine, silently following is not.
 
 ## Measured: a Single Redirect beats a Workers Custom Domain
 
@@ -235,6 +261,34 @@ Its blind spots:
    authoritative check is always the live probe — `302` plus the expected
    `location` header.
 
+Dynamic redirect is **first-match-wins**, so a rule inserted *above* this one
+defeats it while every compared field still matches. Structural comparison cannot
+see that, so the outcome carries `rulePosition` and `ruleCount`; this policy
+expects `rulePosition: 0`.
+
+### Guards on the destructive path
+
+`--remove` can `DELETE` a ruleset, so three checks stand in front of it:
+
+- **Zone identity.** `CLOUDFLARE_ZONE_ID` is the same variable
+  `manage-edge-ingress-rule.mjs` reads, so having it exported for a *different*
+  zone is a realistic operator state. A supplied id is verified against the
+  policy's `zoneName` via `GET /zones/{id}` and refused on mismatch. The
+  `zoneName` in the outcome comes from the API, never from the policy file, so it
+  cannot misstate the blast radius.
+- **Ruleset targeting.** The zone listing also includes account-level rulesets
+  deployable to the zone; writing into one would report success while executing
+  nothing. Only `kind: "zone"` qualifies, and two matches is an error rather than
+  a guess. Two rules sharing the description is likewise an error.
+- **Re-read before delete.** The listing and the `DELETE` are separated by
+  network round trips. The ruleset is re-read immediately before deletion, and if
+  another owner's rule appeared in that window it is preserved via `PUT` instead.
+
+Rule `id`s are stripped before a `PUT`. Measured 2026-08-16 against the live API:
+stripping the `id` from an unrelated rule and re-sending it **preserved that
+rule's id**, so foreign rules keep their identity. This matches what
+`manage-edge-ingress-rule.mjs` already does.
+
 The bridge's own secret is set the same way, without echoing the value:
 
 ```sh
@@ -276,13 +330,30 @@ on a Cloudflare API token with Zone → WAF → Edit. A working zone-scoped toke
 exists. Applying that guard is candidate-b work outside this plan's scope and was
 left alone; the gate is simply no longer credential-blocked.
 
-## Open risk
+## Open risks
 
-The legacy Worker's `GH_TOKEN` PAT expiry is **unknown** and not readable via the
-API. If it expires inside the rollback window, the rollback target fails closed
-with `502`. A decision-recorded manual secret renewal is the one place the
-freeze's letter yields to its intent — the freeze exists to keep the rollback
-target working, and an expired credential defeats that.
+**PAT expiry, both Workers.** The legacy Worker's `GH_TOKEN` expiry is **unknown**
+and not readable via the API. If it expires inside the rollback window, the
+rollback target fails closed with `502`. A decision-recorded manual secret
+renewal is the one place the freeze's letter yields to its intent — the freeze
+exists to keep the rollback target working, and an expired credential defeats
+that. The bridge has identical exposure on its own token; because the bridge is
+now the only host serving correct installs, its expiry is the higher-impact one.
+
+**The bridge sits outside the deployment control plane.** It has no entry in
+`topology.json.units`, so `deploy-units.mjs`, `rollback-units.mjs`,
+`verify-convergence.mjs`, and the pinned-input gate skip it, and no CI workflow
+runs its `check` or the `--inspect` drift gate described above. That is a
+deliberate consequence of keeping `units` a candidate-b concern the plan promised
+not to touch — but it means the bridge is production without production wiring,
+and it has no frozen public-contract snapshot equivalent to
+`tests/contracts/public-edge-contract.test.mjs`. Worth closing before Phase 12,
+or at latest when Phase 12 removes the bridge.
+
+**GitHub API quota.** Every `/version` hit — that is, every `av update` on every
+installed copy — is one authenticated GitHub API call, and `/download/*` is two.
+There is no cache layer, so a single 5,000/hr PAT quota backs installs and updates
+together; exhausting it breaks both at once.
 
 ## What has *not* happened
 

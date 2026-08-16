@@ -164,9 +164,31 @@ test("installer routes proxy the repo contents API at ref=main", async () => {
   assert.equal(powershell.upstream.calls[0].url, CONTENTS_URL("install.ps1"));
 });
 
-test("installer routes preserve the upstream status instead of masking it", async () => {
-  const result = await call("/install", { mock: { shellStatus: 404, shellBody: "Not Found" } });
-  assert.equal(result.status, 404);
+test("an upstream installer failure never reaches the client as a shell script", async () => {
+  // The body would be piped straight into bash. An expired PAT must not deliver
+  // GitHub's `{"message":"Bad credentials"}` JSON as text/x-shellscript.
+  const result = await call("/install", {
+    mock: { shellStatus: 401, shellBody: '{"message":"Bad credentials","documentation_url":"https://docs.github.com/rest"}' },
+  });
+
+  assert.equal(result.status, 502, "a 401 must not masquerade as a client error");
+  assert.equal(header(result, "content-type"), "text/plain; charset=utf-8");
+  assert.equal(result.bodyText, "installer unavailable: install.sh\n");
+  assert.ok(!result.bodyText.includes("Bad credentials"), "upstream error detail must not leak");
+
+  // A genuine upstream 5xx keeps its status so clients can tell broken from gone.
+  const upstreamDown = await call("/install", { mock: { shellStatus: 503, shellBody: "upstream down" } });
+  assert.equal(upstreamDown.status, 503);
+  assert.ok(!upstreamDown.bodyText.includes("upstream down"));
+});
+
+test("a failed asset download never reaches the client as octet-stream", async () => {
+  // Storage-layer XML written to disk as a "binary" is worse than a clean error.
+  const result = await call("/download/checksums.txt", { mock: { assetStatus: 403 } });
+
+  assert.equal(result.status, 502);
+  assert.equal(header(result, "content-type"), "text/plain; charset=utf-8");
+  assert.equal(result.bodyText, "asset download failed: checksums.txt\n");
 });
 
 test("/download serves the release asset as an attachment", async () => {
@@ -248,7 +270,11 @@ const BLOCK_EXPECTATIONS = {
   "/download/.": { status: 404, reason: "normalized to bare /download/, which is not an asset route" },
 };
 
-test("no mustBlock path can make the bridge serve an unsafe asset name", async () => {
+// Named for what it actually pins. Five of the eight policy paths are *not*
+// blocked by the bridge — they are neutralized by normalization into a harmless
+// request — so a name promising "every mustBlock path is rejected" would be
+// coverage theater. The load-bearing rejection tests are the two below this one.
+test("each mustBlock path resolves to its measured, harmless outcome", async () => {
   assert.deepEqual(
     Object.keys(BLOCK_EXPECTATIONS).sort(),
     [...guard.mustBlock].sort(),

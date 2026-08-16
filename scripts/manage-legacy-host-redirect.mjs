@@ -19,9 +19,12 @@
 //   node scripts/manage-legacy-host-redirect.mjs --apply
 //   node scripts/manage-legacy-host-redirect.mjs --remove
 
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { evaluate } from "./edge-ingress-policy.mjs";
 
 const API = "https://api.cloudflare.com/client/v4";
 const POLICY_PATH = join(dirname(fileURLToPath(import.meta.url)), "..", "rules", "legacy-host-redirect.json");
@@ -42,6 +45,44 @@ export function loadPolicy(path = POLICY_PATH) {
   }
   if (!policy.rule?.description) throw new Error("policy rule is missing its stable description");
   return policy;
+}
+
+/** Does the rule's expression match this host and path? */
+export function matches(expression, { host, path }) {
+  return evaluate(expression, { "http.host": host, "http.request.uri.path": path });
+}
+
+/**
+ * Check the rule's expression against the policy's own declared corpus.
+ *
+ * Without this the corpus is decorative. Changing `eq` to `contains` would widen
+ * the rule to every host ending in `vcskill.vchun.dev` — including candidate-b
+ * staging — and nothing would object. `--apply` refuses on any failure.
+ */
+export function verifyPolicy(policy) {
+  const { expression } = policy.rule;
+  const failures = [];
+
+  for (const probe of policy.mustRedirect) {
+    if (!matches(expression, probe)) failures.push({ ...probe, expected: "redirect", actual: "pass-through" });
+  }
+  for (const probe of policy.mustNotRedirect) {
+    if (matches(expression, probe)) failures.push({ ...probe, expected: "pass-through", actual: "redirect" });
+  }
+  return { expression, failures, digest: digestPolicy(policy) };
+}
+
+/** Stable digest of what was actually applied, so drift is attributable. */
+export function digestPolicy(policy) {
+  const canonical = JSON.stringify({
+    id: policy.id,
+    action: policy.rule.action,
+    description: policy.rule.description,
+    expression: policy.rule.expression,
+    enabled: policy.rule.enabled,
+    actionParameters: policy.rule.action_parameters,
+  });
+  return `sha256:${createHash("sha256").update(canonical).digest("hex")}`;
 }
 
 export function createClient({ token, fetchImpl = fetch }) {
@@ -67,16 +108,58 @@ export function createClient({ token, fetchImpl = fetch }) {
 }
 
 /**
+ * Resolve the target zone and prove its identity before anything destructive.
+ *
+ * `CLOUDFLARE_ZONE_ID` is the same variable name `manage-edge-ingress-rule.mjs`
+ * reads, so an operator with it exported for another zone is a realistic state —
+ * and `--remove` can DELETE a ruleset. An id supplied by the caller is therefore
+ * verified against the policy's `zoneName` rather than trusted, and the name
+ * reported back comes from the API, not from the policy file, so the outcome can
+ * never misstate the blast radius.
+ */
+export async function resolveZone(request, policy, zoneId) {
+  if (!zoneId) {
+    const matched = (await request(`/zones?name=${policy.zoneName}`))?.[0];
+    if (!matched?.id) throw new Error(`zone not found: ${policy.zoneName}`);
+    return { zoneId: matched.id, zoneName: matched.name ?? policy.zoneName };
+  }
+
+  const zone = await request(`/zones/${zoneId}`);
+  if (zone?.name !== policy.zoneName) {
+    throw new Error(
+      `refusing to act: CLOUDFLARE_ZONE_ID resolves to zone "${zone?.name ?? "unknown"}" but the policy targets "${policy.zoneName}"`,
+    );
+  }
+  return { zoneId, zoneName: zone.name };
+}
+
+/**
  * Find the zone's dynamic-redirect entrypoint ruleset, plus the source-owned
  * rule inside it. A zone with no redirects at all has no entrypoint yet.
  */
 export async function locateRule(request, zoneId, description) {
   const rulesets = await request(`/zones/${zoneId}/rulesets`);
-  const entrypoint = (rulesets || []).find((ruleset) => ruleset.phase === "http_request_dynamic_redirect");
+  // The zone listing also includes account-level rulesets deployable to this
+  // zone. Writing into one of those would report success while executing
+  // nothing, so only a zone entrypoint qualifies.
+  const candidates = (rulesets || []).filter(
+    (ruleset) => ruleset.phase === "http_request_dynamic_redirect" && ruleset.kind === "zone",
+  );
+  if (candidates.length > 1) {
+    throw new Error(`ambiguous target: ${candidates.length} zone-level dynamic-redirect rulesets on this zone`);
+  }
+  const entrypoint = candidates[0];
   if (!entrypoint) return { ruleset: null, rule: null, rules: [] };
+
   const full = await request(`/zones/${zoneId}/rulesets/${entrypoint.id}`);
   const rules = full.rules || [];
-  return { ruleset: full, rule: rules.find((rule) => rule.description === description) || null, rules };
+  const owned = rules.filter((rule) => rule.description === description);
+  // Duplicates would make `--apply` write another copy and `--remove` delete
+  // both. Refuse rather than guess which one is authoritative.
+  if (owned.length > 1) {
+    throw new Error(`ambiguous target: ${owned.length} rules share the description "${description}"`);
+  }
+  return { ruleset: full, rule: owned[0] || null, rules };
 }
 
 /**
@@ -117,10 +200,16 @@ const sendable = ({ id, version, last_updated, ref, ...rest }) => rest;
 export async function reconcile({ mode = "inspect", token, zoneId, fetchImpl = fetch, policy = loadPolicy() }) {
   if (!["inspect", "apply", "remove"].includes(mode)) throw new Error(`unknown mode: ${mode}`);
 
+  // Corpus first: never reach the network with an expression the policy's own
+  // probes reject.
+  const verification = verifyPolicy(policy);
+  if (verification.failures.length > 0) {
+    throw new Error(`policy corpus failed: ${JSON.stringify(verification.failures)}`);
+  }
+
   const desired = policy.rule;
   const request = createClient({ token, fetchImpl });
-  const resolvedZoneId = zoneId || (await request(`/zones?name=${policy.zoneName}`))?.[0]?.id;
-  if (!resolvedZoneId) throw new Error(`zone not found: ${policy.zoneName}`);
+  const { zoneId: resolvedZoneId, zoneName } = await resolveZone(request, policy, zoneId);
 
   const { ruleset, rule, rules } = await locateRule(request, resolvedZoneId, desired.description);
   const others = rules.filter((entry) => entry.description !== desired.description);
@@ -128,22 +217,46 @@ export async function reconcile({ mode = "inspect", token, zoneId, fetchImpl = f
   const change = mode === "remove" ? { action: rule ? "delete" : "noop", drift: null } : planChange(rule, desired);
   const outcome = {
     mode,
-    zoneName: policy.zoneName,
+    // From the API, not the policy file, so the outcome can never misstate which
+    // zone was touched.
+    zoneName,
     entrypointPresent: Boolean(ruleset),
     statusCode: desired.action_parameters.from_value.status_code,
+    digest: verification.digest,
     action: change.action,
     drift: change.drift,
     applied: false,
     preservedRuleCount: others.length,
+    // Dynamic redirect is first-match-wins, so a rule inserted above this one
+    // silently defeats it while every field this tool compares still matches.
+    // Structural comparison cannot see that; the position can.
+    rulePosition: rule ? rules.indexOf(rule) : null,
+    ruleCount: rules.length,
   };
 
   if (mode === "inspect" || change.action === "noop") return outcome;
 
   if (mode === "remove") {
+    if (others.length > 0) {
+      await request(`/zones/${resolvedZoneId}/rulesets/${ruleset.id}`, { method: "PUT", body: { rules: others.map(sendable) } });
+      outcome.applied = true;
+      return outcome;
+    }
+
     // An entrypoint ruleset with an empty rules array is rejected, so a ruleset
-    // that exists only for this rule is deleted outright.
-    if (others.length === 0) await request(`/zones/${resolvedZoneId}/rulesets/${ruleset.id}`, { method: "DELETE" });
-    else await request(`/zones/${resolvedZoneId}/rulesets/${ruleset.id}`, { method: "PUT", body: { rules: others.map(sendable) } });
+    // that exists only for this rule is deleted outright. Re-read immediately
+    // first: the listing above and this DELETE are separated by network round
+    // trips, and a rule added by anyone in that window would be destroyed with
+    // the ruleset. Fall back to the non-destructive path if that happened.
+    const current = await request(`/zones/${resolvedZoneId}/rulesets/${ruleset.id}`);
+    const survivors = (current.rules || []).filter((entry) => entry.description !== desired.description);
+    if (survivors.length > 0) {
+      await request(`/zones/${resolvedZoneId}/rulesets/${ruleset.id}`, { method: "PUT", body: { rules: survivors.map(sendable) } });
+      outcome.preservedRuleCount = survivors.length;
+      outcome.note = "another owner's rule appeared after the initial read; kept the ruleset instead of deleting it";
+    } else {
+      await request(`/zones/${resolvedZoneId}/rulesets/${ruleset.id}`, { method: "DELETE" });
+    }
     outcome.applied = true;
     return outcome;
   }

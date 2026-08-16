@@ -17,6 +17,7 @@ import {
   planChange,
   reconcile,
   redactError,
+  verifyPolicy,
 } from "./manage-legacy-host-redirect.mjs";
 
 const TOKEN = "test-cf-token";
@@ -42,7 +43,7 @@ const liveOwnedRule = () => ({ id: "bbbb2222", version: "1", ...structuredClone(
  * zone with no dynamic-redirect entrypoint at all, which is the real starting
  * state of vchun.dev.
  */
-function createFakeFetch({ entrypoint = null, rules = [] } = {}) {
+function createFakeFetch({ entrypoint = null, rules = [], rulesets = null, zoneName = "vchun.dev", onGetRuleset } = {}) {
   const calls = [];
   const state = { entrypoint, rules: structuredClone(rules), deleted: false };
 
@@ -54,10 +55,16 @@ function createFakeFetch({ entrypoint = null, rules = [] } = {}) {
 
     const ok = (result) => new Response(JSON.stringify({ success: true, result }), { status: 200 });
 
-    if (path.startsWith("/zones?name=")) return ok([{ id: ZONE_ID }]);
+    if (path.startsWith("/zones?name=")) return ok([{ id: ZONE_ID, name: zoneName }]);
+    if (path === `/zones/${ZONE_ID}`) return ok({ id: ZONE_ID, name: zoneName });
 
     if (path === `/zones/${ZONE_ID}/rulesets` && method === "GET") {
-      return ok(state.entrypoint ? [{ id: RULESET_ID, phase: "http_request_dynamic_redirect" }] : [{ id: "other", phase: "http_request_firewall_custom" }]);
+      if (rulesets) return ok(rulesets);
+      return ok(
+        state.entrypoint
+          ? [{ id: RULESET_ID, phase: "http_request_dynamic_redirect", kind: "zone" }]
+          : [{ id: "other", phase: "http_request_firewall_custom", kind: "zone" }],
+      );
     }
     if (path === `/zones/${ZONE_ID}/rulesets` && method === "POST") {
       state.entrypoint = true;
@@ -65,7 +72,9 @@ function createFakeFetch({ entrypoint = null, rules = [] } = {}) {
       return ok({ id: RULESET_ID, ...body });
     }
     if (path === `/zones/${ZONE_ID}/rulesets/${RULESET_ID}` && method === "GET") {
-      return ok({ id: RULESET_ID, phase: "http_request_dynamic_redirect", rules: state.rules });
+      // Hook for modelling a concurrent writer between the read and the delete.
+      if (onGetRuleset) onGetRuleset(state, calls);
+      return ok({ id: RULESET_ID, phase: "http_request_dynamic_redirect", kind: "zone", rules: state.rules });
     }
     if (path === `/zones/${ZONE_ID}/rulesets/${RULESET_ID}` && method === "PUT") {
       state.rules = body.rules;
@@ -251,6 +260,29 @@ test("remove deletes the ruleset outright when this rule was its only occupant",
   assert.equal(fetchImpl.state.deleted, true);
 });
 
+test("a rule that appears between the read and the delete is not destroyed", async () => {
+  // The listing and the DELETE are separated by network round trips. A rule
+  // added by anyone in that window would go down with the ruleset.
+  let reads = 0;
+  const fetchImpl = createFakeFetch({
+    entrypoint: true,
+    rules: [liveOwnedRule()],
+    onGetRuleset: (state) => {
+      reads += 1;
+      if (reads === 2) state.rules = [...state.rules, structuredClone(foreignRule)];
+    },
+  });
+
+  const outcome = await run("remove", fetchImpl);
+
+  assert.equal(outcome.applied, true);
+  assert.ok(!fetchImpl.calls.some((call) => call.method === "DELETE"), "must not delete a now-shared ruleset");
+  const put = fetchImpl.calls.find((call) => call.method === "PUT");
+  assert.equal(put.body.rules.length, 1);
+  assert.equal(put.body.rules[0].description, foreignRule.description);
+  assert.match(outcome.note, /appeared after the initial read/);
+});
+
 test("remove is a no-op when the rule is already absent", async () => {
   const fetchImpl = createFakeFetch({ entrypoint: true, rules: [foreignRule] });
   const outcome = await run("remove", fetchImpl);
@@ -268,6 +300,110 @@ test("apply then remove returns the zone to its starting state", async () => {
   await run("remove", fetchImpl);
   assert.equal(fetchImpl.state.entrypoint, false);
   assert.equal(fetchImpl.state.rules.length, 0);
+});
+
+// ============================================================== corpus gate
+
+test("the declared corpus is verified against the rule's own expression", () => {
+  const { failures, digest } = verifyPolicy(policy);
+  assert.deepEqual(failures, []);
+  assert.match(digest, /^sha256:[0-9a-f]{64}$/);
+});
+
+test("a widened expression is caught by the corpus, not shipped", () => {
+  // The realistic mistake: `eq` -> `contains` to be "more permissive". It matches
+  // staging.vcskill.vchun.dev and every other suffix lookalike.
+  const widened = structuredClone(policy);
+  widened.rule.expression = '(http.host contains "vcskill.vchun.dev")';
+
+  const { failures } = verifyPolicy(widened);
+  const hosts = failures.map((failure) => failure.host);
+  assert.ok(hosts.includes("staging.vcskill.vchun.dev"), "candidate-b staging must be flagged");
+  assert.ok(hosts.includes("evil-vcskill.vchun.dev"), "suffix lookalike must be flagged");
+});
+
+test("a corpus failure blocks --apply before any network call", async () => {
+  const narrowed = structuredClone(policy);
+  narrowed.rule.expression = '(http.host eq "wrong.example.com")';
+  let called = false;
+
+  await assert.rejects(
+    () => reconcile({ mode: "apply", token: TOKEN, policy: narrowed, fetchImpl: async () => { called = true; } }),
+    /policy corpus failed/,
+  );
+  assert.equal(called, false, "must not reach Cloudflare with a rejected expression");
+});
+
+test("an expression matching its own redirect target would loop and is rejected", () => {
+  const looping = structuredClone(policy);
+  looping.rule.expression = '(http.host eq "ariadnev.com")';
+  assert.ok(verifyPolicy(looping).failures.length > 0);
+});
+
+// ============================================================ zone identity
+
+test("a supplied zone id is verified against the policy, not trusted", async () => {
+  // CLOUDFLARE_ZONE_ID is the same variable manage-edge-ingress-rule.mjs reads,
+  // so having it exported for another zone is a realistic operator state — and
+  // --remove can DELETE a ruleset.
+  const otherZone = createFakeFetch({ entrypoint: true, rules: [liveOwnedRule()], zoneName: "someone-elses.dev" });
+
+  await assert.rejects(
+    () => reconcile({ mode: "remove", token: TOKEN, zoneId: ZONE_ID, fetchImpl: otherZone }),
+    /refusing to act.*someone-elses\.dev.*vchun\.dev/s,
+  );
+  assert.deepEqual(otherZone.calls.filter((call) => call.method !== "GET"), [], "no write may occur");
+});
+
+test("the reported zone name comes from the API, not the policy file", async () => {
+  const fetchImpl = createFakeFetch({ entrypoint: true, rules: [liveOwnedRule()] });
+  const outcome = await reconcile({ mode: "inspect", token: TOKEN, zoneId: ZONE_ID, fetchImpl });
+
+  assert.equal(outcome.zoneName, "vchun.dev");
+  assert.ok(fetchImpl.calls.some((call) => call.path === `/zones/${ZONE_ID}`), "must confirm the zone by id");
+});
+
+// ========================================================== ruleset targeting
+
+test("an account-level ruleset is never mistaken for the zone entrypoint", async () => {
+  // The zone listing also includes account-level rulesets deployable here.
+  // Writing into one reports success while executing nothing.
+  const fetchImpl = createFakeFetch({
+    rulesets: [{ id: "acct", phase: "http_request_dynamic_redirect", kind: "root" }],
+  });
+  const outcome = await run("apply", fetchImpl);
+
+  assert.equal(outcome.entrypointPresent, false);
+  const post = fetchImpl.calls.find((call) => call.method === "POST");
+  assert.equal(post.body.kind, "zone");
+  assert.ok(!fetchImpl.calls.some((call) => call.path.includes("acct")), "must never touch the account ruleset");
+});
+
+test("two zone-level redirect rulesets are ambiguous and refuse to act", async () => {
+  const fetchImpl = createFakeFetch({
+    rulesets: [
+      { id: "a", phase: "http_request_dynamic_redirect", kind: "zone" },
+      { id: "b", phase: "http_request_dynamic_redirect", kind: "zone" },
+    ],
+  });
+  await assert.rejects(() => run("apply", fetchImpl), /ambiguous target: 2 zone-level/);
+});
+
+test("duplicate descriptions refuse to act rather than guess", async () => {
+  const fetchImpl = createFakeFetch({ entrypoint: true, rules: [liveOwnedRule(), liveOwnedRule()] });
+  // --apply would write a third copy; --remove would delete both.
+  await assert.rejects(() => run("remove", fetchImpl), /2 rules share the description/);
+});
+
+test("a rule inserted above ours is visible as a position, since first match wins", async () => {
+  const fetchImpl = createFakeFetch({ entrypoint: true, rules: [foreignRule, liveOwnedRule()] });
+  const outcome = await run("inspect", fetchImpl);
+
+  // Every compared field still matches, so drift is null — position is the only
+  // signal that something now runs ahead of this rule.
+  assert.equal(outcome.action, "noop");
+  assert.equal(outcome.rulePosition, 1);
+  assert.equal(outcome.ruleCount, 2);
 });
 
 // ============================================================== token safety

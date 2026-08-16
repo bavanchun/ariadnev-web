@@ -65,6 +65,21 @@ function ghHeaders(token, accept) {
 }
 
 /**
+ * A bounded, self-authored failure. Upstream status is preserved so clients can
+ * still distinguish "gone" from "broken", but the upstream *body* never is:
+ * GitHub error JSON and storage-layer XML would otherwise be served under this
+ * Worker's own content types.
+ */
+function upstreamFailure(status, message) {
+  return new Response(`${message}\n`, {
+    // 5xx passes through as-is; anything else collapses to 502, so a 401 from an
+    // expired PAT cannot masquerade as a client error.
+    status: status >= 500 ? status : 502,
+    headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" },
+  });
+}
+
+/**
  * Normalize a GitHub `tag_name` into the public `/version` text.
  * Strips the `ariadnev@` release prefix; the legacy `vcskill@` prefix is
  * deliberately not handled, because no tag in this repo carries it.
@@ -80,11 +95,19 @@ async function latestRelease(token, fetchImpl) {
   return res.ok ? { ok: true, release: await res.json() } : { ok: false };
 }
 
-/** Proxy one repo file at `ref=main`, preserving the upstream status. */
+/**
+ * Proxy one repo file at `ref=main`, preserving the upstream status but never
+ * the upstream body on failure.
+ *
+ * A GitHub error body would otherwise be served as `text/x-shellscript` straight
+ * into `curl … | bash`. When the PAT expires that means piping GitHub's
+ * `{"message":"Bad credentials", …}` JSON to a shell.
+ */
 async function installerResponse(token, file, contentType, fetchImpl) {
   const res = await fetchImpl(`${API}/repos/${REPO}/contents/${file}?ref=main`, {
     headers: ghHeaders(token, "application/vnd.github.raw"),
   });
+  if (!res.ok) return upstreamFailure(res.status, `installer unavailable: ${file}`);
   return new Response(res.body, {
     status: res.status,
     headers: { "content-type": contentType, "cache-control": "no-store" },
@@ -112,6 +135,9 @@ async function assetResponse(token, assetName, fetchImpl) {
     headers: ghHeaders(token, "application/octet-stream"),
     redirect: "follow",
   });
+  // Storage-layer error XML must not be served as application/octet-stream and
+  // written to disk as if it were a binary.
+  if (!bin.ok) return upstreamFailure(bin.status, `asset download failed: ${assetName}`);
   return new Response(bin.body, {
     status: bin.status,
     headers: {

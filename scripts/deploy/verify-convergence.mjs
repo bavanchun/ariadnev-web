@@ -13,9 +13,37 @@ import { join } from "node:path";
 
 import { loadJson, resolveUnits, validateDeploymentInput } from "./validate-deployment-input.mjs";
 
+// Machine-route probes never follow redirects.
+//
+// `vcskill.vchun.dev` now 302s to `ariadnev.com` (see
+// docs/decisions/ariadnev-bridge-and-legacy-redirect.md). Following that would
+// make this gate report the *redirect target's* answer as evidence that the unit
+// deployed at `baseUrl` converged, so a completely broken deploy would pass.
+// Worse for `checkPinnedSelector`: the interim bridge has no selector support at
+// all, so a followed probe silently degrades into a latest-equals-expected
+// tautology that can never fail.
+//
+// A 3xx is therefore a hard failure, not something to resolve. If a host is
+// meant to be probed through a redirect, point `baseUrl` at the real target.
+const NO_REDIRECT = { redirect: "manual" };
+
+const redirected = (response) => response.status >= 300 && response.status < 400;
+
+function redirectFailure(check, expected, response) {
+  return {
+    check,
+    expected,
+    observed: null,
+    status: response.status,
+    pass: false,
+    reason: `baseUrl redirects to ${response.headers.get("location") || "an unknown target"}; this gate must probe the deployed unit directly`,
+  };
+}
+
 /** Compare one live machine route against the expected release identity. */
 export async function checkVersionRoute(baseUrl, expectedVersion, fetchImpl = fetch) {
-  const response = await fetchImpl(`${baseUrl}/version`, { redirect: "follow" });
+  const response = await fetchImpl(`${baseUrl}/version`, NO_REDIRECT);
+  if (redirected(response)) return redirectFailure("release-version", expectedVersion, response);
   const text = (await response.text()).trim();
   return {
     check: "release-version",
@@ -28,7 +56,8 @@ export async function checkVersionRoute(baseUrl, expectedVersion, fetchImpl = fe
 
 /** Confirm the pinned release tag resolves to the same version through the selector. */
 export async function checkPinnedSelector(baseUrl, version, fetchImpl = fetch) {
-  const response = await fetchImpl(`${baseUrl}/version?version=${encodeURIComponent(version)}`, { redirect: "follow" });
+  const response = await fetchImpl(`${baseUrl}/version?version=${encodeURIComponent(version)}`, NO_REDIRECT);
+  if (redirected(response)) return redirectFailure("pinned-selector", version, response);
   const text = (await response.text()).trim();
   return {
     check: "pinned-selector",

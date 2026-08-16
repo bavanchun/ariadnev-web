@@ -23,16 +23,21 @@
     "description": "ariadnev: redirect legacy host to ariadnev.com",
     "enabled": true
   },
+  "corpusNote": "Verified against the rule's own expression by verifyPolicy() in scripts/manage-legacy-host-redirect.mjs, which gates --apply. Host and path are both declared because the corpus must be able to catch a scoping mistake (eq -> contains) that no path-only list could see.",
   "mustRedirect": [
-    "/install",
-    "/install.sh",
-    "/install.ps1",
-    "/version",
-    "/download/checksums.txt",
-    "/"
+    { "host": "vcskill.vchun.dev", "path": "/install" },
+    { "host": "vcskill.vchun.dev", "path": "/install.sh" },
+    { "host": "vcskill.vchun.dev", "path": "/install.ps1" },
+    { "host": "vcskill.vchun.dev", "path": "/version" },
+    { "host": "vcskill.vchun.dev", "path": "/download/checksums.txt" },
+    { "host": "vcskill.vchun.dev", "path": "/" }
   ],
   "mustNotRedirect": [
-    "https://ariadnev.com/install",
-    "https://staging.vcskill.vchun.dev/install"
+    { "host": "ariadnev.com", "path": "/install", "why": "the redirect target; matching it would loop" },
+    { "host": "www.ariadnev.com", "path": "/install", "why": "also served by the bridge" },
+    { "host": "staging.vcskill.vchun.dev", "path": "/install", "why": "candidate-b staging must stay reachable" },
+    { "host": "docs.vcskill.vchun.dev", "path": "/", "why": "documentation host is out of scope" },
+    { "host": "vchun.dev", "path": "/install", "why": "the zone apex is not the legacy release host" },
+    { "host": "evil-vcskill.vchun.dev", "path": "/install", "why": "a suffix lookalike must not match" }
   ]
 }
