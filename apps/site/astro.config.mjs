@@ -12,7 +12,7 @@ import { defineConfig } from "astro/config";
 // which this phase must not touch. `tests/site/static-output.test.ts` asserts
 // the authored sitemap still matches the built route set.
 export default defineConfig({
-  site: "https://vcskill.vchun.dev",
+  site: "https://ariadnev.com",
   output: "static",
   trailingSlash: "never",
   build: {

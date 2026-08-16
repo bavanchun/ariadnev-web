@@ -1,7 +1,7 @@
 // Release-pin contract gate.
 //
 // The pin is the one piece of mutable identity the marketing page is allowed to
-// show, and Phase 10 owns writing it. The rule that matters is negative: a
+// show, and the docs content build owns writing it. The rule that matters is negative: a
 // missing or malformed pin must never become a guessed version on a public
 // page. All four branches are exercised here against temporary files, so no
 // fake release data is ever committed.
@@ -16,10 +16,10 @@ let directory: string;
 let path: string;
 
 const VALID = {
-  version: "0.11.0",
-  tag: "v0.11.0",
-  releaseUrl: "https://github.com/bavanchun/vcskill/releases/tag/v0.11.0",
-  publishedAt: "2026-08-09T12:00:00Z",
+  version: "1.0.0",
+  tag: "ariadnev@1.0.0",
+  releaseUrl: "https://docs.ariadnev.com/en/1.0.0/release-notes",
+  publishedAt: "2026-08-16T00:42:42Z",
 };
 
 const write = (value: unknown): void => {
@@ -27,8 +27,8 @@ const write = (value: unknown): void => {
 };
 
 beforeEach(() => {
-  directory = mkdtempSync(join(tmpdir(), "vcskill-pin-"));
-  path = join(directory, "vcskill.json");
+  directory = mkdtempSync(join(tmpdir(), "ariadnev-pin-"));
+  path = join(directory, "ariadnev.json");
 });
 
 afterEach(() => {
@@ -62,8 +62,8 @@ describe("a malformed pin", () => {
     ["a prerelease version", { ...VALID, version: "1.0.0-rc.1", tag: "v1.0.0-rc.1" }],
     ["a version with a leading zero", { ...VALID, version: "01.0.0", tag: "v01.0.0" }],
     ["a tag that disagrees with the version", { ...VALID, tag: "v0.11.1" }],
-    ["a release URL on another repository", { ...VALID, releaseUrl: "https://github.com/attacker/vcskill/releases/tag/v0.11.0" }],
-    ["a release URL that is not a release", { ...VALID, releaseUrl: "https://github.com/bavanchun/vcskill/issues/1" }],
+    ["a release URL on another host", { ...VALID, releaseUrl: "https://docs.attacker.example/en/1.0.0/release-notes" }],
+    ["a release URL on the marketing host instead of the docs host", { ...VALID, releaseUrl: "https://ariadnev.com/en/1.0.0/release-notes" }],
     ["a non-instant publish date", { ...VALID, publishedAt: "2026-08-09" }],
     ["a missing version", { tag: "v0.11.0", releaseUrl: VALID.releaseUrl, publishedAt: VALID.publishedAt }],
   ];
@@ -83,16 +83,16 @@ describe("a malformed pin", () => {
 
 describe("release mode", () => {
   it("is driven by the environment when the caller does not say", () => {
-    const previous = process.env["VCSKILL_RELEASE_MODE"];
+    const previous = process.env["ARIADNEV_RELEASE_MODE"];
     try {
       write("{ broken");
-      process.env["VCSKILL_RELEASE_MODE"] = "1";
+      process.env["ARIADNEV_RELEASE_MODE"] = "1";
       expect(() => loadReleasePin({ path })).toThrow(ReleasePinError);
-      process.env["VCSKILL_RELEASE_MODE"] = "0";
+      process.env["ARIADNEV_RELEASE_MODE"] = "0";
       expect(loadReleasePin({ path })).toBeNull();
     } finally {
-      if (previous === undefined) delete process.env["VCSKILL_RELEASE_MODE"];
-      else process.env["VCSKILL_RELEASE_MODE"] = previous;
+      if (previous === undefined) delete process.env["ARIADNEV_RELEASE_MODE"];
+      else process.env["ARIADNEV_RELEASE_MODE"] = previous;
     }
   });
 });

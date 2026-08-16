@@ -61,16 +61,16 @@ describe("calls to action", () => {
   it("exposes install and docs from the header, within one interaction", () => {
     const header = html.slice(html.indexOf("<header"), html.indexOf("</header>"));
     expect(header).toContain('href="#install"');
-    expect(header).toContain("https://docs.vcskill.vchun.dev/en/stable/");
+    expect(header).toContain("https://docs.ariadnev.com/en/stable/");
   });
 
   it("shows a literal install command in the first section", () => {
     const promise = html.slice(0, html.indexOf('id="execution-map"'));
-    expect(promise).toContain("curl -fsSL https://vcskill.vchun.dev/install | bash");
+    expect(promise).toContain("curl -fsSL https://ariadnev.com/install | bash");
   });
 
   it("offers both platform commands at the final action", () => {
-    expect(html).toContain("irm https://vcskill.vchun.dev/install.ps1 | iex");
+    expect(html).toContain("irm https://ariadnev.com/install.ps1 | iex");
   });
 });
 

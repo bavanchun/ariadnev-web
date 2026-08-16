@@ -1,9 +1,10 @@
 ---
 // The marketing page: six sections, in this order, and nothing else.
 //
-// Structured data is limited to what can be verified from the repository — a
-// name, a description, the source URL, the licence, and the platforms the
-// installer supports. No rating, no price, no review, no download count.
+// Structured data is limited to what can be verified from the public surface —
+// a name, a description, the site URL, and the platforms the installer
+// supports. No rating, no price, no review, no download count, and no source
+// link: the source repository is private.
 import BaseLayout from "../layouts/base-layout.astro";
 import SiteHeader from "../components/site-header.astro";
 import PromiseSection from "../components/promise-section.astro";
@@ -12,7 +13,7 @@ import WorkflowSection from "../components/workflow-section.astro";
 import ProviderProjection from "../components/provider-projection.astro";
 import EvidenceLedger from "../components/evidence-ledger.astro";
 import FinalInstall from "../components/final-install.astro";
-import { SITE } from "../data/marketing-facts";
+import { SITE, DOCS } from "../data/marketing-facts";
 
 const structuredData = {
   "@context": "https://schema.org",
@@ -22,8 +23,6 @@ const structuredData = {
   operatingSystem: "macOS, Linux, Windows",
   description: SITE.description,
   url: SITE.origin,
-  codeRepository: SITE.repository,
-  license: "https://github.com/bavanchun/vcskill/blob/main/LICENSE",
 };
 ---
 
@@ -43,11 +42,10 @@ const structuredData = {
 
   <footer class="site-footer">
     <div class="shell">
-      <p>vcskill is local-first and open source. There is no hosted control plane and no telemetry endpoint.</p>
+      <p>ariadnev is local-first. There is no hosted control plane; telemetry is off by default and no ingest endpoint ships.</p>
       <ul>
         <li><a href={SITE.docsEntry}>Documentation</a></li>
-        <li><a href={SITE.repository}>Source</a></li>
-        <li><a href={`${SITE.repository}/releases`}>Releases</a></li>
+        <li><a href={DOCS.releaseNotes}>Release notes</a></li>
       </ul>
     </div>
   </footer>

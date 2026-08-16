@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <!-- Source of public/social-card.png. Re-render with `node scripts/render-social-card.mjs`. -->
+  <rect width="1200" height="630" fill="#0b0f17"/>
+  <g font-family="Helvetica, Arial, sans-serif">
+    <text x="90" y="170" font-size="84" font-weight="700" fill="#f1f5fb">ariadnev</text>
+    <text x="90" y="252" font-size="40" fill="#6ea8f7">Agent work you can route, gate, and prove.</text>
+    <text x="90" y="312" font-size="26" fill="#aab5c6">A local execution control plane for coding agents.</text>
+  </g>
+  <path d="M90 358H1110" stroke="#2a3140" stroke-width="2"/>
+  <g fill="#161c27" stroke="#6ea8f7" stroke-width="2">
+    <rect x="90" y="430" width="150" height="64" rx="6"/>
+    <rect x="270" y="430" width="150" height="64" rx="6"/>
+    <rect x="450" y="430" width="150" height="64" rx="6"/>
+    <rect x="630" y="430" width="150" height="64" rx="6"/>
+    <rect x="810" y="430" width="150" height="64" rx="6" stroke="#d89a58"/>
+  </g>
+  <g stroke="#465268" stroke-width="2"><path d="M240 462H270M420 462H450M600 462H630M780 462H810"/></g>
+  <g fill="#f1f5fb" font-family="Helvetica, Arial, sans-serif" font-size="22" text-anchor="middle">
+    <text x="165" y="470">compile</text><text x="345" y="470">policy</text><text x="525" y="470">execute</text><text x="705" y="470">checkpoint</text><text x="885" y="470">proof</text>
+  </g>
+</svg>

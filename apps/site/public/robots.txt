@@ -1,4 +1,4 @@
-# Production crawl policy for https://vcskill.vchun.dev
+# Production crawl policy for https://ariadnev.com
 #
 # The marketing site is meant to be indexed. The machine routes served by the
 # edge Worker are not documents and are excluded so a crawler does not fetch an
@@ -12,4 +12,4 @@ Disallow: /install.ps1
 Disallow: /version
 Disallow: /download/
 
-Sitemap: https://vcskill.vchun.dev/sitemap.xml
+Sitemap: https://ariadnev.com/sitemap.xml

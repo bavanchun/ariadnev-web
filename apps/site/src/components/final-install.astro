@@ -4,7 +4,7 @@
 // Both platform commands and the two links a reader needs next. Copy feedback
 // lives inside each command block rather than once at the foot of the section,
 // so the confirmation appears where the reader just clicked.
-import { INSTALL, SITE } from "../data/marketing-facts";
+import { INSTALL, SITE, DOCS } from "../data/marketing-facts";
 import InstallCommand from "./install-command.astro";
 ---
 
@@ -21,8 +21,8 @@ import InstallCommand from "./install-command.astro";
   </div>
 
   <div class="action-row">
-    <a class="action action--primary" href={SITE.docsEntry}>First-run guide</a>
-    <a class="action" href={SITE.repository}>Source on GitHub</a>
+    <a class="action action--primary" href={DOCS.installation}>First-run guide</a>
+    <a class="action" href={DOCS.releaseNotes}>Release notes</a>
   </div>
 
   <p class="note">

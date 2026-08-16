@@ -31,16 +31,30 @@ export interface SourcedClaim {
 // ------------------------------------------------------------------ identity
 
 export const SITE = {
-  origin: "https://vcskill.vchun.dev",
-  docsOrigin: "https://docs.vcskill.vchun.dev",
+  origin: "https://ariadnev.com",
+  docsOrigin: "https://docs.ariadnev.com",
   /** Canonical documentation entry point fixed by the approved architecture. */
-  docsEntry: "https://docs.vcskill.vchun.dev/en/stable/",
-  repository: "https://github.com/bavanchun/vcskill",
-  name: "vcskill",
-  title: "vcskill — a local execution control plane for coding agents",
+  docsEntry: "https://docs.ariadnev.com/en/stable/",
+  name: "ariadnev",
+  title: "ariadnev — a local execution control plane for coding agents",
   description:
     "Install one curated workflow kit across coding-agent targets, then run provider-neutral workflow graphs through a local, durable, policy-gated executor.",
   locale: "en",
+} as const;
+
+/**
+ * Documentation pages the marketing surface cites as sources. Each is a page
+ * the docs build emits from the release docs bundle; `tests/site` asserts every
+ * cited source is one of these, so a claim can never point at a page that
+ * does not exist. The source repository is private, so nothing links there.
+ */
+export const DOCS = {
+  installation: `${SITE.docsEntry}get-started/installation`,
+  graphExecution: `${SITE.docsEntry}concepts/graph-execution`,
+  evaluation: `${SITE.docsEntry}concepts/evaluation`,
+  workflows: `${SITE.docsEntry}reference/workflows`,
+  providers: `${SITE.docsEntry}reference/providers`,
+  releaseNotes: `${SITE.docsEntry}release-notes`,
 } as const;
 
 /**
@@ -67,7 +81,7 @@ export const PROMISE = {
   eyebrow: "Local execution control plane",
   heading: "Agent work you can route, gate, and prove.",
   lines: [
-    "vcskill installs one curated workflow kit across your coding-agent targets from a single local-first CLI.",
+    "ariadnev installs one curated workflow kit across your coding-agent targets from a single local-first CLI.",
     "Then it runs provider-neutral workflow graphs through a durable local executor that enforces policy before a provider ever acts.",
     "Every run is event-sourced, resumable, and answerable: which path executed, which gate held, what proof it produced.",
   ],
@@ -75,11 +89,11 @@ export const PROMISE = {
 
 export const INSTALL = {
   unixLabel: "macOS / Linux",
-  unixCommand: "curl -fsSL https://vcskill.vchun.dev/install | bash",
+  unixCommand: "curl -fsSL https://ariadnev.com/install | bash",
   windowsLabel: "Windows (PowerShell)",
-  windowsCommand: "irm https://vcskill.vchun.dev/install.ps1 | iex",
-  note: "The installer resolves the binary for your platform and verifies its sha256 before installing. The CLI is standalone and needs no Node runtime.",
-  source: "https://github.com/bavanchun/vcskill#install",
+  windowsCommand: "irm https://ariadnev.com/install.ps1 | iex",
+  note: "The installer resolves the binary for your platform, verifies its sha256, and links the short `av` alias. The CLI is standalone and needs no Node runtime.",
+  source: DOCS.installation,
 } as const;
 
 // ------------------------------------------------------------- execution map
@@ -94,8 +108,8 @@ export interface MapState {
 }
 
 /**
- * The five states of `vc run`, in execution order. Sourced from
- * docs/graph-execution-architecture.md, whose public pipeline is
+ * The five states of `av run`, in execution order. Sourced from the
+ * graph-execution documentation, whose public pipeline is
  * `GraphIRV1 -> compiler/lint -> policy -> event-sourced runner -> executor registry`.
  */
 export const EXECUTION_MAP: readonly MapState[] = [
@@ -125,7 +139,7 @@ export const EXECUTION_MAP: readonly MapState[] = [
     label: "Checkpoint",
     summary:
       "Durable state is written outside the inspected workspace, so a run survives interruption and can be resumed, inspected, or cancelled.",
-    produces: "A resumable run under ~/.vcskill/runs/",
+    produces: "A resumable run under ~/.ariadnev/runs/",
   },
   {
     id: "proof",
@@ -138,9 +152,9 @@ export const EXECUTION_MAP: readonly MapState[] = [
 
 export const EXECUTION_MAP_SOURCE: SourcedClaim = {
   claim:
-    "Compile, policy, and execute are the documented public pipeline of `vc run`; checkpoint and proof name the durable-state and resume behaviour the same document specifies.",
-  source: `${SITE.repository}/blob/main/docs/graph-execution-architecture.md`,
-  sourceLabel: "docs/graph-execution-architecture.md",
+    "Compile, policy, and execute are the documented public pipeline of `av run`; checkpoint and proof name the durable-state and resume behaviour the same document specifies.",
+  source: DOCS.graphExecution,
+  sourceLabel: "Graph execution",
   caveat:
     "The five names are this page's vocabulary for that behaviour, not five stages the runtime reports under these labels.",
 };
@@ -201,8 +215,8 @@ export const WORKFLOWS: readonly WorkflowNarrative[] = [
 
 export const WORKFLOW_SOURCE: SourcedClaim = {
   claim: "Each narrative describes the committed graph of the same name.",
-  source: `${SITE.repository}/tree/main/kit/workflows`,
-  sourceLabel: "kit/workflows/",
+  source: DOCS.workflows,
+  sourceLabel: "Workflow reference",
   caveat:
     "Graph structure is a static contract. It does not by itself prove that a given provider behaves correctly at run time.",
 };
@@ -232,8 +246,8 @@ export const PROVIDERS: readonly ProviderProjection[] = [
 
 export const PROVIDER_PRINCIPLE: SourcedClaim = {
   claim:
-    "Where a target path or format is not verified, vcskill skips the artifact and logs it in the install summary rather than writing a guess.",
-  source: `${SITE.repository}#provider-matrix`,
+    "Where a target path or format is not verified, ariadnev skips the artifact and logs it in the install summary rather than writing a guess.",
+  source: DOCS.providers,
   sourceLabel: "Provider matrix",
   caveat:
     "Coverage differs per provider and changes between releases. The generated matrix is the authority; this projection is not.",
@@ -258,8 +272,8 @@ export const EVIDENCE: readonly EvidenceEntry[] = [
   {
     kind: "contract",
     statement:
-      "Static graph contracts are machine-checked: `vc run <workflow> --validate` proves a canonical graph without probing any runtime.",
-    source: `${SITE.repository}/blob/main/docs/graph-execution-architecture.md`,
+      "Static graph contracts are machine-checked: `av run <workflow> --validate` proves a canonical graph without probing any runtime.",
+    source: DOCS.graphExecution,
     sourceLabel: "Graph execution architecture",
     caveat: "Validation proves the graph, not the behavior of a provider executing it.",
   },
@@ -267,7 +281,7 @@ export const EVIDENCE: readonly EvidenceEntry[] = [
     kind: "measured",
     statement:
       "Fixture suites exercise routing, trajectory, recovery, authority, and duplicate-effect behavior against the committed graphs.",
-    source: `${SITE.repository}/tree/main/packages/cli/src/eval`,
+    source: DOCS.evaluation,
     sourceLabel: "Evaluation and harness suites",
     caveat: "Fixtures cover the scenarios they encode; they are not a general correctness proof.",
   },
@@ -275,25 +289,25 @@ export const EVIDENCE: readonly EvidenceEntry[] = [
     kind: "measured",
     statement:
       "Capability-gated Codex and Claude Code probes report only the pinned runtime and model that actually ran.",
-    source: `${SITE.repository}/blob/main/docs/release-and-publish-guide.md`,
-    sourceLabel: "Release and publish guide",
+    source: DOCS.graphExecution,
+    sourceLabel: "Runtime pinning and probes",
     caveat: "A pinned-runtime result says nothing about a different runtime or a different model.",
   },
   {
     kind: "boundary",
     statement:
       "Active `safe-change-delivery` execution is denied in public builds until a real side-effect executor and approval input surface exist.",
-    source: `${SITE.repository}/blob/main/docs/graph-execution-architecture.md`,
+    source: DOCS.graphExecution,
     sourceLabel: "Graph execution architecture",
-    caveat: "vcskill does not simulate a successful mutation in order to look complete.",
+    caveat: "ariadnev does not simulate a successful mutation in order to look complete.",
   },
   {
     kind: "boundary",
     statement:
       "Run state is event-sourced outside the inspected workspace, and resume refuses to switch providers on a digest mismatch.",
-    source: `${SITE.repository}/blob/main/docs/graph-execution-architecture.md`,
+    source: DOCS.graphExecution,
     sourceLabel: "Durable state and privacy",
-    caveat: "Durability is local. There is no hosted control plane and no telemetry endpoint.",
+    caveat: "Durability is local. There is no hosted control plane, and telemetry is off by default with no ingest endpoint shipped.",
   },
 ];
 
@@ -313,7 +327,8 @@ const STABLE_SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 const ISO_INSTANT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/;
 
 /**
- * Read the optional machine-generated release pin, which Phase 10 produces.
+ * Read the optional machine-generated release pin, which the docs content
+ * build produces from the release docs bundle.
  *
  * Absent pin  -> `null`, and the release-specific row is omitted entirely.
  * Malformed   -> `null` in a normal build; throws in a release build, so a
@@ -322,7 +337,7 @@ const ISO_INSTANT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/;
  * A guessed or defaulted version is never returned under any condition.
  */
 export function loadReleasePin(
-  { path = join(repoRoot, "releases", "vcskill.json"), releaseMode = process.env.VCSKILL_RELEASE_MODE === "1" } = {},
+  { path = join(repoRoot, "releases", "ariadnev.json"), releaseMode = process.env.ARIADNEV_RELEASE_MODE === "1" } = {},
 ): ReleasePin | null {
   let raw: string;
   try {
@@ -348,9 +363,10 @@ export function loadReleasePin(
   const { version, tag, releaseUrl, publishedAt } = record;
 
   if (typeof version !== "string" || !STABLE_SEMVER.test(version)) return reject("version is not a stable semver");
-  if (tag !== `v${version}`) return reject("tag does not match the version");
-  if (typeof releaseUrl !== "string" || !releaseUrl.startsWith(`${SITE.repository}/releases/`)) {
-    return reject("releaseUrl is not a release URL of this repository");
+  if (tag !== `ariadnev@${version}`) return reject("tag does not match the version");
+  // Release notes live on the documentation host; the source repository is private.
+  if (typeof releaseUrl !== "string" || !releaseUrl.startsWith(`${SITE.docsOrigin}/`)) {
+    return reject("releaseUrl is not on the documentation host");
   }
   if (typeof publishedAt !== "string" || !ISO_INSTANT.test(publishedAt)) return reject("publishedAt is not an ISO instant");
 
