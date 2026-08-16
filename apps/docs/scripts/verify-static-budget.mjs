@@ -3,13 +3,14 @@ import { readFile } from "node:fs/promises";
 import { extname, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import { brotliCompressSync, constants as zlibConstants } from "node:zlib";
-import { loadDocsContentCatalog } from "../src/lib/content-catalog.ts";
+import { enumerateDocsRoutes, loadDocsContentCatalog } from "../src/lib/content-catalog.ts";
 import { resolveDocsContentRoot } from "../src/lib/docs-content-root.ts";
 
 const appRoot = resolve(import.meta.dirname, "..");
 const defaultContentRoot = resolveDocsContentRoot(appRoot);
 const defaultOutRoot = resolve(appRoot, "out");
 const defaultBudgetPath = resolve(appRoot, "../../tests/benchmarks/performance-budgets.json");
+const defaultRatchetPath = resolve(appRoot, "../../tests/benchmarks/docs-per-route-ratchet.json");
 
 function attribute(tag, name) {
   const match = tag.match(new RegExp(`\\b${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`, "i"));
@@ -86,17 +87,8 @@ function collectRouteResources(routePathname, outRoot) {
   return [...resources.keys()];
 }
 
-export async function verifyStaticBudget({
-  contentRoot = defaultContentRoot,
-  outRoot = defaultOutRoot,
-  catalogPath = resolve(contentRoot, "generated/catalog.json"),
-  budgetPath = defaultBudgetPath,
-} = {}) {
-  const catalog = await loadDocsContentCatalog(catalogPath, contentRoot);
-  const installation = catalog.pages.find((page) => page.locale === "en" && page.version === catalog.currentStable && page.slug.join("/") === "get-started/installation");
-  const page = installation ?? catalog.pages.find((candidate) => candidate.locale === "en" && candidate.version === catalog.currentStable && candidate.slug.length === 0);
-  if (!page) throw new Error("docs budget route cannot be selected from the catalog");
-  const routePathname = `/en/stable/${page.slug.length > 0 ? `${page.slug.join("/")}/` : ""}`;
+// Compute per-resource-class totals for a single route.
+function measureRoute(routePathname, outRoot) {
   const resources = collectRouteResources(routePathname, outRoot);
   const totals = { total: 0, js: 0, css: 0, fonts: 0, images: 0 };
   for (const path of resources) {
@@ -108,22 +100,84 @@ export async function verifyStaticBudget({
     if ([".woff", ".woff2"].includes(extension)) totals.fonts += bytes;
     if ([".svg", ".png", ".jpg", ".jpeg", ".webp", ".avif", ".gif", ".ico"].includes(extension)) totals.images += bytes;
   }
+  return { routePathname, resources: resources.length, ...totals };
+}
+
+function routePathnameFor(param) {
+  const suffix = param.slug.length > 0 ? `${param.slug.join("/")}/` : "";
+  return `/${param.locale}/${param.version}/${suffix}`;
+}
+
+export async function verifyStaticBudget({
+  contentRoot = defaultContentRoot,
+  outRoot = defaultOutRoot,
+  catalogPath = resolve(contentRoot, "generated/catalog.json"),
+  budgetPath = defaultBudgetPath,
+  ratchetPath = defaultRatchetPath,
+} = {}) {
+  const catalog = await loadDocsContentCatalog(catalogPath, contentRoot);
+  const installation = catalog.pages.find((page) => page.locale === "en" && page.version === catalog.currentStable && page.slug.join("/") === "get-started/installation");
+  const page = installation ?? catalog.pages.find((candidate) => candidate.locale === "en" && candidate.version === catalog.currentStable && candidate.slug.length === 0);
+  if (!page) throw new Error("docs budget route cannot be selected from the catalog");
+  const primaryRoute = `/en/stable/${page.slug.length > 0 ? `${page.slug.join("/")}/` : ""}`;
+  const primary = measureRoute(primaryRoute, outRoot);
+
   const budgetContract = JSON.parse(await readFile(budgetPath, "utf8"));
   const caps = new Map(budgetContract.budgets.map((budget) => [budget.id, budget.cap]));
   for (const [id, actual] of [
-    ["docs-total-transfer-compressed", totals.total],
-    ["docs-js-compressed", totals.js],
-    ["docs-css-compressed", totals.css],
-    ["docs-fonts-compressed", totals.fonts],
-    ["docs-images-compressed", totals.images],
+    ["docs-total-transfer-compressed", primary.total],
+    ["docs-js-compressed", primary.js],
+    ["docs-css-compressed", primary.css],
+    ["docs-fonts-compressed", primary.fonts],
+    ["docs-images-compressed", primary.images],
   ]) {
     const cap = caps.get(id);
     if (!Number.isSafeInteger(cap) || actual > cap) throw new Error(`${id}: ${actual} bytes exceed the frozen ${cap ?? "missing"} byte budget`);
   }
-  return Object.freeze({ routePathname, resources: resources.length, ...totals });
+
+  // Ratchet guard: every enumerable route must respect the frozen 300000 byte
+  // cap OR its grandfathered ceiling. Grandfathered routes ratchet DOWN only:
+  // a future build that grows a grandfathered route above its ceiling fails
+  // the same way a non-grandfathered route failing the cap does. Phase 3
+  // recovers each ceiling to the cap; only then may the grandfather entry go.
+  const ratchet = JSON.parse(await readFile(ratchetPath, "utf8"));
+  if (ratchet.policy !== "ratchet-down-only") throw new Error("docs per-route ratchet policy is not ratchet-down-only");
+  const capUnderRatchet = ratchet.capUnderRatchet;
+  const ceilings = new Map(ratchet.grandfathered.map((entry) => [entry.route, entry.ceiling]));
+  const jsCap = caps.get("docs-js-compressed");
+  const cssCap = caps.get("docs-css-compressed");
+  const fontsCap = caps.get("docs-fonts-compressed");
+  const imagesCap = caps.get("docs-images-compressed");
+  const perRouteFailures = [];
+  const perRouteResults = [];
+  for (const param of enumerateDocsRoutes(catalog)) {
+    const routePathname = routePathnameFor(param);
+    const measurement = measureRoute(routePathname, outRoot);
+    perRouteResults.push(measurement);
+    const ceiling = ceilings.get(routePathname) ?? capUnderRatchet;
+    if (measurement.total > ceiling) {
+      const label = ceilings.has(routePathname) ? "grandfathered ceiling" : `frozen ${capUnderRatchet} byte cap`;
+      perRouteFailures.push(`${routePathname}: ${measurement.total} bytes exceed ${label} (${ceiling})`);
+    }
+    if (measurement.js > jsCap) perRouteFailures.push(`${routePathname}: ${measurement.js} JS bytes exceed the frozen ${jsCap} cap`);
+    if (measurement.css > cssCap) perRouteFailures.push(`${routePathname}: ${measurement.css} CSS bytes exceed the frozen ${cssCap} cap`);
+    if (measurement.fonts > fontsCap) perRouteFailures.push(`${routePathname}: ${measurement.fonts} font bytes exceed the frozen ${fontsCap} cap`);
+    if (measurement.images > imagesCap) perRouteFailures.push(`${routePathname}: ${measurement.images} image bytes exceed the frozen ${imagesCap} cap`);
+  }
+  if (perRouteFailures.length > 0) {
+    throw new Error(`docs per-route budget failed ${perRouteFailures.length} check(s):\n  ${perRouteFailures.join("\n  ")}`);
+  }
+
+  return Object.freeze({
+    ...primary,
+    perRouteChecked: perRouteResults.length,
+    grandfatheredRoutes: ceilings.size,
+    perRouteResults: Object.freeze(perRouteResults),
+  });
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const result = await verifyStaticBudget();
-  process.stdout.write(`${JSON.stringify(result)}\n`);
+  const { perRouteResults, ...summary } = result;
+  process.stdout.write(`${JSON.stringify(summary)}\n`);
 }

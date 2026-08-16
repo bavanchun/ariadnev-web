@@ -8,7 +8,9 @@ Required by: every downstream phase (frozen caps)
 Sources of record:
 
 - [`tests/benchmarks/performance-budgets.json`](../../tests/benchmarks/performance-budgets.json) — the frozen budget contract
-- [`apps/docs/scripts/verify-static-budget.mjs`](../../apps/docs/scripts/verify-static-budget.mjs) — the per-route walker
+- [`tests/benchmarks/docs-per-route-ratchet.json`](../../tests/benchmarks/docs-per-route-ratchet.json) — the ratchet-down-only grandfather list (2026-08-17)
+- [`apps/docs/scripts/verify-static-budget.mjs`](../../apps/docs/scripts/verify-static-budget.mjs) — the per-route walker (now walks every enumerable route)
+- [`tests/docs/docs-per-route-ratchet.test.mjs`](../../tests/docs/docs-per-route-ratchet.test.mjs) — manifest schema + file-existence integrity
 - [`apps/docs/out/`](../../apps/docs/out) — the production build measured
 - [`plans/260816-2345-ariadnev-web-uiux-upgrade/phase-01-contract-gate-and-measurement-spike.md`](../../plans/260816-2345-ariadnev-web-uiux-upgrade/phase-01-contract-gate-and-measurement-spike.md) — the phase this decision closes
 
@@ -44,7 +46,7 @@ pre-compressed extensions (fonts, images) count raw.
 | Budget cap | 300,000 bytes |
 | **Routes over cap** | **10 of 42** |
 
-**Finding**: `verify-static-budget.mjs` currently enforces the 300KB cap on
+**Finding**: `verify-static-budget.mjs` previously enforced the 300KB cap on
 `/en/stable/get-started/installation/` alone. The 10 over-cap routes have been
 shipping over-cap because the check never visited them:
 
@@ -52,9 +54,43 @@ shipping over-cap because the check never visited them:
 - all six `/reference/cli/` variants at ~304KB — over by ~4KB
 
 This is a **discovered pre-Phase-1 baseline violation**, not a Phase-1-induced
-overrun. The plan's "no silent budget increase" rule stands; a Phase 1
-follow-on optimization (or an explicit user decision to widen the cap for the
-skills+cli reference routes) must land before Phase 3 begins.
+overrun.
+
+### Ratchet guard (landed 2026-08-17)
+
+`verify-static-budget.mjs` now walks every route `enumerateDocsRoutes(catalog)`
+returns (66 today) instead of only `installation`. Ten routes are grandfathered
+at their measured 2026-08-17 values in `tests/benchmarks/docs-per-route-ratchet.json`.
+Policy is **ratchet-down-only**: a future build that grows any grandfathered
+route above its ceiling fails the same way a non-grandfathered route failing
+the 300000 cap does. Silence is over; regression is impossible without an
+explicit ratchet-file edit that the code review process will catch.
+
+The frozen `docs-total-transfer-compressed` cap is unchanged at 300000. The
+grandfather list is a temporary enforcement device, not a cap change, and
+lives in its own file so nothing in `performance-budgets.json` moved.
+
+### Shrink criterion (PENDING FORK — awaiting user decision)
+
+The recommended fork amends the earlier "must land before Phase 3 begins"
+language to **"must land before Phase 3 completes"**. Rationale:
+
+- The shell payload is a constant 289,398 bytes compressed
+  (`js=120,565 + css=3,525 + fonts=159,432 + images=5,876`). Per-route HTML
+  headroom against 300000 is ~10,600 bytes.
+- Shrinking the reference-index HTML alone cannot recover the over-cap routes;
+  the levers are **fonts subsetting** and **JS bundle reduction** — both
+  squarely Phase 2/3 shell-rewrite work.
+- The ratchet guard means nothing worsens in the interim. An entry criterion
+  would force optimizing markup that Phase 5's regenerator throws away.
+- A cap widening (an explicit user decision that lands in
+  `performance-budgets.json` first) remains available as a fallback if shell
+  shrink demonstrably cannot reach the frozen cap.
+
+If accepted, the "Stop conditions" section below reads "unresolved after
+Phase 3 completion" instead of "before Phase 3 begins." Not applied yet:
+the caller stopped for user go-ahead per the "no silent stop-condition edit"
+rule. Task tracker item `P1.L`.
 
 Every measured route shares the same shell payload budget consumption:
 `js=120,565`, `css=3,525`, `fonts=159,432`, `images=5,876`, `html=variable`.
@@ -122,9 +158,8 @@ would not reflect the pressure the plan is testing for.
 
 - **Route transfer**: any viable shell variant exceeds 300KB per route after
   optimization. Stop for user decision; no silent cap increase, no scope cut.
-  **The 10 currently over-cap routes are a pre-existing state that must be
-  resolved before Phase 3 begins**, either by optimization or by an explicit
-  user decision to widen the cap for reference routes.
+  **The 10 currently over-cap routes are held under the ratchet guard**; the
+  recommended amendment above defers final shrink to Phase 3 completion.
 - **Total output / build cost**: unresolvable growth after optimization and
   CI sharding. Historical scope stays; unresolved cost blocks Phase 1.
 - **Search partitions**: cross 160,000 compressed on any partition. First

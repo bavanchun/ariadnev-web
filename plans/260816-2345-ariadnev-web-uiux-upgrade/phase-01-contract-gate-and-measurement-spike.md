@@ -119,9 +119,24 @@ measurement environment is repeatable.
 - Create: `packages/contracts/src/cli-command-contract.ts`
 - Modify: `packages/contracts/src/index.ts`
 - Modify: `apps/docs/src/lib/content-catalog.ts`
-- Modify: `scripts/docs-content/build-content-root.mjs`
-- Create: `tests/contracts/cli-command-contract.test.ts`
+- Modify: `apps/docs/scripts/verify-static-budget.mjs` (ratchet extension, 2026-08-17)
+- Create: `tests/benchmarks/docs-per-route-ratchet.json` (ratchet grandfather list, 2026-08-17)
+- Create: `tests/docs/docs-per-route-ratchet.test.mjs` (manifest integrity, 2026-08-17)
+- Create: `packages/contracts/src/cli-command-contract.test.ts`
+  (colocated with the contract package because `pnpm run contracts` runs
+  vitest on `packages/contracts/`; the plan originally proposed
+  `tests/contracts/cli-command-contract.test.ts` but colocation avoids a
+  duplicate test-discovery surface and the bundle-anchored integration case
+  reads the same fixtures either way)
 - Modify: `tests/docs/content-pipeline.test.mjs`
+- Modify: `tests/docs/forbidden-runtime-features.test.mjs` (assert ratchet
+  wiring stays in verify-static-budget.mjs)
+- Not modified: `scripts/docs-content/build-content-root.mjs`. The plan
+  originally listed this as `Modify:` for the additive catalog fields; the
+  fields land as optional in `content-catalog.ts` and pass through unset
+  today. Phase 3–5 populate them per page as those phases own the page
+  render surfaces; the round-trip test in `content-pipeline.test.mjs`
+  proves the pipeline preserves them when present.
 - Create: `docs/decisions/cli-command-identity-and-retired-routes.md`
 - Create: `docs/decisions/docs-catalog-and-safe-components.md`
 - Create: `docs/decisions/fumadocs-ui-adoption-spike.md`

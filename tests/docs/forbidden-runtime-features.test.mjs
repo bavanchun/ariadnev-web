@@ -76,6 +76,13 @@ test("full docs build enforces the frozen static transfer budgets", async () => 
     assert.match(verifier, new RegExp(id));
   }
   assert.match(verifier, /nomodule/);
+  // Ratchet guard: verify-static-budget.mjs must walk every enumerable route,
+  // not only the installation route, and consult the grandfather list before
+  // rejecting an over-cap route. Removing either wire dropping to the old
+  // single-route behavior is a plan-level regression.
+  assert.match(verifier, /enumerateDocsRoutes/);
+  assert.match(verifier, /docs-per-route-ratchet\.json/);
+  assert.match(verifier, /ratchet-down-only/);
 });
 
 test("docs build rejects executable MDX before source generation", async () => {

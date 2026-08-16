@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "policy": "ratchet-down-only",
+  "capUnderRatchet": 300000,
+  "measuredAt": "2026-08-17",
+  "rationale": "Extends apps/docs/scripts/verify-static-budget.mjs from the single installation route to every enumerable docs route. Ten routes currently exceed the frozen 300000 byte cap for docs-total-transfer-compressed because the enforcement point was previously the installation route alone. Each over-cap route is grandfathered at its measured 2026-08-17 value; every future build must be strictly non-worsening against its ceiling, and every non-grandfathered route must respect the 300000 byte cap. Phase 3 exit criterion, per docs/decisions/docs-performance-baselines.md: every grandfathered ceiling equals capUnderRatchet (i.e. every over-cap route has been shrunk to 300000 or below) before Phase 3 marks complete. Cap widening is a separate explicit user decision that must land in performance-budgets.json first.",
+  "grandfathered": [
+    { "route": "/en/stable/reference/cli/",     "ceiling": 304189, "note": "Shell payload constant 289398 + HTML 14791 = 304189." },
+    { "route": "/en/1.1.0/reference/cli/",     "ceiling": 304206, "note": "Shell payload constant 289398 + HTML 14808 = 304206." },
+    { "route": "/en/1.0.0/reference/cli/",     "ceiling": 303792, "note": "Historical projection CLI reference." },
+    { "route": "/vi/stable/reference/cli/",     "ceiling": 304413, "note": "VI localization adds a few bytes to the CLI reference HTML." },
+    { "route": "/vi/1.1.0/reference/cli/",     "ceiling": 304419, "note": "VI CLI reference at 1.1.0." },
+    { "route": "/vi/1.0.0/reference/cli/",     "ceiling": 304060, "note": "VI historical CLI reference." },
+    { "route": "/en/stable/reference/skills/", "ceiling": 313052, "note": "Skills catalog is the largest reference page: 23654 bytes HTML." },
+    { "route": "/en/1.1.0/reference/skills/", "ceiling": 313057, "note": "EN 1.1.0 skills catalog." },
+    { "route": "/vi/stable/reference/skills/", "ceiling": 313223, "note": "VI stable skills catalog." },
+    { "route": "/vi/1.1.0/reference/skills/", "ceiling": 313235, "note": "VI 1.1.0 skills catalog — current global maximum." }
+  ]
+}
