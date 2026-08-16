@@ -278,6 +278,30 @@ test("percent-encoded traversal is rejected before any upstream call", async () 
   }
 });
 
+// The policy list was written for the zone rule and stops at the shapes that
+// rule can express. The in-Worker guard covers strictly more, so these vectors
+// are pinned here rather than left implied — most importantly the CRLF case,
+// which would otherwise be a `content-disposition` header injection.
+test("hostile asset names beyond the policy list are rejected in-Worker", async () => {
+  const vectors = [
+    ["/download/%252e%252e%252fchecksums.txt", "asset-double-encoded"],
+    ["/download/..%2fchecksums.txt", "asset-path-separator"],
+    ["/download/%2e%2e%5cchecksums.txt", "asset-path-separator"],
+    ["/download/checksums%00.txt", "asset-control-character"],
+    ["/download/a%0d%0aX-Injected:%20yes", "asset-control-character"],
+    // Invalid percent sequences survive URL parsing but throw in decodeURIComponent.
+    ["/download/%c0%ae%c0%ae", "malformed-encoding"],
+    ["/download/.hidden", "asset-name-charset"],
+  ];
+
+  for (const [path, reason] of vectors) {
+    const result = await call(path);
+    assert.equal(result.status, 400, `${path} must be a bounded client error`);
+    assert.equal(result.bodyText, `bad request: ${reason}\n`, `${path} must be rejected as ${reason}`);
+    assert.equal(result.upstream.calls.length, 0, `${path} must not reach GitHub`);
+  }
+});
+
 test("every mustAllow path is accepted, proving decode happens before validation", async () => {
   for (const raw of guard.mustAllow) {
     const path = rebrand(raw);
