@@ -23,6 +23,9 @@ importers:
       vitest:
         specifier: 4.1.10
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.2.0)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))
+      wrangler:
+        specifier: 4.120.0
+        version: 4.120.0(@cloudflare/workers-types@5.20260810.1)
 
   apps/docs:
     dependencies:

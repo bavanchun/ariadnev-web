@@ -40,7 +40,23 @@ export function deployUnit(unit, environment, { dryRun, runner = spawnSync } = {
     // Only the version id is retained. Wrangler output can echo account and
     // route detail that has no place in committed evidence.
     workerVersionId: versionId,
+    // On failure, the last lines of Wrangler's output are kept for the error
+    // message only — redacted of anything credential- or account-shaped — so
+    // an operator learns *why* without the record ever carrying it.
+    failure: result.status === 0 ? undefined : redactWranglerOutput(output),
   };
+}
+
+/** The tail of Wrangler output with tokens, account ids, and zone ids removed. */
+export function redactWranglerOutput(output) {
+  return String(output ?? "")
+    .replace(/\b[0-9a-f]{32}\b/g, "[redacted-id]")
+    .replace(/Bearer\s+\S+/gi, "Bearer [redacted]")
+    .replace(/\b(?:cfut|cf|ghp|github_pat)_[A-Za-z0-9_-]{8,}\b/g, "[redacted-token]")
+    .trim()
+    .split("\n")
+    .slice(-12)
+    .join("\n");
 }
 
 /**
@@ -85,7 +101,7 @@ export async function deployUnits(input, options = {}) {
   for (const unit of units) {
     const deployment = deployUnit(unit, environment, options);
     deployments.push(deployment);
-    if (!deployment.ok) throw new Error(`unit ${unit.id} failed to deploy; halting before any later unit`);
+    if (!deployment.ok) throw new Error(`unit ${unit.id} failed to deploy; halting before any later unit\n${deployment.failure ?? ""}`);
 
     if (options.dryRun) continue;
     const label = `${unit.id}@${deployment.workerVersionId ?? "unknown"}`;
