@@ -124,6 +124,27 @@ pinned rather than an `npx` download; seven hostile-vector tests covering the pr
 2. **Resolved.** `www.ariadnev.com` is bound, as a second custom domain in the same deploy. No
    pre-existing `www` record conflicted; it answers `200`.
 
+## Code review (`4bec80b`)
+
+A post-implementation review found nine issues; eight were confirmed and fixed,
+one did not reproduce.
+
+| Severity | Finding | Outcome |
+|---|---|---|
+| High | The redirect defanged `verify-convergence.mjs` — it followed the 302 and validated the bridge instead of the production unit; the pinned-selector check became a tautology | Fixed: `redirect: "manual"`, 3xx is a hard failure naming the target |
+| High | `CLOUDFLARE_ZONE_ID` was trusted unverified before a `DELETE` | Fixed: zone identity asserted against the policy; reported `zoneName` now comes from the API |
+| High | `mustRedirect`/`mustNotRedirect` had no verifier — decorative, unlike the pattern it mirrors | Fixed: corpus evaluated against the rule's own expression, gating `--apply` before any network call |
+| Medium | `locateRule` took the first match with no `kind` filter; duplicates ambiguous; TOCTOU before `DELETE` | Fixed: `kind: "zone"` only, ambiguity is an error, re-read before delete |
+| Medium | Bridge forwarded upstream error bodies verbatim — an expired PAT would pipe GitHub's JSON into bash as `text/x-shellscript` | Fixed: non-2xx collapses to a self-authored plain-text failure |
+| Medium | Drift detection blind to rule ordering, though dynamic redirect is first-match-wins | Fixed: `rulePosition` and `ruleCount` in the outcome |
+| Medium | A test name promised more than it pinned | Fixed: renamed to what it measures |
+| Low | ADR cited cross-repo paths without qualifying them | Fixed: `ariadnev-kit:` prefix and a note |
+| — | **Did not reproduce:** stripping a foreign rule's `id` before a `PUT` was said to recreate it | Measured live: the id was **preserved**. Rejected with evidence; recorded in the ADR |
+
+Accepted and recorded rather than fixed: the bridge sits outside the deployment
+control plane (`topology.json.units`, CI, contract snapshot). Wiring it in means
+touching `units`, which this plan promised not to do. Documented as an open risk.
+
 ## Follow-ups this work surfaced (out of scope, not actioned)
 
 - The raw dot-segment ingress guard in `edge-routing-topology.md` is listed as blocked on a Cloudflare
