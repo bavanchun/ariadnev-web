@@ -1,7 +1,7 @@
 ---
 phase: 3
 title: "Redirect rule tooling"
-status: pending
+status: completed
 priority: P2
 effort: "3h"
 dependencies: []
@@ -94,11 +94,29 @@ at call time; it is never committed and never printed.
 
 ## Success Criteria
 
-- [ ] `pnpm run test:native` green with the new suite
-- [ ] `--inspect` runs read-only against the live zone and reports the planned change
-- [ ] Re-running `--apply` twice produces no second rule (idempotent)
-- [ ] `--remove` deletes only this rule, leaving other rules in the ruleset intact
-- [ ] No token value appears in any output, including error paths
+- [x] `pnpm run test:native` green with the new suite — 149/149, 20 of them this suite
+- [x] `--inspect` runs read-only against the live zone and reports the planned change — reported
+  `entrypointPresent: false, action: create`, exit 2, zero non-GET requests
+- [x] Re-running `--apply` twice produces no second rule (idempotent) — verified live: second run
+  `action: noop, applied: false`
+- [x] `--remove` deletes only this rule, leaving other rules in the ruleset intact; and deletes the
+  entrypoint ruleset outright when this rule was its only occupant, because Cloudflare rejects an
+  entrypoint with an empty `rules` array
+- [x] No token value appears in any output, including error paths
+
+## Execution note — a bug the live dry-run caught
+
+The first `--inspect` after applying reported permanent `action_parameters` drift on a rule that
+matched exactly. Cloudflare echoes `action_parameters` back with its keys in **its own alphabetical
+order**, and the original comparison was `JSON.stringify`, which is order-sensitive. The effect was
+not cosmetic: `--inspect` would have exited 2 forever (useless as a CI gate) and `--apply` would have
+re-PUT the ruleset on every run.
+
+Replaced with `matchesDeclared`, a recursive subset test over declared keys only. Everything the
+policy states is still compared exactly — including `status_code`, so the 302 → 301 flip at
+rollback-window close still registers as drift — while key ordering and any server-side default the
+policy does not declare no longer cause churn. Both failure shapes are now pinned by tests. Fixed in
+`82fea6a`.
 
 ## Risk Assessment
 

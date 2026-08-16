@@ -1,7 +1,7 @@
 ---
 phase: 1
 title: "Bridge worker implementation"
-status: pending
+status: completed
 priority: P1
 effort: "4h"
 dependencies: []
@@ -57,6 +57,10 @@ a frozen file's content.
 - Create: `workers/bridge/src/index.test.mjs` — `node --test` suite
 - Create: `workers/bridge/package.json` — mirrors `workers/edge/package.json`, wrangler `4.120.0`
 - Modify: `package.json` — append the new test file to the `test:native` list
+- Modify: `pnpm-workspace.yaml` — **(added during execution)** register `workers/bridge` so its
+  wrangler `4.120.0` is a pinned workspace dependency rather than an unpinned `npx` download. The
+  bridge declares no `build` script, so the root `pnpm -r run build` skips it and the build graph is
+  unchanged; qualification passing after the change confirms it.
 - Do **not** touch: `worker.js`, `landing.html`, `wrangler.toml`, `landing-consistency.test.mjs`
 
 ## Implementation Steps
@@ -80,12 +84,27 @@ a frozen file's content.
 
 ## Success Criteria
 
-- [ ] `pnpm run test:native` green, new suite included
-- [ ] `pnpm run test:qualification` green
-- [ ] No GitHub URL in `workers/bridge/` contains `bavanchun/vcskill`
-- [ ] Every `mustBlock` traversal case from the ingress-rule policy is rejected by the bridge's own validation
-- [ ] Every `mustAllow` case is accepted, including the percent-encoded `checksums%2Etxt` form (proves decode-before-validate ordering)
-- [ ] `git diff --stat` shows zero lines changed in the four frozen files
+- [x] `pnpm run test:native` green, new suite included — 128/128, then 149/149 after Phase 3
+- [x] `pnpm run test:qualification` green — contracts, typecheck, build, 128 native, 158 vitest
+- [x] No GitHub URL in `workers/bridge/` contains `bavanchun/vcskill`
+- [x] **(amended)** Every `mustBlock` path yields either a 4xx or serves only a `mustAllow` asset
+  name that passes `assertSafeAssetName`; the percent-encoded family is rejected `400` in-Worker with
+  zero upstream calls.
+
+  The original wording — "every `mustBlock` case is rejected by the bridge's own validation" — rests
+  on a false premise and cannot be satisfied. Cloudflare and the WHATWG URL parser both collapse
+  literal RFC 3986 dot segments before any handler reads the path, so `/download/./checksums.txt` and
+  `/download/nested/../checksums.txt` arrive already normalized to `/download/checksums.txt`, which is
+  itself a `mustAllow` entry. No in-Worker check can distinguish them. This is consistent with
+  `raw-download-path-guard.json:5`, which says in-Worker validation *cannot* observe raw forms — that
+  is why the zone rule exists for candidate-b. The phase-01 criterion misapplied that rationale.
+  Measured behavior is recorded as an explicit 8-row table in the test file.
+- [x] Every `mustAllow` case is accepted, including the percent-encoded `checksums%2Etxt` form
+  (proves decode-before-validate ordering) — also confirmed live: `200`, 716 bytes
+- [x] **(added)** Hostile vectors beyond the policy list are rejected: double-encoding, encoded
+  backslash, `%00`, CRLF `content-disposition` injection, overlong UTF-8, leading dot. All seven
+  verified against the deployed Worker as well as the unit suite.
+- [x] `git diff --stat` shows zero lines changed in the four frozen files
 
 ## Risk Assessment
 

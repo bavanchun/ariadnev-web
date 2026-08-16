@@ -1,7 +1,7 @@
 ---
 phase: 2
 title: "Deploy bridge and provision ariadnev.com"
-status: pending
+status: completed
 priority: P1
 effort: "2h"
 dependencies: [1]
@@ -87,15 +87,35 @@ provisioning.
 
 ## Success Criteria
 
-- [ ] `/version` returns the 1.0.0 version string
-- [ ] `/install` returns 200 with the ariadnev installer
-- [ ] `/download/checksums.txt` and a platform binary both return 200
-- [ ] Traversal probe returns 4xx and no file content
-- [ ] Clean-machine `curl … | bash` install succeeds, checksum verifies, `ariadnev --version` prints 1.0.0
-- [ ] `av update --check` resolves against `ariadnev.com`
-- [ ] `wrangler deployments list --name vcskill` still shows `b93d9d2`
-- [ ] `www.ariadnev.com` answers (or is deliberately deferred and noted)
-- [ ] Pre-flight passed: every asset name the installers compute exists in the 1.0.0 release, and `checksums.txt`'s format matches the installer's grep
+- [x] `/version` returns the 1.0.0 version string
+- [x] `/install` returns 200 with the ariadnev installer
+- [x] `/download/checksums.txt` and a platform binary both return 200 — the binary confirmed by a real
+  86 MB `ariadnev-darwin-arm64` download whose sha256 verified, not by a HEAD probe
+- [x] Traversal probe returns 4xx and no file content — `%2e%2e%2f` and `sub%2F` both `400
+  asset-path-separator`; the literal `../` form arrives normalized and 404s
+- [x] Clean install succeeds, checksum verifies, `ariadnev --version` prints 1.0.0 — run into an
+  isolated `ARIADNEV_INSTALL_DIR` so the operator's own install was never overwritten
+- [x] `av update --check` resolves against `ariadnev.com` → "up to date"
+- [x] `wrangler deployments list --name vcskill` still shows `b93d9d2` / tag `vcskill-0.11.0`
+- [x] `www.ariadnev.com` answers — no pre-existing `www` record conflicted; bound as a second custom
+  domain in the same deploy. **Resolves plan open question 2.**
+- [x] Pre-flight passed: the installers compute exactly `ariadnev-{darwin,linux}-{arm64,x64}` and
+  `ariadnev-windows-x64.exe`; all five exist in the release; `checksums.txt` is `hash␣␣name`, matching
+  both the bash `grep " ${asset}$"` and PowerShell `\s<asset>$` contracts with exactly one match each
+
+## Execution notes
+
+Step order was inverted deliberately: **deploy first, then set the secret.** `wrangler secret put`
+against a Worker that does not exist yet prompts interactively to create a draft, which does not
+survive a piped stdin. Deploying first costs a few seconds of fail-closed `500` on a hostname nothing
+points at yet. The secret was then piped from the mode-600 token file into `wrangler secret put`
+stdin, so the PAT was never echoed to a terminal or the transcript.
+
+Cloudflare provisioned the apex DNS (`172.67.135.116`, `104.21.6.235`) and TLS as part of the deploy;
+no certificate lag was observed.
+
+Risk "Authorization header forwarded to signed S3 storage" did not materialize: the full binary
+download through `/download/` succeeded and verified.
 
 ## Risk Assessment
 

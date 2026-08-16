@@ -1,7 +1,7 @@
 ---
 phase: 4
 title: "Apply redirect and verify ordering"
-status: pending
+status: completed
 priority: P1
 effort: "1h"
 dependencies: [2, 3]
@@ -85,14 +85,41 @@ already delivered by Phase 2 and is unaffected.
    ```
 7. Confirm the legacy worker still shows `b93d9d2` and no frozen file changed.
 
+## Result — the assumption holds
+
+**A Cloudflare Single Redirect in `http_request_dynamic_redirect` executes before a Worker holding
+the hostname via a Workers Custom Domain.** Measured 2026-08-16 on `vchun.dev`; this is the first
+empirical datum this project has on the question.
+
+The first probe immediately after `--apply` returned **200**. Per the pre-decided triage this was
+*not* read as "the Worker won" — false positive (a), propagation, was ruled out first. At **t+15s**
+the same probe returned `HTTP/2 302`, `location: https://ariadnev.com/install`. The 200 was
+propagation lag under 15 seconds. Had the triage order not been written down in advance, that first
+probe would have produced the wrong conclusion and stopped the plan.
+
+`--apply` returned no 403, so the token's **Zone → Single Redirect → Edit** permission is confirmed
+by an actual write rather than inferred — closing the caveat recorded in the plan's preconditions.
+
 ## Success Criteria
 
-- [ ] `vcskill.vchun.dev/install` → `302` with `Location: https://ariadnev.com/install`
-- [ ] Query strings survive the redirect
-- [ ] `curl -fsSL https://vcskill.vchun.dev/install | bash` installs successfully end-to-end
-- [ ] Rule removal restores direct 200 serving within seconds; re-apply restores the 302
-- [ ] `wrangler deployments list --name vcskill` still shows `b93d9d2`
-- [ ] The ordering result — whichever way it went — is written into the Phase 5 decision record
+- [x] `vcskill.vchun.dev/install` → `302` with `Location: https://ariadnev.com/install`
+- [x] Query strings survive the redirect — `/download/checksums.txt?x=1&y=2` → `…?x=1&y=2`
+- [x] `curl -fsSL https://vcskill.vchun.dev/install | bash` installs successfully end-to-end,
+  checksum verified, `ariadnev --version` → 1.0.0
+- [x] Rule removal restores direct 200 serving within seconds; re-apply restores the 302 — both
+  converged in ~8s. The restored response is the *frozen legacy* Worker, confirmed by its
+  vcskill-branded landing page, not the bridge.
+- [x] No redirect loop — `curl -sSL` reports exactly 1 redirect, final `https://ariadnev.com/version`
+- [x] `wrangler deployments list --name vcskill` still shows `b93d9d2`; frozen files diff empty
+- [x] The ordering result is written into the Phase 5 decision record
+
+## Incidental finding
+
+With the rule removed, the legacy host was probed directly: `vcskill.vchun.dev/version` returns
+**`ariadnev@1.0.0`**, not `1.0.0`. The frozen Worker strips `^vcskill@`, which no longer matches the
+renamed tag. This also demonstrates the frozen Worker is reading `bavanchun/ariadnev-kit` through
+GitHub's rename redirect — the invariant that forbids recreating `bavanchun/vcskill` is load-bearing
+today, not theoretical. Recorded in the decision record.
 
 ## Risk Assessment
 
