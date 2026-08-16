@@ -38,6 +38,9 @@ node_modules/.cache/
 # OS noise
 .DS_Store
 
+# Per-machine agent scratch memory. Reports under plans/ stay tracked.
+.claude/agent-memory/
+
 # Release locks and lockfiles stay tracked on purpose:
 #   pnpm-lock.yaml, deployment/topology.json, docs/decisions/*.json
 
