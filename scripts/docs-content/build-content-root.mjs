@@ -127,6 +127,22 @@ export function loadAuthoredPages(authoredRoot) {
 
 // ---------------------------------------------------------------- catalog
 
+const SECTION_ORDER = ["", "get-started", "concepts", "guides", "reference", "release-notes"];
+const PAGE_ORDER = {
+  "get-started": ["installation", "first-install"],
+  concepts: ["kit-and-adapt-engine", "graph-execution", "evaluation"],
+  guides: ["upgrading", "configuration", "uninstall-and-doctor", "migration-from-vcskill"],
+  reference: ["cli", "providers", "skills", "workflows"],
+};
+
+/** Reading-order rank of a catalog entry: section first, then the authored page order inside it. */
+function sectionRank(entry) {
+  const [section, ...rest] = entry.slug;
+  const sectionIndex = entry.slug.length === 0 ? 0 : SECTION_ORDER.indexOf(section);
+  const pageIndex = (PAGE_ORDER[section] ?? []).indexOf(rest.join("/"));
+  return (sectionIndex === -1 ? SECTION_ORDER.length : sectionIndex) * 100 + (pageIndex === -1 ? 50 : pageIndex);
+}
+
 function slugOf(pageId) {
   return pageId === "index" ? [] : pageId.split("/");
 }
@@ -265,7 +281,13 @@ export function buildContentRoot(options) {
         throw new Error(`authored content is missing the ${locale} index page`);
       }
     }
-    entries.sort((left, right) => left.id.localeCompare(right.id, "en"));
+    // Catalog order is the sidebar order the docs shell renders, so sort by
+    // reading order — locale, edition, then section rank — instead of by id.
+    // Within a section, pages keep their authored path order.
+    entries.sort((left, right) => left.locale.localeCompare(right.locale, "en")
+      || right.version.localeCompare(left.version, "en", { numeric: true })
+      || sectionRank(left) - sectionRank(right)
+      || left.id.localeCompare(right.id, "en"));
     attachSiblings(entries, currentStable, previousStable);
 
     const catalog = {

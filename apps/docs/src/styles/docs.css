@@ -1,5 +1,60 @@
 @import "@ariadnev-web/tokens/docs.css";
 
+/*
+ * The docs stylesheet was written against an earlier token vocabulary
+ * (`--vc-*`). The shared tokens package now emits `--vcs-*`; this block is the
+ * single mapping between the two so the rules below stay readable and a token
+ * rename in packages/tokens is a one-place change here.
+ */
+:root {
+  --vc-color-canvas: var(--vcs-surface-canvas);
+  --vc-color-canvas-raised: var(--vcs-surface-raised);
+  --vc-color-text: var(--vcs-text-primary);
+  --vc-color-text-muted: var(--vcs-text-muted);
+  --vc-color-link: var(--vcs-text-accent);
+  --vc-color-link-hover: var(--vcs-color-spectral-400);
+  --vc-color-border: var(--vcs-surface-border);
+  --vc-color-border-strong: var(--vcs-surface-border-strong);
+  --vc-color-focus: var(--vcs-focus-color);
+  --vc-color-focus-contrast: var(--vcs-app-background);
+  --vc-color-checkpoint: var(--vcs-topology-checkpoint);
+  --vc-color-selection-background: var(--vcs-color-spectral-600);
+  --vc-color-selection-text: var(--vcs-text-on-accent);
+  --vc-focus-ring-width: var(--vcs-focus-width);
+  --vc-focus-ring-offset: var(--vcs-focus-offset);
+  --vc-border-width-hairline: var(--vcs-border-width-hairline);
+  --vc-border-width-strong: var(--vcs-border-width-thick);
+  --vc-border-width-gate: var(--vcs-border-width-thick);
+  --vc-border-radius-small: var(--vcs-border-radius-sm);
+  --vc-border-radius-control: var(--vcs-border-radius-md);
+  --vc-border-radius-panel: var(--vcs-border-radius-lg);
+  --vc-font-family-body: var(--vcs-font-family-body);
+  --vc-font-family-display: var(--vcs-font-family-display);
+  --vc-font-family-mono: var(--vcs-font-family-mono);
+  --vc-font-size-caption: var(--vcs-font-size-xs);
+  --vc-font-size-lead: var(--vcs-font-size-lg);
+  --vc-font-size-heading-small: var(--vcs-font-size-xl);
+  --vc-font-size-heading: var(--vcs-font-size-2xl);
+  --vc-font-size-display: var(--vcs-font-size-4xl);
+  --vc-font-weight-semibold: var(--vcs-font-weight-bold);
+  --vc-font-weight-bold: var(--vcs-font-weight-bold);
+  --vc-font-line-height-body: var(--vcs-font-line-height-normal);
+  --vc-font-line-height-heading: var(--vcs-font-line-height-snug);
+  --vc-font-line-height-tight: var(--vcs-font-line-height-tight);
+  --vc-font-letter-spacing-tight: var(--vcs-font-tracking-tight);
+  --vc-size-content-docs: var(--vcs-size-prose-max);
+  --vc-size-control-minimum: var(--vcs-size-touch-target);
+  --vc-space-1: var(--vcs-space-1);
+  --vc-space-2: var(--vcs-space-2);
+  --vc-space-3: var(--vcs-space-3);
+  --vc-space-4: var(--vcs-space-4);
+  --vc-space-5: var(--vcs-space-5);
+  --vc-space-6: var(--vcs-space-6);
+  --vc-space-8: var(--vcs-space-8);
+  --vc-space-12: calc(var(--vcs-space-6) * 2);
+  --vc-space-16: calc(var(--vcs-space-8) * 2);
+}
+
 * { box-sizing: border-box; }
 html { background: var(--vc-color-canvas); color: var(--vc-color-text); scroll-behavior: smooth; }
 body { margin: 0; min-width: 0; overflow-x: hidden; font-family: var(--vc-font-family-body); line-height: var(--vc-font-line-height-body); }
