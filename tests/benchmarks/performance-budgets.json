@@ -179,22 +179,24 @@
       "id": "search-index-en-compressed",
       "metric": "transfer",
       "unit": "bytes",
-      "cap": 120000,
-      "rationale": "English search partition stays bounded enough for static client loading.",
+      "cap": 160000,
+      "rationale": "English search partition stays bounded for static client loading. Raised from 120000 on 2026-08-16: the first real content root (ariadnev 1.0.0, 103-skill catalog plus the generated CLI reference) measured 124960 bytes compressed; 160000 keeps ~28% headroom without indexing less than the reference the reader searches for.",
       "baseline": {
-        "status": "not-observable-on-legacy-topology",
-        "reason": "No English static docs search partition exists in the legacy release."
+        "status": "observed",
+        "currentObserved": 124960,
+        "evidence": "apps/docs/out/search/en/stable.json"
       }
     },
     {
       "id": "search-index-vi-compressed",
       "metric": "transfer",
       "unit": "bytes",
-      "cap": 120000,
-      "rationale": "Vietnamese search partition is frozen separately to avoid silent growth.",
+      "cap": 160000,
+      "rationale": "Vietnamese search partition is frozen separately to avoid silent growth. Raised from 120000 on 2026-08-16 alongside the English cap; the ariadnev 1.0.0 content root measured 121535 bytes compressed.",
       "baseline": {
-        "status": "not-observable-on-legacy-topology",
-        "reason": "No Vietnamese static docs search partition exists in the legacy release."
+        "status": "observed",
+        "currentObserved": 121535,
+        "evidence": "apps/docs/out/search/vi/stable.json"
       }
     }
   ]

@@ -1,0 +1,87 @@
+---
+title: "Thực thi đồ thị"
+description: "Cách av run biên dịch một workflow trung lập với provider, quyết định chính sách cục bộ, và ghi trạng thái bền vững có thể resume."
+---
+
+`av run` là mặt phẳng điều khiển thực thi cục bộ của ariadnev. Nó biên dịch một workflow chuẩn, trung lập với provider từ kit, áp chính sách trước khi bất kỳ provider nào thực thi, và ghi đủ trạng thái bền vững riêng tư để resume sau gián đoạn. Codex và Claude Code triển khai cùng một hợp đồng executor; cấu hình provider không bao giờ đi vào đồ thị.
+
+Pipeline công khai rất hẹp:
+
+```text
+GraphIRV1 -> compiler/lint -> policy -> event-sourced runner -> executor registry
+                                                           -> Codex
+                                                           -> Claude Code
+```
+
+## Vòng đời
+
+Kiểm tra đồ thị mà không thăm dò runtime nào:
+
+```bash
+av run read-only-delivery --validate --json
+```
+
+Thăm dò một runtime và báo đồ thị có chạy được ở đó không, không tạo run:
+
+```bash
+av --dry-run run read-only-delivery --runtime claude-code --json
+```
+
+Bắt đầu và vận hành một run bền vững:
+
+```bash
+av run read-only-delivery \
+  --runtime claude-code \
+  --instruction "Find the module that owns routing and cite the source file" \
+  --json
+
+av run status <run-id> --json
+av run resume <run-id> --runtime claude-code --instruction "..." --json
+av run cancel <run-id> --json
+```
+
+`resume` yêu cầu đúng digest chỉ dẫn gốc, danh tính workspace, digest đồ thị đã biên dịch, hợp đồng runner, runtime, phiên bản runtime và model. Lệch là được báo; ariadnev không bao giờ âm thầm đổi provider. Một run đã kết thúc resume một cách idempotent mà không gọi provider.
+
+## Năm trạng thái, theo cách gọi của tài liệu này
+
+- **Compile** — đồ thị chuẩn được biên dịch và lint từ kit; kết quả là một digest đồ thị.
+- **Policy** — quyền hạn được xác định trước khi liên hệ provider: node được dùng năng lực nào, có gây tác động không, có cần người phê duyệt không. Quyết định là cục bộ.
+- **Execute** — runner đưa đồ thị qua executor registry; mọi chuyển tiếp được nối thêm vào event log.
+- **Checkpoint** — trạng thái bền vững được ghi bên ngoài workspace đang kiểm tra, nên run sống sót qua gián đoạn và có thể resume, kiểm tra hoặc hủy.
+- **Proof** — resume kiểm tra lại danh tính đã ghim; một envelope JSON ổn định là kết quả bạn có thể diff.
+
+Các tên này là cách gọi của tài liệu này cho hành vi ở trên, không phải năm giai đoạn mà runtime báo cáo dưới nhãn đó.
+
+## Hôm nay chạy được gì
+
+Ba workflow chuẩn là `read-only-delivery`, `bugfix-delivery` và `safe-change-delivery` — xem [tham chiếu workflow](%ROOT%reference/workflows/) để biết node và edge. Thực thi chủ động công khai là **chỉ đọc**. `safe-change-delivery` kiểm tra được, nhưng dry-run và thực thi vẫn bị chính sách từ chối cho đến khi có một executor tác động phụ và bề mặt phê duyệt công khai thật; ariadnev không giả lập một thay đổi thành công để trông cho đủ.
+
+## Hợp đồng runtime
+
+Cấu hình runtime và model nằm ngoài đồ thị. Mặc định được ghim và thăm dò trước khi dùng:
+
+| Provider | Runtime | Model mặc định | Cách ly |
+|---|---|---|---|
+| Codex | `0.147.0` | `gpt-5.4-mini` | Home do controller sở hữu; chỉ liên kết file auth |
+| Claude Code | `2.1.226` | `sonnet` | `--safe-mode`; chỉ Read/Glob/Grep; config cách ly cho auth bằng API key, auth home thường cho OAuth |
+
+Chỉ dùng `--runtime-version` và `--model` cùng `--runtime` tường minh. Nếu CLI cục bộ mới hơn không khớp, thăm dò trả về `runtime-version-drift` thay vì cố tương thích. Cả hai adapter dùng mảng đối số không qua shell, gửi chỉ dẫn không tin cậy qua stdin, yêu cầu đầu ra ràng buộc schema, giới hạn bằng chứng ở đường dẫn tương đối trong workspace, giới hạn đầu ra và thời gian, và thu dọn toàn bộ cây tiến trình khi thành công, thất bại, hết giờ hoặc hủy.
+
+Ghi đè tùy chọn: `ARIADNEV_CODEX_HOME`, `ARIADNEV_CLAUDE_CONFIG_DIR`, `ARIADNEV_CLAUDE_AUTH_HOME`.
+
+## Trạng thái bền vững và quyền riêng tư
+
+Dữ liệu run nằm dưới `~/.ariadnev/runs/<run-id>/` và phải ở ngoài workspace đang kiểm tra.
+
+| File | Mục đích | Ranh giới nội dung |
+|---|---|---|
+| `manifest.json` | Danh tính bất biến của đồ thị, runtime, workspace và chỉ dẫn | Chỉ digest và metadata phân loại |
+| `events.jsonl` | Chuyển tiếp điều khiển chỉ nối thêm | Không có prompt hay giá trị trạng thái ứng dụng |
+| `checkpoint.json` | Trạng thái điều khiển rút gọn bền vững | Metadata đồ thị, node, trạng thái, phiên bản |
+| `state-current.json` | Trạng thái ứng dụng để resume chính xác | Có thể chứa trạng thái tác vụ nhạy cảm |
+| `state-previous.json` | Trạng thái write-ahead trước đó | Dự phòng nhất quán khi crash |
+| `cancel-request.json` | Đánh dấu hủy hợp tác | Timestamp và seal toàn vẹn |
+
+Thư mục là `0700` và file là `0600` nơi nền tảng hỗ trợ mode POSIX. Envelope nghiêm ngặt, giới hạn kích thước, có seal, và fail closed khi hỏng. Phản hồi JSON của lệnh có thể cố ý chứa trạng thái kết quả cho người gọi — đừng chuyển hướng nó vào log công khai khi tác vụ nhạy cảm.
+
+Mọi phản hồi vòng đời là một đối tượng JSON với `schemaVersion: 1`, `action`, `ok` và `status`. Stdout, stderr, prompt và trace thô của provider không bao giờ được đưa vào bản ghi điều khiển bền vững. Không có mặt phẳng điều khiển được host.

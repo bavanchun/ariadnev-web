@@ -1,0 +1,44 @@
+---
+title: "Gỡ cài đặt, doctor, audit và backup"
+description: "Các lệnh dựa trên receipt để kiểm tra, sửa chữa, sao lưu và gỡ một bản cài."
+---
+
+Mọi thứ ở đây đọc receipt mà bản cài đã ghi — `.ariadnev/receipt.json` trong dự án, `~/.ariadnev/receipt.json` với phạm vi toàn cục.
+
+## doctor
+
+```bash
+ariadnev doctor [--global]
+```
+
+Kiểm tra file, hook, binding settings và phiên bản so với receipt. Mã thoát là `0` khỏe, `1` suy giảm, `2` không khỏe — giữ ổn định có chủ ý để CI chặn theo.
+
+## audit
+
+```bash
+ariadnev audit kit [--global] [--json] [--strict]
+ariadnev audit scripts [--json] [--strict]
+```
+
+`audit kit` phân loại mọi file đã cài thành `ok`, `modified`, `missing` hoặc `untracked` và thoát `1` khi có lệch; `--strict` còn thất bại với file untracked. `audit scripts` quét các script kit đóng gói để tìm leo thang đặc quyền, thực thi mã từ xa và ghi ra ngoài skill.
+
+## backups
+
+```bash
+ariadnev backups list [--global]
+ariadnev backups restore <timestamp> [--file <rel>] [--global] [--dry-run]
+```
+
+Cài và gỡ đều tạo backup có timestamp. `restore` sao lưu an toàn trạng thái hiện tại trước khi ghi.
+
+## uninstall
+
+```bash
+ariadnev uninstall [--provider a,b] [--global] [--dry-run]
+```
+
+Gỡ đúng những gì receipt liệt kê cho provider đã chọn và **giữ lại mọi file bạn đã sửa** kể từ khi cài. Nó phục hồi một bản cài bị gián đoạn trước khi ghi receipt, và thất bại thay vì báo thành công khi không có bản ghi cài nào.
+
+## Mã thoát
+
+Các lệnh thêm sau bản phát hành đầu tiên của CLI dùng chung một bảng: `0` đã làm điều được yêu cầu; `1` đã chạy và câu trả lời là phủ định (có lệch, verify thất bại); `2` không thể chạy như được gọi; `3` không thể chạy vì môi trường chưa sẵn sàng. `doctor`, `audit`, `validate`, `eval`, `skill` và `run` giữ mã chúng đã ship.

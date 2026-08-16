@@ -1,0 +1,42 @@
+---
+title: "Đánh giá"
+description: "Các tầng chất lượng đằng sau kit, mỗi tầng chứng minh gì, và ranh giới chứng minh mà chúng cố ý dừng lại."
+---
+
+ariadnev nêu rõ ranh giới chứng minh của mình. Mỗi tầng dưới đây chứng minh một điều cụ thể, và không tầng nào chứng minh sự tương đương tổng quát giữa các provider hay việc thay đổi workspace tùy ý một cách an toàn.
+
+## Hợp đồng tĩnh
+
+`ariadnev validate` lint mọi skill và biên dịch mọi đồ thị workflow để tìm lỗi cấu trúc, quyền hạn, phục hồi, bằng chứng và năng lực. `--check` còn thất bại khi ma trận README lệch. `av run <workflow> --validate` chứng minh một đồ thị chuẩn mà không thăm dò runtime nào — nó chứng minh đồ thị, không phải hành vi của provider thực thi nó.
+
+## Tầng 1 — chất lượng skill tĩnh
+
+`ariadnev eval` chấm chất lượng skill từ mã nguồn. Miễn phí, luôn bật, và là sàn mà một bản phát hành phải vượt qua.
+
+## Tầng 2 — bộ hành vi
+
+`ariadnev eval --suite` chạy benchmark hành vi từ source checkout trong các fixture mới, dùng xong bỏ. Runner là một mảng argv JSON nghiêm ngặt được spawn không qua shell; nó chỉ nhận prompt của case qua stdin và một allowlist môi trường bootstrap tường minh thay vì môi trường xung quanh của CLI — `GH_TOKEN`, API key và `NODE_OPTIONS` không được kế thừa. Các bộ fixture kiểm tra hành vi định tuyến, quỹ đạo, phục hồi, quyền hạn và tác động trùng lặp trên các đồ thị đã commit; chúng bao phủ các kịch bản chúng mã hóa và không phải bằng chứng đúng đắn tổng quát.
+
+```sh
+ariadnev eval --suite \
+  --runner '["agent-command","arg-1"]' \
+  --runtime-provider provider-id \
+  --runtime-version exact-version \
+  --model exact-model
+```
+
+Lệnh phát ra một báo cáo JSON đã lọc và ẩn danh, thoát khác 0 khi Tầng 1 thất bại, một sàn phát hành cứng thất bại, hoặc bằng chứng tin cậy còn thiếu. Các năng lực mà controller không thể trung gian — mạng, dịch vụ ngoài — giữ nguyên `unsupported` thay vì để executor tự nhận.
+
+## Tầng 3 — LLM judge (tùy chọn)
+
+Khi đặt `ARIADNEV_EVAL_CMD`, một LLM judge cũng chấm skill. Nó không bao giờ thay thế hai tầng trên.
+
+## Thăm dò runtime
+
+Các thăm dò Codex và Claude Code có cổng năng lực chỉ báo cáo runtime và model đã ghim thực sự chạy. Kết quả với runtime đã ghim không nói gì về runtime khác hay model khác.
+
+## Điều không được chứng minh
+
+- Rằng một provider hành xử đúng lúc chạy chỉ vì đồ thị của nó hợp lệ.
+- Sự tương đương tổng quát giữa các provider.
+- Thực thi an toàn thay đổi workspace tùy ý — thực thi chủ động `safe-change-delivery` vẫn bị chính sách từ chối trong bản công khai cho đến khi có executor tác động phụ và bề mặt phê duyệt thật.

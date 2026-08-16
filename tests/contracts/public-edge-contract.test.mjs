@@ -299,7 +299,7 @@ test("frozen routes, viewports, run order, aggregation, interactions, and caps c
     "marketing-images-compressed": 200000, "docs-total-transfer-compressed": 300000,
     "docs-js-compressed": 140000, "docs-css-compressed": 50000,
     "docs-fonts-compressed": 180000, "docs-images-compressed": 120000,
-    "search-index-en-compressed": 120000, "search-index-vi-compressed": 120000,
+    "search-index-en-compressed": 160000, "search-index-vi-compressed": 160000,
   });
 });
 

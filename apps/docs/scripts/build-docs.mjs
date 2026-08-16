@@ -19,6 +19,14 @@ function requestedContentRoot(args) {
 }
 
 const requestedRoot = requestedContentRoot(process.argv.slice(2));
+// With no explicit root (flag or ARIADNEV_DOCS_CONTENT_ROOT) this is a product
+// build: generate the content root from the pinned release bundle first, so the
+// docs can never be built from stale generated files.
+if (requestedRoot === undefined && !process.env[DOCS_CONTENT_ROOT_ENV]) {
+  const { buildContentRoot, parseArguments } = await import("../../../scripts/docs-content/build-content-root.mjs");
+  const result = buildContentRoot(parseArguments([]));
+  process.stdout.write(`docs content root: ${result.pageCount} pages for ${result.catalog.currentStable} (previous ${result.catalog.previousStable})\n`);
+}
 const unresolvedContentRoot = requestedRoot === undefined ? resolveDocsContentRoot(appRoot) : resolve(requestedRoot);
 const contentRoot = await realpath(unresolvedContentRoot).catch(() => { throw new Error("docs content root does not exist"); });
 if (!(await stat(contentRoot)).isDirectory()) throw new Error("docs content root must be a directory");

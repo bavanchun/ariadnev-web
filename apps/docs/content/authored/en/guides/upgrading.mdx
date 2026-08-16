@@ -1,0 +1,25 @@
+---
+title: "Upgrading"
+description: "Keep the binary current with av update; the curl installer is only for the first install."
+---
+
+After the first install, upgrade with the CLI itself:
+
+```bash
+ariadnev update            # self-update to the latest release, sha256-verified
+ariadnev update --check    # only report whether a newer version exists (offline-safe)
+```
+
+`update` resolves the latest release from `https://ariadnev.com/version`, downloads the matching binary, verifies its sha256 against the published checksums, and replaces the installed binary in place. Add `--global` when the binary lives in a global location you chose at install time.
+
+## Reinstalling the kit after an upgrade
+
+The binary and the kit it embeds move together. After updating, re-run `ariadnev install` for the providers you use so their artifacts match the new receipt, then `ariadnev doctor` to confirm.
+
+## Version and release notes
+
+```bash
+ariadnev --version
+```
+
+Every release ships its own [release notes](%ROOT%release-notes/), and this documentation is versioned alongside it — the version selector switches between the current stable release and the previous one.

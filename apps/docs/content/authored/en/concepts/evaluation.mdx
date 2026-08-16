@@ -1,0 +1,42 @@
+---
+title: "Evaluation"
+description: "The quality tiers behind the kit, what each proves, and the proof boundary they deliberately stop at."
+---
+
+ariadnev states its proof boundary explicitly. Each tier below proves something specific, and none of them proves general provider parity or safe arbitrary workspace mutation.
+
+## Static contracts
+
+`ariadnev validate` lints every skill and compiles every workflow graph for structural, authority, recovery, evidence, and capability defects. `--check` additionally fails on README matrix drift. `av run <workflow> --validate` proves a canonical graph without probing any runtime — it proves the graph, not the behaviour of a provider executing it.
+
+## Tier 1 — static skill quality
+
+`ariadnev eval` scores kit skill quality from the source alone. It is free, always on, and the floor a release must clear.
+
+## Tier 2 — behavioural suite
+
+`ariadnev eval --suite` runs the source-checkout behavioural benchmark in fresh, disposable fixtures. The runner is a strict JSON argv array spawned without a shell; it receives only the case prompt on stdin and an explicit bootstrap environment allowlist rather than the CLI's ambient environment — `GH_TOKEN`, API keys, and `NODE_OPTIONS` are not inherited. Fixture suites exercise routing, trajectory, recovery, authority, and duplicate-effect behaviour against the committed graphs; they cover the scenarios they encode and are not a general correctness proof.
+
+```sh
+ariadnev eval --suite \
+  --runner '["agent-command","arg-1"]' \
+  --runtime-provider provider-id \
+  --runtime-version exact-version \
+  --model exact-model
+```
+
+The command emits one allowlisted, redacted JSON report and exits non-zero when Tier 1 fails, a hard release floor fails, or trusted evidence remains incomplete. Capabilities the controller cannot mediate — network, external services — stay explicitly `unsupported` rather than being claimed by the executor.
+
+## Tier 3 — LLM judge (opt-in)
+
+When `ARIADNEV_EVAL_CMD` is set, an LLM judge scores skills as well. It never replaces the two tiers above.
+
+## Runtime probes
+
+Capability-gated Codex and Claude Code probes report only the pinned runtime and model that actually ran. A pinned-runtime result says nothing about a different runtime or a different model.
+
+## What is not proven
+
+- That any provider behaves correctly at run time merely because its graph validates.
+- General provider parity.
+- Safe execution of arbitrary workspace mutation — active `safe-change-delivery` execution stays policy-denied in public builds until a real side-effect executor and approval surface exist.

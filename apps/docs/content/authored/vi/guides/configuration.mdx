@@ -1,0 +1,33 @@
+---
+title: "Cấu hình"
+description: "Hai lớp cấu hình, mỗi lớp được đặt khóa nào, và cách xem điều gì đã có hiệu lực."
+---
+
+Cấu hình nằm ở hai file:
+
+- `~/.ariadnev/config.json` — của bạn.
+- `<project>/.ariadnev/config.json` — của repository.
+
+Hai lớp **không** có quyền ngang nhau. File dự án có thể đặt các khóa mang hình dạng workspace — `paths.*`, `plan.*`, `locale.*`, `docs.maxLoc`, `project.*`, `statusline.*`. Mọi thứ khác chỉ dành cho người dùng: `privacyBlock`, `trust.enabled`, `assertions`, `scripts.executionPolicy` và các đích thông báo. File dự án đặt một khóa chỉ-người-dùng sẽ bị bỏ khóa đó và nêu tên trong cảnh báo, nên một repository bạn clone không thể tắt chặn quyền riêng tư của bạn hay trỏ thông báo của bạn đi nơi khác.
+
+Đích thông báo phải là URL `https` trên host được cho phép: `discord.com`, `slack.com`, `api.telegram.org`.
+
+## Xem điều gì đã có hiệu lực
+
+```bash
+ariadnev config prefs resolve [--json]
+```
+
+In các cài đặt có hiệu lực sau cả hai lớp, chúng đến từ file nào, và mọi khóa đã bị từ chối. Đích thông báo in ra dạng `<redacted>`.
+
+## Gợi ý trong editor
+
+Binary đóng gói `schemas/av-config.schema.json`, sinh từ định nghĩa TypeScript, nên không thể lệch với những gì CLI chấp nhận.
+
+## Telemetry
+
+ariadnev có cơ chế telemetry ẩn danh, opt-out, **tắt mặc định** — không gì được gửi trừ khi cấu hình một endpoint nhận, và không endpoint nào được đóng gói. Khi bật, nó không lưu trạng thái: không id thiết bị, không IP, không định danh, chỉ các enum phân loại. Kiểm tra bằng `ariadnev telemetry status`; tắt bất cứ lúc nào với `ARIADNEV_TELEMETRY_DISABLED=1` hoặc chuẩn `DO_NOT_TRACK=1`. Nó tự tắt trong CI.
+
+## Bảo mật
+
+Bộ cài xác minh sha256 của từng binary trước khi cài, và CLI ẩn các chuỗi có hình dạng thông tin xác thực khỏi mọi đầu ra.

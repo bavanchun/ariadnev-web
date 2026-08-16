@@ -1,0 +1,56 @@
+---
+title: "Migrating from vcskill"
+description: "ariadnev is the renamed continuation of vcskill. Nothing migrates itself; this is the short one-time cleanup."
+---
+
+Version 1.0.0 renamed the whole product: the binary and package, the `ARIADNEV_*` environment prefix, the `av:` skill namespace, the `~/.ariadnev` and `.ariadnev/` state directories, the `~/.cache/ariadnev` cache, and the base URL `ariadnev.com`.
+
+The new CLI knows nothing about what the old name left on disk — **there is no migration code**, deliberately. A migration that silently moves files is a change you cannot review, and the only files involved are a cache, a state directory, and installed artifacts you can reinstall in one command. So this is a short cleanup you do yourself, once.
+
+## 1. Remove the old installed artifacts
+
+If you still have the old binary, uninstall with it — it reads its own receipt and removes exactly what it wrote:
+
+```bash
+vc uninstall --provider claude-code    # repeat per provider; add --global for the ~/ scope
+```
+
+If the old binary is gone, the receipt at `.vcskill/receipt.json` (or `~/.vcskill/receipt.json`) names every path it wrote:
+
+```bash
+python3 -c "import json,sys; [print(f['path']) for i in json.load(open('.vcskill/receipt.json'))['installs'].values() for f in i['files']]"
+```
+
+## 2. Remove the old state and cache
+
+```bash
+rm -rf ~/.vcskill
+rm -rf ~/.cache/vcskill
+```
+
+## 3. Remove the old binary and alias
+
+```bash
+rm -f ~/.local/bin/vc ~/.local/bin/vcskill
+```
+
+On Windows, delete `%LOCALAPPDATA%\Programs\vcskill`.
+
+## 4. Install again
+
+```bash
+curl -fsSL https://ariadnev.com/install | bash
+ariadnev install
+```
+
+## What is not carried over
+
+- **Old receipts** — the new CLI writes `.ariadnev/receipt.json` and does not read a `.vcskill` receipt, which is why step 1 comes first.
+- **Old backups** — `~/.vcskill/backups` is not read by `ariadnev backups`; copy anything you want first.
+- **Old config** — the new config is `~/.ariadnev/config.json` with a different shape.
+
+Two readers stay compatible because they touch data already on your disk: an `AGENTS.md` managed block written with the old markers is replaced rather than duplicated, and a schema-1 receipt is still readable so `doctor` and `uninstall` keep working against it.
+
+## If you skip this
+
+The old files are inert — no process reads them — but they still sit in your provider directories, where the model reads them as instructions alongside the new ones. Two versions of the same skill in one `skills/` directory is the problem worth avoiding, not the disk space.

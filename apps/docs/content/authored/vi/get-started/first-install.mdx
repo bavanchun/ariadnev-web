@@ -1,0 +1,48 @@
+---
+title: "Lần cài đầu tiên"
+description: "Cài kit vào một hoặc nhiều provider, chọn phạm vi dự án hay toàn cục, và kiểm tra kết quả bằng doctor."
+---
+
+`ariadnev install` ghi kit vào các provider bạn chọn. Chạy một lần cho mỗi dự án, hoặc một lần toàn cục; nó ghi lại chính xác những gì đã ghi trong một receipt.
+
+## Tương tác
+
+```bash
+av install
+```
+
+Bạn chọn provider và phạm vi từ danh sách. Không có gì được ghi cho đến khi bạn xác nhận.
+
+## Không tương tác
+
+```bash
+ariadnev install --provider codex,cursor
+ariadnev install --provider claude-code --global
+ariadnev install --provider opencode --dry-run     # xem trước, không ghi gì
+```
+
+Cờ toàn cục dùng được ở mọi nơi: `--home <dir>`, `--cwd <dir>`, `--dry-run`, `--yes`.
+
+## Phạm vi
+
+- **Dự án** (mặc định) ghi vào repository hiện tại — ví dụ `.claude/skills/` cho Claude Code — và ghi `.ariadnev/receipt.json` tại đó.
+- **Toàn cục** (`--global`) ghi vào thư mục home và ghi `~/.ariadnev/receipt.json`.
+
+## Cái gì vào đâu
+
+Mỗi provider có quy ước riêng. Claude Code nhận bề mặt rộng nhất: skill, agent, command, rule, script, hook và statusline. Codex nhận skill và script ở agent home dùng chung, rule dưới dạng `AGENTS.md`. Nơi đường dẫn hoặc định dạng đích chưa xác minh cho một provider, ariadnev **bỏ qua** artifact đó và nêu tên trong bản tóm tắt cài đặt thay vì ghi một phỏng đoán. Bảng đầy đủ nằm ở [tham chiếu provider](%ROOT%reference/providers/), và `ariadnev kit install-path <provider>` in ra cho một provider.
+
+Hook Claude Code là một hợp đồng sự kiện: cài vào claude-code sẽ sao chép file hook và, sau khi xác nhận y/n, hợp nhất binding sự kiện vào settings.
+
+## Kiểm tra
+
+```bash
+ariadnev list            # nội dung kit và trạng thái cài theo provider
+ariadnev doctor          # kiểm tra sức khỏe bản cài so với receipt
+```
+
+`doctor` thoát `0` khỏe, `1` suy giảm, `2` không khỏe, nên CI có thể chặn theo đó.
+
+## Sau đó, trong agent của bạn
+
+Với Claude Code, thử vòng lặp hằng ngày: `/av:brainstorm <idea>` để khám phá hướng tiếp cận, `/av:plan` để chia phase, `/av:cook <plan path>` để triển khai với test và review có sẵn. `/av:scout <question>` trả lời "X nằm ở đâu"; `/av:fix <bug>` chứng minh nguyên nhân gốc trước khi chạm vào code. Danh sách đầy đủ là [danh mục skill](%ROOT%reference/skills/).

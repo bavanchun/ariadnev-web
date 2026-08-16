@@ -1,0 +1,25 @@
+---
+title: "Nâng cấp"
+description: "Giữ binary luôn mới bằng av update; bộ cài curl chỉ dành cho lần cài đầu."
+---
+
+Sau lần cài đầu, nâng cấp bằng chính CLI:
+
+```bash
+ariadnev update            # tự cập nhật lên bản mới nhất, xác minh sha256
+ariadnev update --check    # chỉ báo có bản mới hay không (an toàn khi offline)
+```
+
+`update` lấy bản phát hành mới nhất từ `https://ariadnev.com/version`, tải binary tương ứng, xác minh sha256 với checksums đã công bố, và thay binary đã cài tại chỗ. Thêm `--global` khi binary nằm ở vị trí toàn cục bạn chọn lúc cài.
+
+## Cài lại kit sau khi nâng cấp
+
+Binary và kit nhúng trong nó đi cùng nhau. Sau khi cập nhật, chạy lại `ariadnev install` cho các provider bạn dùng để artifact khớp receipt mới, rồi `ariadnev doctor` để xác nhận.
+
+## Phiên bản và ghi chú phát hành
+
+```bash
+ariadnev --version
+```
+
+Mỗi bản phát hành có [ghi chú phát hành](%ROOT%release-notes/) riêng, và tài liệu này được đánh phiên bản cùng nó — bộ chọn phiên bản chuyển giữa bản ổn định hiện tại và bản trước.

@@ -1,0 +1,37 @@
+---
+title: "ariadnev documentation"
+description: "Install one curated workflow kit across your coding-agent targets, then run provider-neutral workflow graphs through a local, policy-gated executor."
+---
+
+ariadnev is a local-first command-line tool for people who work with coding agents. It does two things:
+
+- **Installs a curated kit** of Agent Skills, specialist agents, rules, scripts, and Claude Code hooks into the providers you use — Claude Code, Codex, Cursor, opencode, Antigravity, or a generic agent tree — writing each artifact only where the target path and format are verified.
+- **Runs provider-neutral workflow graphs** through `av run`: a durable local executor that compiles a canonical graph, decides policy before any provider acts, and records event-sourced, resumable state outside your workspace.
+
+The standalone binary needs no Node runtime. `ariadnev` and `av` are the same command.
+
+## Start here
+
+- [Installation](%ROOT%get-started/installation/) — one command per platform, sha256-verified.
+- [Your first install](%ROOT%get-started/first-install/) — pick providers and scope, read the receipt, check with `doctor`.
+- [Upgrading](%ROOT%guides/upgrading/) — `av update` keeps the binary current.
+
+## Understand it
+
+- [The kit and the adapt engine](%ROOT%concepts/kit-and-adapt-engine/) — what gets installed, where, and why a target is skipped rather than guessed.
+- [Graph execution](%ROOT%concepts/graph-execution/) — the `av run` lifecycle: compile, policy, execute, checkpoint, proof.
+- [Evaluation](%ROOT%concepts/evaluation/) — what the quality tiers prove and what they deliberately do not.
+
+## Reference
+
+Generated from the release itself, so it cannot drift from the binary you installed:
+
+- [CLI reference](%ROOT%reference/cli/)
+- [Provider reference](%ROOT%reference/providers/)
+- [Skill catalog](%ROOT%reference/skills/)
+- [Workflow reference](%ROOT%reference/workflows/)
+- [Release notes](%ROOT%release-notes/)
+
+## Coming from vcskill?
+
+ariadnev is the renamed continuation of vcskill. Nothing migrates itself, on purpose; the [migration guide](%ROOT%guides/migration-from-vcskill/) is a short one-time cleanup.

@@ -1,0 +1,56 @@
+---
+title: "Di trú từ vcskill"
+description: "ariadnev là phần tiếp nối của vcskill dưới tên mới. Không có gì tự di trú; đây là lần dọn dẹp ngắn, một lần."
+---
+
+Phiên bản 1.0.0 đổi tên toàn bộ sản phẩm: binary và package, tiền tố biến môi trường `ARIADNEV_*`, namespace skill `av:`, thư mục trạng thái `~/.ariadnev` và `.ariadnev/`, cache `~/.cache/ariadnev`, và URL gốc `ariadnev.com`.
+
+CLI mới không biết gì về những gì tên cũ để lại trên đĩa — **không có mã di trú**, đó là chủ ý. Một cuộc di trú âm thầm di chuyển file là một thay đổi bạn không thể review, và các file liên quan chỉ là một cache, một thư mục trạng thái và các artifact đã cài mà bạn có thể cài lại bằng một lệnh. Vậy nên đây là một lần dọn dẹp ngắn bạn tự làm.
+
+## 1. Gỡ artifact cũ đã cài
+
+Nếu vẫn còn binary cũ, gỡ bằng nó — nó đọc receipt của chính nó và gỡ đúng những gì đã ghi:
+
+```bash
+vc uninstall --provider claude-code    # lặp lại cho từng provider; thêm --global cho phạm vi ~/
+```
+
+Nếu binary cũ không còn, receipt tại `.vcskill/receipt.json` (hoặc `~/.vcskill/receipt.json`) liệt kê mọi đường dẫn nó đã ghi:
+
+```bash
+python3 -c "import json,sys; [print(f['path']) for i in json.load(open('.vcskill/receipt.json'))['installs'].values() for f in i['files']]"
+```
+
+## 2. Xóa trạng thái và cache cũ
+
+```bash
+rm -rf ~/.vcskill
+rm -rf ~/.cache/vcskill
+```
+
+## 3. Xóa binary và bí danh cũ
+
+```bash
+rm -f ~/.local/bin/vc ~/.local/bin/vcskill
+```
+
+Trên Windows, xóa `%LOCALAPPDATA%\Programs\vcskill`.
+
+## 4. Cài lại
+
+```bash
+curl -fsSL https://ariadnev.com/install | bash
+ariadnev install
+```
+
+## Điều không được mang sang
+
+- **Receipt cũ** — CLI mới ghi `.ariadnev/receipt.json` và không đọc receipt `.vcskill`, vì thế bước 1 phải làm trước.
+- **Backup cũ** — `~/.vcskill/backups` không được `ariadnev backups` đọc; sao chép thứ bạn muốn giữ trước.
+- **Config cũ** — config mới là `~/.ariadnev/config.json` với hình dạng khác.
+
+Hai trình đọc vẫn tương thích vì chúng chạm vào dữ liệu đã có trên đĩa của bạn: khối quản lý `AGENTS.md` viết bằng marker cũ được thay thế thay vì nhân đôi, và receipt schema-1 vẫn đọc được nên `doctor` và `uninstall` tiếp tục hoạt động với nó.
+
+## Nếu bạn bỏ qua
+
+Các file cũ là trơ — không tiến trình nào đọc chúng — nhưng chúng vẫn nằm trong thư mục provider của bạn, nơi model đọc chúng như chỉ dẫn cạnh các file mới. Hai phiên bản của cùng một skill trong một thư mục `skills/` mới là vấn đề đáng tránh, không phải dung lượng đĩa.
