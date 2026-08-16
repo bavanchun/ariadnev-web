@@ -145,7 +145,54 @@ tokenizes.
 
 This lands squarely inside the plan's projected `+212 to +530` range: 212 if
 historical is dropped, 318 with historical retained. Historical retention is
-locked scope in the plan, so 318 is the working number for Phase 1 sub-step 8.
+locked scope in the plan.
+
+## Projected +318 route cost (Phase 1 sub-step 8, spike measurement)
+
+Measured 2026-08-17 on the current build via a spike script that reads the
+per-doc unit cost of every search partition and multiplies against the
+318-route arithmetic. Three worst-case indexer-tokenization strategies were
+compared per partition against the frozen 160,000 byte search cap:
+
+| Partition | + 53 docs FULL prose | + 53 docs HALF (title+desc+options) | + 53 docs MIN (title+desc+aliases) |
+|---|---|---|---|
+| en/stable | 381,436 (OVER by 221k) | 232,788 (OVER by 73k) | **113,870 (under by 46k)** |
+| en/1.1.0 | 381,558 (OVER by 222k) | 232,863 (OVER by 73k) | **113,907 (under by 46k)** |
+| en/1.0.0 | 293,944 (OVER by 134k) | 154,845 (under by 5k) | **43,567 (under by 116k)** |
+| vi/stable | 355,814 (OVER by 196k) | 217,151 (OVER by 57k) | **106,221 (under by 54k)** |
+| vi/1.1.0 | 356,050 (OVER by 196k) | 217,295 (OVER by 57k) | **106,291 (under by 54k)** |
+| vi/1.0.0 | 299,710 (OVER by 140k) | 157,883 (under by 2k) | **44,421 (under by 116k)** |
+
+**MANDATORY constraint**: command detail pages **must be indexed with the MIN
+strategy** (title + description + aliases only, NO full-prose tokenization).
+Every other tokenization strategy busts at least the two `/stable/` partitions
+by tens of KB. This falls out of Phase 5's generated-reference build: the
+indexer differentiates by `pageKind: "command"` and switches its extraction
+policy accordingly.
+
+**Per-route transfer for one command detail page**:
+
+- Shell payload constant: **289,398** bytes compressed
+- Detail HTML (title header + one command's fragment + navigation): **~2,337**
+- Projected total per route: **291,735** bytes compressed
+- Headroom vs 300,000 cap: **8,265 bytes**
+
+This clears the cap but is tight. Any per-page JS/CSS added by the
+safe-component decision (see
+[`docs-catalog-and-safe-components.md`](./docs-catalog-and-safe-components.md))
+must fit inside the 8,265-byte headroom or the command detail routes join the
+ratchet's grandfather list.
+
+**Output byte growth (unbounded, no cap today)**:
+
+- Current 66 MD files: 361,064 raw / 127,992 compressed (avg 5,471 / 1,939)
+- Worst-case +318 MD @ full-size: +1,739,778 raw / ~+617k compressed
+- Projected total MD output: ~2.1 MB raw / ~745 KB compressed. Acceptable.
+
+**Build cost**: not directly measured; route count 66 → 384 (5.8x). MDX
+compilation is the load-bearing step. A full-build wall-time measurement is
+deferred to Phase 5 where the actual command-detail rendering path lands and
+the number reflects real work, not a projected loop.
 
 ## Build cost baseline
 

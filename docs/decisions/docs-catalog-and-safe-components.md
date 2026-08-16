@@ -80,6 +80,34 @@ work, and this decision will name the winner after the spike:
 Success criterion for the spike is the smallest model that implements
 D03–D17 without duplicating source facts.
 
+### Additional constraint from Phase 1 sub-step 8 (2026-08-17)
+
+The projected-route measurement in
+[`docs-performance-baselines.md`](./docs-performance-baselines.md) proved
+that command detail pages must use **MIN search tokenization** (title +
+description + aliases only). Full-prose tokenization busts the 160,000 byte
+search cap on both stable partitions by ~70–222KB depending on partition and
+strategy.
+
+The safe-component approach chosen for D13 (command detail) **must let the
+search indexer identify title/description/aliases in isolation** — either by
+keeping those fields in frontmatter (approach 1 and approach 3 do this
+naturally; approach 2 requires the deterministic-Markdown transform to
+preserve section boundaries). This constraint narrows the spike's D13 winner
+in advance:
+
+- Approach 1 (pure Markdown + global mappings): frontmatter title/description
+  + a plain aliases list in the body — trivial for MIN tokenization
+- Approach 3 (screen-specific React chrome outside MDX): the MDX body remains
+  prose; command data is fed directly from the bundle JSON, so the indexer
+  can slice it directly from the source of truth
+- Approach 2 (exact-name safe MDX components): requires the deterministic
+  lowering to emit clearly-delimited title/description/aliases sections so
+  the indexer's regex can carve them out; feasibility is a spike gate
+
+Approach 2's search-boundary feasibility joins its existing byte-identical
+lowering feasibility as a hard spike gate for D13.
+
 ## Stop conditions
 
 - **Discovery output is no longer deterministic under approach 2.** Fall back
