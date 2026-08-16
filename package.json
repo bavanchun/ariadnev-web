@@ -10,7 +10,7 @@
   },
   "scripts": {
     "test": "pnpm run test:native && vitest run",
-    "test:native": "node --test tests/contracts/public-edge-contract.test.mjs landing-consistency.test.mjs scripts/edge-ingress-rule.test.mjs scripts/legacy-host-redirect.test.mjs workers/edge/src/index.test.mjs workers/bridge/src/index.test.mjs tests/deployment/deployment-control-plane.test.mjs tests/tokens/token-contract.test.mjs tests/tokens/font-contract.test.mjs tests/tokens/generated-css.test.mjs && pnpm run test:docs",
+    "test:native": "node --test tests/contracts/public-edge-contract.test.mjs landing-consistency.test.mjs scripts/edge-ingress-rule.test.mjs scripts/legacy-host-redirect.test.mjs workers/edge/src/index.test.mjs workers/bridge/src/index.test.mjs tests/deployment/deployment-control-plane.test.mjs tests/deployment/compose-deployment-input.test.mjs tests/tokens/token-contract.test.mjs tests/tokens/font-contract.test.mjs tests/tokens/generated-css.test.mjs && pnpm run test:docs",
     "test:qualification": "pnpm run contracts && pnpm run typecheck && pnpm run build && pnpm run test",
     "typecheck": "tsc --build --force && pnpm --filter @ariadnev-web/docs typecheck",
     "build": "pnpm -r --workspace-concurrency=1 run build",
@@ -27,7 +27,8 @@
     "contracts:pkg": "pnpm --filter @ariadnev-web/contracts",
     "tokens": "pnpm --filter @ariadnev-web/tokens",
     "test:docs": "node --test tests/docs/*.test.mjs",
-    "docs:content": "node scripts/docs-content/build-content-root.mjs"
+    "docs:content": "node scripts/docs-content/build-content-root.mjs",
+    "compose:input": "node scripts/deploy/compose-deployment-input.mjs"
   },
   "devDependencies": {
     "@types/node": "26.2.0",
