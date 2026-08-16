@@ -1,8 +1,30 @@
 # vcskill-web
 
-The public web surface for [**vcskill**](https://vcskill.vchun.dev): an Astro
-marketing site, a static Fumadocs documentation product, and the Cloudflare
-Worker that serves the release routes.
+The public web surface for **ariadnev** (formerly vcskill): an Astro marketing
+site, a static Fumadocs documentation product, and the Cloudflare Worker that
+serves the release routes.
+
+**The canonical host is [`ariadnev.com`](https://ariadnev.com).**
+
+```sh
+curl -fsSL https://ariadnev.com/install | bash
+```
+
+`vcskill.vchun.dev` is the legacy host. It answers with a `302` to the matching
+path on `ariadnev.com`, so old bookmarks and piped-bash callers keep working.
+The redirect is a source-controlled Cloudflare Single Redirect, not a deploy:
+
+```sh
+CLOUDFLARE_API_TOKEN=… node scripts/manage-legacy-host-redirect.mjs --inspect   # read-only, default
+CLOUDFLARE_API_TOKEN=… node scripts/manage-legacy-host-redirect.mjs --apply
+CLOUDFLARE_API_TOKEN=… node scripts/manage-legacy-host-redirect.mjs --remove    # instant rollback
+```
+
+Behind the redirect, `vcskill.vchun.dev` still runs the frozen legacy Worker
+described under [Legacy runtime](#legacy-runtime); the candidate-b cutover has
+not shipped. See
+[`docs/decisions/ariadnev-bridge-and-legacy-redirect.md`](./docs/decisions/ariadnev-bridge-and-legacy-redirect.md)
+for why `ariadnev.com` is served by an interim Worker and when it retires.
 
 The vcskill source repository is private. This repository is its **only** public
 face: it proxies the private repository's GitHub Releases with a server-side
@@ -34,6 +56,7 @@ every dependency is an exact version and `pnpm-lock.yaml` is committed.
 | `packages/contracts` | Trusted docs-bundle schema, archive policy, verify-first atomic extractor |
 | `packages/tokens` | Shared design tokens (Phase 5) |
 | `workers/edge` | Release edge Worker: install, version, download |
+| `workers/bridge` | Interim Worker serving `ariadnev.com`; deleted at the candidate-b cutover |
 
 ```sh
 pnpm install --frozen-lockfile

@@ -1,7 +1,7 @@
 ---
 phase: 5
 title: "Docs, decision record, topology note"
-status: pending
+status: completed
 priority: P2
 effort: "2h"
 dependencies: [4]
@@ -79,12 +79,40 @@ rollback window closes.
 
 ## Success Criteria
 
-- [ ] ADR exists, numbered in sequence, covering all three points plus the decommission trigger
-- [ ] `topology.json` diff touches only the new `interim` key
-- [ ] `pnpm run test:qualification` green (control-plane test accepts the new key)
-- [ ] README states `ariadnev.com` as canonical and documents both rule commands
-- [ ] No secret values or absolute local paths committed
-- [ ] Phase 4's measured ordering result is written down with its date and probe
+- [x] **(amended)** ADR exists as `docs/decisions/ariadnev-bridge-and-legacy-redirect.md`, covering
+  all three points plus the decommission trigger. **Not numbered** — `docs/decisions/` uses
+  descriptive filenames with no numbering (`edge-routing-topology.md`,
+  `edge-routing-observations.json`). This step's "next ADR number" instruction was written against a
+  convention this repository does not have; the existing convention was followed instead, per the
+  same step's own "follow the existing file's heading style".
+- [x] `topology.json` diff touches only the new `interim` key — `selected`, `units`, `rollbackOrder`,
+  `environments`, and `legacyWorker` are byte-identical
+- [x] `pnpm run test:qualification` green (control-plane test accepts the new key). Verified there is
+  no schema guarding `topology.json`: every reader does plain key lookups, and the repo's JSON-schema
+  validator covers only `deployment-contract.schema.json` and `cutover-record.schema.json`.
+- [x] README states `ariadnev.com` as canonical and documents all three rule commands
+- [x] No secret values or absolute local paths committed
+- [x] Phase 4's measured ordering result is written down with its date, probe, and — added after
+  advisory review — its **conditionality**: the measurement covers Custom Domains only, and
+  `wrangler.combined.production.toml:24` is `routes = []`, so Phase 12 may bind the legacy host by
+  route instead. The ADR prescribes a one-curl re-probe at that point rather than letting Phase 12
+  inherit the result unconditionally.
+
+## Added beyond the original scope
+
+Advisory review surfaced three things worth recording that this phase did not originally plan:
+
+1. **Rollback restores routing, not serving correctness.** `--remove` makes `vcskill.vchun.dev`
+   reachable again, but the frozen Worker cannot serve a working 1.0.0 install: the release publishes
+   only `ariadnev-*` assets, and `/download/vcskill-darwin-arm64` 404s (verified). Correct installs
+   depend on the bridge staying up, so the bridge is production, not scaffolding.
+2. **The drift check's two blind spots** — a dashboard edit to the rule's `description` makes it
+   invisible to `locateRule` and the next `--apply` creates a second rule (`preservedRuleCount` is the
+   tell); and structural comparison is churn detection, never a substitute for the live probe.
+3. **A newly unblocked, deliberately untouched gate.** `edge-routing-topology.md` lists the raw
+   dot-segment ingress guard as blocked on a Cloudflare token with Zone → WAF → Edit. A working
+   zone-scoped token now exists, so the gate is no longer credential-blocked — but applying it is
+   candidate-b work outside this plan's scope and was left alone.
 
 ## Risk Assessment
 

@@ -8,6 +8,27 @@
     "manager": "scripts/manage-edge-ingress-rule.mjs",
     "required": true
   },
+  "interim": {
+    "note": "Additive record of state that exists outside the units below. This does NOT change `selected`, reorder units, or constitute a cutover decision.",
+    "host": {
+      "hostname": "ariadnev.com",
+      "alsoBound": ["www.ariadnev.com"],
+      "servedBy": "ariadnev-bridge",
+      "wranglerConfig": "workers/bridge/wrangler.toml",
+      "secretNames": ["GH_TOKEN"],
+      "reason": "Canonical host for ariadnev@1.0.0 installs. Stood up before the candidate-b cutover because install.sh, install.ps1, and packages/cli/src/cli/update-command.ts hardcode this domain with no environment override, so the release was uninstallable until it answered.",
+      "retireAt": "phase-12-cutover"
+    },
+    "legacyHostRedirect": {
+      "policy": "rules/legacy-host-redirect.json",
+      "manager": "scripts/manage-legacy-host-redirect.mjs",
+      "statusCode": 302,
+      "appliedAt": "2026-08-16",
+      "note": "Outlives ariadnev-bridge. Survives the Phase 12 cutover and is what flips 302 -> 301 once the rollback window closes. Removing it restores direct legacy serving within seconds without a deploy; verified live.",
+      "retireAt": "legacy-decommission"
+    },
+    "decisionRecord": "docs/decisions/ariadnev-bridge-and-legacy-redirect.md"
+  },
   "environments": {
     "staging": {
       "baseUrl": "https://staging.vcskill.vchun.dev",
