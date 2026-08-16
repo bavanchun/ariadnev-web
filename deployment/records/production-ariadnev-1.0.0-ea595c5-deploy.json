@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "recordId": "production-1-0-0-ea595c5f69ed",
+  "environment": "production",
+  "phase": "deploy",
+  "input": {
+    "productSha": "ea595c5f69ed964888bdfab96228771ba03a6880",
+    "qualificationEvidenceSha": "51d8f33150869b017d1fed70bfbeee8c7a8d2368",
+    "topology": "candidate-b",
+    "units": [
+      "docs",
+      "edge"
+    ]
+  },
+  "startedAtUtc": "2026-08-16T13:03:05Z",
+  "completedAtUtc": "2026-08-16T13:03:24Z",
+  "result": "pass",
+  "observations": [
+    {
+      "unit": "docs",
+      "route": "/",
+      "status": 200,
+      "contentClass": "html",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "workerVersionId": "b2b5e105-b9bd-4a7a-b4f7-9719d9ca69a7",
+      "deploymentLabel": "docs@b2b5e105-b9bd-4a7a-b4f7-9719d9ca69a7",
+      "pass": true
+    },
+    {
+      "unit": "docs",
+      "route": "/en/stable/",
+      "status": 200,
+      "contentClass": "html",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "workerVersionId": "b2b5e105-b9bd-4a7a-b4f7-9719d9ca69a7",
+      "deploymentLabel": "docs@b2b5e105-b9bd-4a7a-b4f7-9719d9ca69a7",
+      "pass": true
+    },
+    {
+      "unit": "docs",
+      "route": "/vi/stable/",
+      "status": 200,
+      "contentClass": "html",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "workerVersionId": "b2b5e105-b9bd-4a7a-b4f7-9719d9ca69a7",
+      "deploymentLabel": "docs@b2b5e105-b9bd-4a7a-b4f7-9719d9ca69a7",
+      "pass": true
+    },
+    {
+      "unit": "docs",
+      "route": "/llms.txt",
+      "status": 200,
+      "contentClass": "text/plain",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "workerVersionId": "b2b5e105-b9bd-4a7a-b4f7-9719d9ca69a7",
+      "deploymentLabel": "docs@b2b5e105-b9bd-4a7a-b4f7-9719d9ca69a7",
+      "pass": true
+    },
+    {
+      "unit": "docs",
+      "route": "/docs-bundle.manifest.json",
+      "status": 200,
+      "contentClass": "application/json",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "workerVersionId": "b2b5e105-b9bd-4a7a-b4f7-9719d9ca69a7",
+      "deploymentLabel": "docs@b2b5e105-b9bd-4a7a-b4f7-9719d9ca69a7",
+      "pass": true
+    },
+    {
+      "unit": "edge",
+      "route": "/version",
+      "status": 200,
+      "contentClass": "text/plain",
+      "cacheControl": "no-store",
+      "workerVersionId": "62e7b184-5c36-4306-a232-4514dd70b90d",
+      "deploymentLabel": "edge@62e7b184-5c36-4306-a232-4514dd70b90d",
+      "pass": true
+    },
+    {
+      "unit": "edge",
+      "route": "/install",
+      "status": 200,
+      "contentClass": "text/x-shellscript",
+      "cacheControl": "no-store",
+      "workerVersionId": "62e7b184-5c36-4306-a232-4514dd70b90d",
+      "deploymentLabel": "edge@62e7b184-5c36-4306-a232-4514dd70b90d",
+      "pass": true
+    },
+    {
+      "unit": "edge",
+      "route": "/install.sh",
+      "status": 200,
+      "contentClass": "text/x-shellscript",
+      "cacheControl": "no-store",
+      "workerVersionId": "62e7b184-5c36-4306-a232-4514dd70b90d",
+      "deploymentLabel": "edge@62e7b184-5c36-4306-a232-4514dd70b90d",
+      "pass": true
+    },
+    {
+      "unit": "edge",
+      "route": "/install.ps1",
+      "status": 200,
+      "contentClass": "text/plain",
+      "cacheControl": "no-store",
+      "workerVersionId": "62e7b184-5c36-4306-a232-4514dd70b90d",
+      "deploymentLabel": "edge@62e7b184-5c36-4306-a232-4514dd70b90d",
+      "pass": true
+    },
+    {
+      "unit": "edge",
+      "route": "/download/checksums.txt",
+      "status": 200,
+      "contentClass": "application/octet-stream",
+      "cacheControl": "no-store",
+      "workerVersionId": "62e7b184-5c36-4306-a232-4514dd70b90d",
+      "deploymentLabel": "edge@62e7b184-5c36-4306-a232-4514dd70b90d",
+      "pass": true
+    }
+  ]
+}
