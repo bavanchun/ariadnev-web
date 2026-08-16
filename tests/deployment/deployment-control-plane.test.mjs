@@ -126,6 +126,28 @@ test("a document route accepts HTML 200 but a machine route never does", async (
   assert.equal((await smokeRoute("https://docs.example.test", "/llms.txt", "docs@v1", missing, "document")).pass, false);
 });
 
+test("a smoke probe retries transport failures and 5xx within its bound, but never a 4xx", async () => {
+  const noWait = { attempts: 4, delayMs: 0, sleep: async () => {} };
+  let calls = 0;
+  const comesUp = async () => {
+    calls += 1;
+    if (calls === 1) throw new TypeError("fetch failed");
+    if (calls === 2) return new Response("origin error", { status: 522, headers: { "content-type": "text/plain" } });
+    return new Response("1.0.0", { status: 200, headers: { "content-type": "text/plain" } });
+  };
+  const healthy = await smokeRoute("https://example.test", "/version", "edge@v1", comesUp, "machine", noWait);
+  assert.equal(healthy.pass, true);
+  assert.equal(calls, 3);
+
+  let notFoundCalls = 0;
+  const missing = async () => { notFoundCalls += 1; return new Response("nope", { status: 404, headers: { "content-type": "text/plain" } }); };
+  assert.equal((await smokeRoute("https://example.test", "/version", "edge@v1", missing, "machine", noWait)).pass, false);
+  assert.equal(notFoundCalls, 1, "a 4xx is a verdict, not a transient");
+
+  const neverUp = async () => { throw new TypeError("fetch failed"); };
+  await assert.rejects(() => smokeRoute("https://example.test", "/version", "edge@v1", neverUp, "machine", noWait), /fetch failed/);
+});
+
 test("each unit is smoked on the host and response class its topology entry declares", async () => {
   // A live (non-dry-run) deploy against a fake wrangler and a fake network:
   // the docs unit must be probed on docsBaseUrl and accept HTML, the edge

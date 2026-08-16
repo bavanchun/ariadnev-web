@@ -59,6 +59,13 @@ export function redactWranglerOutput(output) {
     .join("\n");
 }
 
+/** Up to two minutes of bounded retry while a new hostname comes up. */
+export const DEFAULT_SMOKE_RETRY = Object.freeze({
+  attempts: 12,
+  delayMs: 10_000,
+  sleep: (ms) => new Promise((resolvePromise) => setTimeout(resolvePromise, ms)),
+});
+
 /**
  * Probe one route and reduce it to a sanitized observation.
  *
@@ -68,8 +75,22 @@ export function redactWranglerOutput(output) {
  * to prevent. A `document` route (docs unit) is HTML by nature and passes on
  * any 200.
  */
-export async function smokeRoute(baseUrl, route, deploymentLabel, fetchImpl = fetch, expects = "machine") {
-  const response = await fetchImpl(`${baseUrl}${route}`, { redirect: "follow" });
+export async function smokeRoute(baseUrl, route, deploymentLabel, fetchImpl = fetch, expects = "machine", retry = DEFAULT_SMOKE_RETRY) {
+  // A freshly bound Custom Domain answers with DNS/TLS errors or 5xx for up to
+  // about a minute while Cloudflare provisions the record and certificate. A
+  // smoke probe therefore retries — bounded, on transport failures and 5xx
+  // only — before it counts as a verdict. A 4xx or a wrong body class is a
+  // verdict on the first answer, never retried.
+  let response;
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      response = await fetchImpl(`${baseUrl}${route}`, { redirect: "follow" });
+      if (response.status < 500 || attempt >= retry.attempts) break;
+    } catch (error) {
+      if (attempt >= retry.attempts) throw error;
+    }
+    await retry.sleep(retry.delayMs);
+  }
   const contentType = response.headers.get("content-type") ?? "";
   const body = await response.text();
   const isHtml = contentType.startsWith("text/html");
@@ -111,7 +132,7 @@ export async function deployUnits(input, options = {}) {
     const baseUrl = environmentHosts[smoke.base];
     if (typeof baseUrl !== "string") throw new Error(`unit ${unit.id} smoke base ${smoke.base} is not declared for ${environment}`);
     for (const route of unit.smokeRoutes) {
-      const observation = { unit: unit.id, ...(await smokeRoute(baseUrl, route, label, options.fetchImpl, smoke.expects)) };
+      const observation = { unit: unit.id, ...(await smokeRoute(baseUrl, route, label, options.fetchImpl, smoke.expects, options.smokeRetry)) };
       observations.push(observation);
       if (!observation.pass) {
         throw new Error(`smoke check failed for ${unit.id} ${route} (status ${observation.status}); halting`);
