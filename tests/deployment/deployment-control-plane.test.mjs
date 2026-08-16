@@ -531,3 +531,39 @@ test("deployments are serialized per environment and never cancelled midway", ()
 test("production deployment is gated on a protected GitHub environment", () => {
   assert.match(workflow("deploy.yml"), /environment: \$\{\{ inputs\.environment == 'production' && 'web-production'/);
 });
+
+// ------------------------------------------------------------- cutover record composition
+
+test("the deploy-phase record is composed from the control plane's own outputs and validates", async () => {
+  const { composeCutoverRecord, recordIdFor } = await import("../../scripts/deploy/compose-cutover-record.mjs");
+  const input = baseInput();
+  const deployResult = {
+    environment: "staging",
+    topology: "candidate-b",
+    deployments: [
+      { unit: "docs", workerName: "ariadnev-docs-staging", ok: true, workerVersionId: "11111111-1111-4111-8111-111111111111" },
+      { unit: "edge", workerName: "ariadnev-edge-staging", ok: true, workerVersionId: "22222222-2222-4222-8222-222222222222" },
+    ],
+    observations: [
+      { unit: "docs", route: "/en/stable/", status: 200, contentClass: "html", cacheControl: "public, max-age=0, must-revalidate", bodyBytes: 1234, deploymentLabel: "docs@1111", pass: true },
+      { unit: "edge", route: "/version", status: 200, contentClass: "text/plain", cacheControl: "no-store", bodyBytes: 5, deploymentLabel: "edge@2222", pass: true },
+    ],
+  };
+  const record = composeCutoverRecord({ input, deployResult, convergence: { converged: true }, startedAtUtc: "2026-08-16T09:00:00Z", completedAtUtc: "2026-08-16T09:05:00Z" });
+  assert.equal(record.result, "pass");
+  assert.equal(record.recordId, recordIdFor(input));
+  assert.match(record.recordId, /^[a-z0-9][a-z0-9-]{7,63}$/);
+  assert.equal(validateCutoverRecord(record).valid, true, validateCutoverRecord(record).errors?.join("; "));
+  // Runtime-only detail never reaches the record; the version id is attached from the deployment.
+  assert.equal("bodyBytes" in record.observations[0], false);
+  assert.equal(record.observations[1].workerVersionId, "22222222-2222-4222-8222-222222222222");
+  // A failed convergence or observation marks the record fail, never silently pass.
+  assert.equal(composeCutoverRecord({ input, deployResult, convergence: { converged: false }, startedAtUtc: "2026-08-16T09:00:00Z" }).result, "fail");
+});
+
+test("the deploy workflow composes the record from tee'd machine outputs under pipefail", () => {
+  const deploy = workflow("deploy.yml");
+  assert.match(deploy, /set -o pipefail\n\s+date -u[^\n]*deploy-started-at\.txt\n\s+node scripts\/deploy\/deploy-units\.mjs "\$\{\{ inputs\.input_path \}\}" \| tee deploy-result\.json/);
+  assert.match(deploy, /compose-cutover-record\.mjs "\$\{\{ inputs\.input_path \}\}"[\s\S]*--deploy-result deploy-result\.json --convergence convergence\.json/);
+  assert.doesNotMatch(deploy, /\.record\.json/, "no step may expect a hand-written record file");
+});

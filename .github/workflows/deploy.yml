@@ -156,13 +156,22 @@ jobs:
       - name: Deploy in topology order and smoke every machine route
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DEPLOY_TOKEN }}
-        run: node scripts/deploy/deploy-units.mjs "${{ inputs.input_path }}"
-      - name: Verify convergence against the declared release
-        run: node scripts/deploy/verify-convergence.mjs "${{ inputs.input_path }}"
-      - name: Write the sanitized cutover record
         run: |
-          node scripts/deploy/write-cutover-record.mjs \
-            "${{ inputs.input_path }}.record.json" --out cutover-record.json
+          set -o pipefail
+          date -u +%Y-%m-%dT%H:%M:%SZ > deploy-started-at.txt
+          node scripts/deploy/deploy-units.mjs "${{ inputs.input_path }}" | tee deploy-result.json
+      - name: Verify convergence against the declared release
+        run: |
+          set -o pipefail
+          node scripts/deploy/verify-convergence.mjs "${{ inputs.input_path }}" | tee convergence.json
+      - name: Write the sanitized cutover record
+        # Assembled from the two machine outputs above, validated against
+        # deployment/cutover-record.schema.json, and refused if anything
+        # credential-shaped is present.
+        run: |
+          node scripts/deploy/compose-cutover-record.mjs "${{ inputs.input_path }}" \
+            --deploy-result deploy-result.json --convergence convergence.json \
+            --started-at "$(cat deploy-started-at.txt)" --out cutover-record.json
       - uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v5
         with:
           name: cutover-record-${{ inputs.environment }}
