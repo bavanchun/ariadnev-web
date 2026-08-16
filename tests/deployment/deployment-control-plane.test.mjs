@@ -170,6 +170,22 @@ test("the deploy job ships the artifact the build job qualified", () => {
   assert.doesNotMatch(deployJob, /pnpm run build|pnpm run test:qualification/, "the deploy job must not rebuild");
 });
 
+test("the deploy job reads the input as of the trigger commit and proves it names the checkout", () => {
+  // The input is committed after the product it names, so the productSha
+  // checkout holds an older copy; deploying from that copy would record the
+  // wrong product. The trigger-time file travels as an artifact instead.
+  const deploy = workflow("deploy.yml");
+  const preflight = deploy.slice(deploy.indexOf("  preflight:"), deploy.indexOf("  environment-policy:"));
+  assert.match(preflight, /upload-artifact@[0-9a-f]{40}[\s\S]*name: deployment-input-\$\{\{ github\.run_id \}\}[\s\S]*path: \$\{\{ inputs\.input_path \}\}/);
+  const deployJob = deploy.slice(deploy.indexOf("  deploy:"));
+  assert.match(deployJob, /download-artifact@[0-9a-f]{40}[\s\S]*name: deployment-input-\$\{\{ github\.run_id \}\}/);
+  assert.match(deployJob, /test "\$\(node -p "require\('\.\/\$INPUT'\)\.productSha"\)" = "\$\(git rev-parse HEAD\)"/);
+  for (const script of ["deploy-units.mjs", "verify-convergence.mjs", "compose-cutover-record.mjs"]) {
+    assert.match(deployJob, new RegExp(`${script.replace(".", "\\.")} "\\$INPUT_PATH"`), `${script} must read the trigger-time input`);
+  }
+  assert.doesNotMatch(deployJob.slice(deployJob.indexOf("Reconcile the source-owned")), /inputs\.input_path/, "no deploy step after the swap may read the checkout's input");
+});
+
 // ----------------------------------------------------------------- rollback
 
 test("a rollback plan requires an explicit worker version for every unit", () => {
@@ -563,7 +579,7 @@ test("the deploy-phase record is composed from the control plane's own outputs a
 
 test("the deploy workflow composes the record from tee'd machine outputs under pipefail", () => {
   const deploy = workflow("deploy.yml");
-  assert.match(deploy, /set -o pipefail\n\s+date -u[^\n]*deploy-started-at\.txt\n\s+node scripts\/deploy\/deploy-units\.mjs "\$\{\{ inputs\.input_path \}\}" \| tee deploy-result\.json/);
-  assert.match(deploy, /compose-cutover-record\.mjs "\$\{\{ inputs\.input_path \}\}"[\s\S]*--deploy-result deploy-result\.json --convergence convergence\.json/);
+  assert.match(deploy, /set -o pipefail\n\s+date -u[^\n]*deploy-started-at\.txt\n\s+node scripts\/deploy\/deploy-units\.mjs "\$INPUT_PATH" \| tee deploy-result\.json/);
+  assert.match(deploy, /compose-cutover-record\.mjs "\$INPUT_PATH"[\s\S]*--deploy-result deploy-result\.json --convergence convergence\.json/);
   assert.doesNotMatch(deploy, /\.record\.json/, "no step may expect a hand-written record file");
 });
