@@ -1,7 +1,7 @@
 ---
 title: "ariadnev candidate-b cutover: real site, real docs, controlled production"
 description: "Take ariadnev.com from the interim holding page to the Phase 12 candidate-b topology: rebranded Astro site, the Fumadocs docs product with EN/VI content, and a deploy-workflow-driven staging → production cutover that retires the bridge."
-status: in-progress
+status: completed
 priority: P1
 effort: "4-6d"
 tags: [web, docs, cloudflare, cutover, rebrand]
@@ -52,8 +52,8 @@ The user chose the full path on 2026-08-16.
 | 2 | [Port the docs platform onto `main`](phase-02-port-docs-platform.md) | — | completed (PR #6) |
 | 3 | [Docs content pipeline + EN/VI content](phase-03-docs-content.md) | 2 | completed (PR #6) |
 | 4 | [Retarget topology and Worker configs to ariadnev hosts](phase-04-topology-and-workers.md) | 1, 2 | completed (PR #6) |
-| 5 | [Provision the deploy control plane and ship staging](phase-05-control-plane-and-staging.md) | 3, 4 | in-progress — docs unit live on staging.docs.ariadnev.com (2026-08-16); edge unit + workflow run wait on secrets |
-| 6 | [Production cutover, bridge retirement, records](phase-06-production-cutover.md) | 5 | pending |
+| 5 | [Provision the deploy control plane and ship staging](phase-05-control-plane-and-staging.md) | 3, 4 | completed (staging runs 31940193116 / 31940937973; docs.ariadnev.com production run 31940617893)
+| 6 | [Production cutover, bridge retirement, records](phase-06-production-cutover.md) | 5 | completed (production run 31941102304 → deployment/records/production-ariadnev-1.0.0-deploy.json; bridge deleted 2026-08-16) |
 
 Phases 1 and 2 are independent and may run in parallel (disjoint files: `apps/site/**` +
 `tests/site/**` vs `apps/docs/**` + `tests/docs/**`).
@@ -71,6 +71,8 @@ Phases 1 and 2 are independent and may run in parallel (disjoint files: `apps/si
 ## Status log
 
 - 2026-08-16 — Phases 1–4 merged as PR #6 (`75284a9`); code review findings closed in the same PR. Qualification evidence recorded at `deployment/evidence/75284a9….json`; `deployment/inputs/staging-ariadnev-1.0.0.json` composed. Docs unit deployed to `staging.docs.ariadnev.com` through `deploy-units.mjs` (Cloudflare OAuth, not the workflow): 5/5 smoke routes pass. Blocked for the edge unit and the workflow path: Worker `GH_TOKEN`, `CLOUDFLARE_DEPLOY_TOKEN`, `CLOUDFLARE_WAF_TOKEN` (owner-created). GitHub environments `web-staging` / `web-production` created; **required reviewers are unavailable on the current plan for a private repo**, so `verify-production-environment.mjs` will fail as written — decision needed (see phase 5).
+
+- 2026-08-16 (later) — Owner supplied a Cloudflare token (Workers + Zone Read, then WAF Edit + DNS Edit) and a fine-grained PAT (Contents:read on ariadnev-kit); secrets set on both Workers and both GitHub environments. Seven staging workflow runs surfaced and fixed: build order (edge before site), missing Playwright browser, artifact restored at the wrong path, root `wrangler` absent, no cutover-record producer, the input read from the productSha checkout instead of the trigger commit, and smoke racing a freshly bound hostname. Production gate implemented as `deployment/production-policy.json` (see decision record). Production: docs unit via workflow, edge deployed detached and smoked on workers.dev, `wrangler deploy` moved the apex Custom Domains from the bridge with no gap, full production run green with record; `ariadnev-bridge` deleted. Acceptance criteria 1–7 verified live.
 
 ## Risks
 

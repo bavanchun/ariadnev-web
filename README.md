@@ -21,13 +21,14 @@ CLOUDFLARE_API_TOKEN=… node scripts/manage-legacy-host-redirect.mjs --remove  
 ```
 
 Behind the redirect, `vcskill.vchun.dev` still runs the frozen legacy Worker
-described under [Legacy runtime](#legacy-runtime). The candidate-b cutover that
-moves `ariadnev.com` from the interim bridge Worker to the combined edge Worker
-and stands up `docs.ariadnev.com` is tracked in
-[`plans/260816-1437-ariadnev-candidate-b-cutover/`](./plans/260816-1437-ariadnev-candidate-b-cutover/plan.md).
-See
-[`docs/decisions/ariadnev-bridge-and-legacy-redirect.md`](./docs/decisions/ariadnev-bridge-and-legacy-redirect.md)
-for why `ariadnev.com` was first served by an interim Worker.
+described under [Legacy runtime](#legacy-runtime). Since 2026-08-16 the
+candidate-b topology is live: `ariadnev.com` is the combined edge Worker
+(`ariadnev-edge`) serving the Astro site and the release routes, and
+`docs.ariadnev.com` is the documentation Worker (`ariadnev-docs`). The cutover
+is recorded in [`plans/260816-1437-ariadnev-candidate-b-cutover/`](./plans/260816-1437-ariadnev-candidate-b-cutover/plan.md)
+and `deployment/records/`; the interim bridge that first served the apex is
+retired (see
+[`docs/decisions/ariadnev-bridge-and-legacy-redirect.md`](./docs/decisions/ariadnev-bridge-and-legacy-redirect.md)).
 
 The ariadnev source repository (`bavanchun/ariadnev-kit`) is private. This
 repository is its **only** public face: it proxies the private repository's
@@ -60,7 +61,7 @@ every dependency is an exact version and `pnpm-lock.yaml` is committed.
 | `packages/contracts` | Trusted docs-bundle schema, archive policy, verify-first atomic extractor |
 | `packages/tokens` | Shared design tokens |
 | `workers/edge` | Release edge Worker: install, version, download, plus the site assets under candidate B |
-| `workers/bridge` | Interim Worker serving `ariadnev.com`; deleted at the candidate-b cutover |
+| `workers/bridge` | Interim Worker that served `ariadnev.com` until the 2026-08-16 cutover; kept redeployable as an emergency rollback |
 | `releases/` | The release pin (`ariadnev.json`) and the synchronised docs bundle it names |
 | `scripts/docs-content/` | Turns the pinned release bundle + authored EN/VI pages into the docs content root |
 
@@ -117,6 +118,12 @@ unprotected lookalike `/installer`.
 node scripts/deploy/validate-deployment-input.mjs deployment/inputs/<name>.json
 gh workflow run deploy.yml -f environment=staging -f input_path=deployment/inputs/<name>.json
 ```
+
+Inputs are composed, never typed: `pnpm run compose:input -- --environment … --product-sha … --evidence-sha … --out …`.
+Every successful run uploads a `cutover-record-<environment>` artifact; the
+records of the 1.0.0 cutover live under `deployment/records/`. Production runs
+are gated as `deployment/production-policy.json` declares (see
+`docs/decisions/production-gate-without-required-reviewers.md`).
 
 Inputs are immutable — one `productSha`, one exact release tag, an explicit unit
 set. Branch names, tag aliases, and `latest` are not representable. Production

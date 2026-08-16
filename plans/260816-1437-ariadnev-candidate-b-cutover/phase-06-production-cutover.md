@@ -15,3 +15,12 @@
 ## Rollback
 - Before step 5: nothing public changed; `rollback.yml` per unit.
 - After step 5: `wrangler deploy --config workers/bridge/wrangler.toml` restores the bridge on the apex in one command (its `GH_TOKEN` must be re-set); or first-cutover rollback restores the legacy binding map per topology.
+
+## Executed 2026-08-16
+
+- Step 3: `deployment/inputs/production-ariadnev-1.0.0-docs.json` → run 31940395289 (deploy ok, smoke lost the DNS race → fixed with bounded retry) → run 31940617893 green. `docs.ariadnev.com` live.
+- Step 4: `wrangler deploy --config workers/edge/wrangler.combined.production.detached.toml` from the qualified artifact (`web-product-3de2ee8…`, byte-identical to local dist); GH_TOKEN set; all machine routes and `/` verified on `ariadnev-edge.<account>.workers.dev`.
+- Step 5: `wrangler deploy --config workers/edge/wrangler.combined.production.toml` moved `ariadnev.com` + `www.ariadnev.com` Custom Domains from `ariadnev-bridge` to `ariadnev-edge` directly (no delete needed, no observed gap). Verified `/`, `/install`, `/install.ps1`, `/version`, `/version?version=1.0.0`, `/download/checksums.txt` 200 and `/installer` 404 on the apex.
+- Ingress policy production enabled (`734d2e3`), staging re-qualified (31940937973), production full run 31941102304 green → `deployment/records/production-ariadnev-1.0.0-deploy.json`.
+- Step 7: `ariadnev-bridge` deleted; `topology.json` interim block, decision record addendum, README updated. Legacy `vcskill` Worker untouched (`vcskill.vchun.dev` still 302s to the apex).
+- Step 8 (soak / legacy decommission): not started — separate decision.

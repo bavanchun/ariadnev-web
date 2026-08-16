@@ -9,20 +9,19 @@
     "required": true
   },
   "interim": {
-    "note": "Additive record of state that exists outside the units below. This does NOT change `selected`, reorder units, or constitute a cutover decision.",
+    "note": "Additive record of state outside the units below. The interim bridge is retired; the legacy host redirect remains until the legacy decommission.",
     "host": {
       "hostname": "ariadnev.com",
       "alsoBound": [
         "www.ariadnev.com"
       ],
-      "servedBy": "ariadnev-bridge",
-      "wranglerConfig": "workers/bridge/wrangler.toml",
+      "servedBy": "ariadnev-edge",
       "secretNames": [
         "GH_TOKEN"
       ],
       "reason": "Canonical host for ariadnev@1.0.0 installs. Stood up before the candidate-b cutover because install.sh, install.ps1, and packages/cli/src/cli/update-command.ts hardcode this domain with no environment override, so the release was uninstallable until it answered.",
-      "retireAt": "phase-12-cutover",
-      "retirementProcedure": "plans/260816-1437-ariadnev-candidate-b-cutover/phase-06-production-cutover.md"
+      "retiredAt": "2026-08-16",
+      "retirement": "ariadnev-bridge deleted 2026-08-16 after wrangler moved the ariadnev.com and www.ariadnev.com Custom Domains to ariadnev-edge (production deploy run 31941102304, record deployment/records/production-ariadnev-1.0.0-deploy.json). Redeployable from workers/bridge/ as an emergency rollback (re-set GH_TOKEN)."
     },
     "legacyHostRedirect": {
       "policy": "rules/legacy-host-redirect.json",
@@ -32,7 +31,16 @@
       "note": "Outlives ariadnev-bridge. Survives the Phase 12 cutover and is what flips 302 -> 301 once the rollback window closes. Removing it restores direct legacy serving within seconds without a deploy; verified live.",
       "retireAt": "legacy-decommission"
     },
-    "decisionRecord": "docs/decisions/ariadnev-bridge-and-legacy-redirect.md"
+    "decisionRecord": "docs/decisions/ariadnev-bridge-and-legacy-redirect.md",
+    "cutover": {
+      "date": "2026-08-16",
+      "productSha": "734d2e3e95f472e6d0d4245efba9f4203e5583e6",
+      "record": "deployment/records/production-ariadnev-1.0.0-deploy.json",
+      "docsHostnameLive": "docs.ariadnev.com",
+      "apexServedBy": "ariadnev-edge",
+      "rollbackWindow": "open",
+      "note": "First-cutover rollback per firstCutover below is still available; the vcskill Worker and its bindings are unchanged."
+    }
   },
   "environments": {
     "staging": {

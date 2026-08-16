@@ -1,6 +1,6 @@
 # ariadnev bridge and legacy host redirect
 
-Status: **Applied in production**
+Status: **Superseded for the bridge (retired 2026-08-16); redirect still applied**
 Recorded: 2026-08-16
 Phase: interim (between Phase 7 and the Phase 12 cutover)
 Required by: Phase 12 (production cutover), legacy decommission
@@ -375,3 +375,22 @@ together; exhausting it breaks both at once.
 Production `vcskill.vchun.dev` still runs the frozen legacy Worker behind the
 redirect. Candidate-b has not shipped, `selected` is unchanged, and the Phase 12
 cutover remains outstanding.
+
+
+## Addendum — 2026-08-16: bridge retired at the candidate-b cutover
+
+The candidate-b cutover shipped the same day
+(`plans/260816-1437-ariadnev-candidate-b-cutover/`). `docs.ariadnev.com` was
+deployed first (production run 31940617893), then `ariadnev-edge` was deployed
+without a hostname and smoke-tested on its workers.dev origin, then
+`wrangler deploy` with the production profile moved the `ariadnev.com` and
+`www.ariadnev.com` Custom Domains from `ariadnev-bridge` to `ariadnev-edge`
+with no observed gap. The full production run 31941102304 (docs + edge,
+ingress rule enabled, convergence verified) produced
+`deployment/records/production-ariadnev-1.0.0-deploy.json`, after which
+`ariadnev-bridge` was deleted.
+
+What is unchanged: the `vcskill.vchun.dev` → `ariadnev.com` redirect rule, and
+the frozen legacy `vcskill` Worker, which remains the first-cutover rollback
+target until the rollback window closes. The rename-redirect invariants above
+still hold for that Worker.
