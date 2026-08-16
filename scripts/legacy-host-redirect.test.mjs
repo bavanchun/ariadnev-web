@@ -12,6 +12,7 @@ import {
   createClient,
   loadPolicy,
   locateRule,
+  matchesDeclared,
   parseMode,
   planChange,
   reconcile,
@@ -172,6 +173,39 @@ test("a changed status code registers as drift, not a no-op", () => {
   // rule is expected to receive; a shallow compare would silently skip it.
   assert.equal(change.action, "update");
   assert.deepEqual(change.drift, ["action_parameters"]);
+});
+
+// Regression: the live API returns action_parameters with its keys in its own
+// (alphabetical) order. A JSON.stringify comparison reported drift forever, so
+// --inspect always exited 2 and --apply re-PUT on every run.
+test("Cloudflare's own key ordering and server-added defaults are not drift", () => {
+  const asCloudflareReturnsIt = {
+    ...structuredClone(policy.rule),
+    action_parameters: {
+      from_value: {
+        preserve_query_string: true,
+        status_code: 302,
+        target_url: { expression: 'concat("https://ariadnev.com", http.request.uri.path)' },
+      },
+    },
+  };
+  assert.equal(planChange(asCloudflareReturnsIt, policy.rule).action, "noop");
+
+  // A key the policy does not declare is the server's business, not drift.
+  const withServerDefault = structuredClone(asCloudflareReturnsIt);
+  withServerDefault.action_parameters.from_value.some_future_default = false;
+  assert.equal(planChange(withServerDefault, policy.rule).action, "noop");
+});
+
+test("matchesDeclared compares declared values exactly at any depth", () => {
+  assert.equal(matchesDeclared({ a: { b: 1 }, extra: 2 }, { a: { b: 1 } }), true);
+  assert.equal(matchesDeclared({ a: { b: 2 } }, { a: { b: 1 } }), false);
+  assert.equal(matchesDeclared({ a: {} }, { a: { b: 1 } }), false);
+  // A declared value must not be satisfied by a loose match.
+  assert.equal(matchesDeclared({ a: "302" }, { a: 302 }), false);
+  assert.equal(matchesDeclared({ a: [1, 2] }, { a: [1, 2] }), true);
+  assert.equal(matchesDeclared({ a: [1, 2, 3] }, { a: [1, 2] }), false);
+  assert.equal(matchesDeclared(null, { a: 1 }), false);
 });
 
 test("a changed host expression registers as drift", () => {

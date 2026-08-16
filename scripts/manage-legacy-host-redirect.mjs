@@ -80,6 +80,24 @@ export async function locateRule(request, zoneId, description) {
 }
 
 /**
+ * Does `actual` carry every value `declared` specifies, at any nesting depth?
+ *
+ * Deliberately a subset test, not deep equality. Cloudflare echoes
+ * `action_parameters` back with its keys in its own order and may add server-side
+ * defaults; both would make a strict comparison report drift forever, so `apply`
+ * would re-PUT on every run and `--inspect` would be useless as a CI gate.
+ * Anything this file declares is still compared exactly.
+ */
+export function matchesDeclared(actual, declared) {
+  if (declared === null || typeof declared !== "object") return actual === declared;
+  if (actual === null || typeof actual !== "object") return false;
+  if (Array.isArray(declared)) {
+    return Array.isArray(actual) && actual.length === declared.length && declared.every((value, index) => matchesDeclared(actual[index], value));
+  }
+  return Object.keys(declared).every((key) => matchesDeclared(actual[key], declared[key]));
+}
+
+/**
  * Compute the change needed to reconcile the live rule with the source of truth.
  *
  * `action_parameters` is compared structurally, not by identity: the status code
@@ -89,9 +107,7 @@ export async function locateRule(request, zoneId, description) {
 export function planChange(existing, desired) {
   if (!existing) return { action: "create", drift: null };
   const drift = ["action", "expression", "enabled"].filter((key) => existing[key] !== desired[key]);
-  if (JSON.stringify(existing.action_parameters) !== JSON.stringify(desired.action_parameters)) {
-    drift.push("action_parameters");
-  }
+  if (!matchesDeclared(existing.action_parameters, desired.action_parameters)) drift.push("action_parameters");
   return drift.length === 0 ? { action: "noop", drift: null } : { action: "update", drift };
 }
 
