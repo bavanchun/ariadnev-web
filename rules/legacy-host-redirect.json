@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "legacy-host-redirect",
+  "purpose": "Redirect the legacy release host vcskill.vchun.dev to the canonical ariadnev.com, path-preserving, without redeploying the frozen legacy Worker that still holds the hostname via a Workers Custom Domain.",
+  "rationale": "ariadnev@1.0.0 installers and update-command.ts hardcode https://ariadnev.com. The legacy host must keep answering for stale bookmarks and piped-bash callers, but it must land on the canonical host. A zone-level Single Redirect achieves that additively: applying and removing it is a one-rule API call with no deploy, which is what keeps the first-cutover rollback instant.",
+  "lifetime": "Outlives workers/bridge. The bridge is deleted at the Phase 12 candidate-b cutover; this rule persists and its status_code flips 302 -> 301 only after the rollback window closes.",
+  "zoneName": "vchun.dev",
+  "rulesetPhase": "http_request_dynamic_redirect",
+  "rulesetName": "ariadnev legacy host redirect",
+  "statusCodeRationale": "302, not 301, for the whole rollback window. A 301 caches indefinitely in browsers and intermediaries and cannot be recalled, which would partially defeat a rollback to vcskill.vchun.dev. curl does not cache redirects, so machine clients are indifferent either way.",
+  "rule": {
+    "action": "redirect",
+    "action_parameters": {
+      "from_value": {
+        "target_url": {
+          "expression": "concat(\"https://ariadnev.com\", http.request.uri.path)"
+        },
+        "status_code": 302,
+        "preserve_query_string": true
+      }
+    },
+    "expression": "(http.host eq \"vcskill.vchun.dev\")",
+    "description": "ariadnev: redirect legacy host to ariadnev.com",
+    "enabled": true
+  },
+  "mustRedirect": [
+    "/install",
+    "/install.sh",
+    "/install.ps1",
+    "/version",
+    "/download/checksums.txt",
+    "/"
+  ],
+  "mustNotRedirect": [
+    "https://ariadnev.com/install",
+    "https://staging.vcskill.vchun.dev/install"
+  ]
+}
