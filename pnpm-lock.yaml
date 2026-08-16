@@ -113,6 +113,9 @@ importers:
 
   workers/edge:
     devDependencies:
+      '@ariadnev-web/site':
+        specifier: workspace:*
+        version: link:../../apps/site
       '@cloudflare/workers-types':
         specifier: 5.20260810.1
         version: 5.20260810.1
