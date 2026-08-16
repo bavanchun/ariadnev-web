@@ -2,12 +2,13 @@ import { readFile, rename, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { enumerateDocsRoutes, loadDocsContentCatalog } from "../src/lib/content-catalog.ts";
+import { resolveDocsContentRoot } from "../src/lib/docs-content-root.ts";
 import { routeUrl } from "../src/lib/static-discovery.ts";
 
 const appRoot = resolve(import.meta.dirname, "..");
 
 export async function setStaticDocumentLanguages({
-  contentRoot = resolve(appRoot, "content"),
+  contentRoot = resolveDocsContentRoot(appRoot),
   outRoot = resolve(appRoot, "out"),
   catalogPath = resolve(contentRoot, "generated/catalog.json"),
 } = {}) {

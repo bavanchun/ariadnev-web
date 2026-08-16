@@ -4,9 +4,10 @@ import { extname, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import { brotliCompressSync, constants as zlibConstants } from "node:zlib";
 import { loadDocsContentCatalog } from "../src/lib/content-catalog.ts";
+import { resolveDocsContentRoot } from "../src/lib/docs-content-root.ts";
 
 const appRoot = resolve(import.meta.dirname, "..");
-const defaultContentRoot = resolve(appRoot, "content");
+const defaultContentRoot = resolveDocsContentRoot(appRoot);
 const defaultOutRoot = resolve(appRoot, "out");
 const defaultBudgetPath = resolve(appRoot, "../../tests/benchmarks/performance-budgets.json");
 

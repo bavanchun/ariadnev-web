@@ -1,11 +1,10 @@
 import assert from "node:assert/strict";
-import { cp, readFile, rm, stat } from "node:fs/promises";
+import { readFile, rm } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { resolve } from "node:path";
 import { temporaryContent } from "./contract-fixture.mjs";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
-const appContent = resolve(repositoryRoot, "apps/docs/content");
 
 async function run(command, args) {
   await new Promise((resolvePromise, reject) => {
@@ -15,11 +14,9 @@ async function run(command, args) {
   });
 }
 
-if (await stat(appContent).then(() => true, () => false)) throw new Error("temporary export refuses to replace an existing apps/docs/content tree");
 const fixture = await temporaryContent();
 try {
-  await cp(fixture.root, appContent, { recursive: true, errorOnExist: true });
-  await run("pnpm", ["--filter", "@vcskill/docs", "build"]);
+  await run(process.execPath, ["apps/docs/scripts/build-docs.mjs", "--content-root", fixture.root]);
   for (const locale of ["en", "vi"]) {
     const html = await readFile(resolve(repositoryRoot, `apps/docs/out/${locale}/stable/index.html`), "utf8");
     assert.equal((html.match(/<h1\b/g) ?? []).length, 1, `${locale} stable output must contain one H1`);
@@ -30,6 +27,5 @@ try {
     assert.equal((markdown.match(/^#\s+/gm) ?? []).length, 1, `${locale} Markdown sibling must contain one H1`);
   }
 } finally {
-  await rm(appContent, { recursive: true, force: true });
   await rm(fixture.root, { recursive: true, force: true });
 }

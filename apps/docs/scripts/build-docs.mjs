@@ -1,20 +1,39 @@
 import { spawn } from "node:child_process";
-import { access } from "node:fs/promises";
+import { realpath, stat } from "node:fs/promises";
 import { resolve } from "node:path";
+import { loadDocsContentCatalog } from "../src/lib/content-catalog.ts";
+import { DOCS_CONTENT_ROOT_ENV, resolveDocsContentRoot } from "../src/lib/docs-content-root.ts";
 
 const appRoot = resolve(import.meta.dirname, "..");
 
+function requestedContentRoot(args) {
+  let value;
+  for (let index = 0; index < args.length; index += 1) {
+    const argument = args[index];
+    if (argument !== "--content-root") throw new Error(`unsupported docs build argument: ${argument}`);
+    if (value !== undefined || !args[index + 1] || args[index + 1].startsWith("--")) throw new Error("--content-root requires one explicit path");
+    value = args[index + 1];
+    index += 1;
+  }
+  return value;
+}
+
+const requestedRoot = requestedContentRoot(process.argv.slice(2));
+const unresolvedContentRoot = requestedRoot === undefined ? resolveDocsContentRoot(appRoot) : resolve(requestedRoot);
+const contentRoot = await realpath(unresolvedContentRoot).catch(() => { throw new Error("docs content root does not exist"); });
+if (!(await stat(contentRoot)).isDirectory()) throw new Error("docs content root must be a directory");
+const catalogPath = resolve(contentRoot, "generated/catalog.json");
+await loadDocsContentCatalog(catalogPath, contentRoot);
+const childEnvironment = { ...process.env, [DOCS_CONTENT_ROOT_ENV]: contentRoot };
+
 async function run(command, args) {
   await new Promise((resolvePromise, reject) => {
-    const child = spawn(command, args, { cwd: appRoot, stdio: "inherit" });
+    const child = spawn(command, args, { cwd: appRoot, env: childEnvironment, stdio: "inherit" });
     child.once("error", reject);
     child.once("exit", (code, signal) => code === 0 && !signal ? resolvePromise() : reject(new Error(`${command} ${args.join(" ")} failed`)));
   });
 }
 
-await access(resolve(appRoot, "content/generated/catalog.json")).catch(() => {
-  throw new Error("Phase 8 docs content is required for a full docs build; use the temporary contract build in tests for Phase 7 validation");
-});
 await run("pnpm", ["exec", "fumadocs-mdx", "source.config.ts", ".source"]);
 await run("pnpm", ["exec", "next", "build", "--webpack"]);
 await run(process.execPath, ["--experimental-strip-types", "scripts/set-static-document-language.mjs"]);

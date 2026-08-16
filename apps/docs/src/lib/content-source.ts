@@ -1,10 +1,12 @@
 import { docs } from "collections/server";
 import { loader } from "fumadocs-core/source";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { findCatalogPage, loadDocsContentCatalog } from "./content-catalog.ts";
+import { resolveDocsContentRoot } from "./docs-content-root.ts";
 
-const appRoot = process.cwd();
-export const docsContentRoot = resolve(appRoot, "content");
+const appRoot = fileURLToPath(new URL("../../", import.meta.url));
+export const docsContentRoot = resolveDocsContentRoot(appRoot);
 export const docsCatalogPath = resolve(docsContentRoot, "generated/catalog.json");
 
 const catalogPromise = loadDocsContentCatalog(docsCatalogPath, docsContentRoot);

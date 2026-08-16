@@ -1,9 +1,28 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { spawn } from "node:child_process";
+import { readFile, rm, writeFile } from "node:fs/promises";
+import { join, resolve } from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
+import { catalogFixture, temporaryContent } from "./contract-fixture.mjs";
 
 const root = new URL("../../apps/docs/", import.meta.url);
+const repositoryRoot = fileURLToPath(new URL("../../", import.meta.url));
+
+async function runDocsBuild(contentRoot) {
+  return new Promise((resolvePromise, reject) => {
+    const child = spawn(process.execPath, [resolve(repositoryRoot, "apps/docs/scripts/build-docs.mjs"), "--content-root", contentRoot], {
+      cwd: repositoryRoot,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let output = "";
+    const append = (chunk) => { output = `${output}${chunk}`.slice(-16_000); };
+    child.stdout.on("data", append);
+    child.stderr.on("data", append);
+    child.once("error", reject);
+    child.once("exit", (code, signal) => resolvePromise({ code, signal, output }));
+  });
+}
 
 test("Next configuration is export-only with trailing slash and unoptimized images", async () => {
   const config = await readFile(new URL("next.config.mjs", root), "utf8");
@@ -39,11 +58,33 @@ test("deployment configs are assets-only and topology exact", async () => {
 
 test("full docs build enforces the frozen static transfer budgets", async () => {
   const build = await readFile(new URL("scripts/build-docs.mjs", root), "utf8");
+  assert.match(build, /--content-root/);
+  assert.ok(build.indexOf("loadDocsContentCatalog(catalogPath, contentRoot)") < build.indexOf('run("pnpm", ["exec", "fumadocs-mdx"'), "public Markdown validation must precede Fumadocs compilation");
   assert.match(build, /scripts\/set-static-document-language\.mjs/);
   assert.match(build, /scripts\/verify-static-budget\.mjs/);
+  const sourceConfig = await readFile(new URL("source.config.ts", root), "utf8");
+  assert.match(sourceConfig, /resolveDocsContentRoot/);
+  const temporaryExport = await readFile(new URL("../../tests/docs/run-temporary-export.mjs", root), "utf8");
+  assert.match(temporaryExport, /--content-root/);
+  assert.doesNotMatch(temporaryExport, /\bcp\(/);
   const verifier = await readFile(new URL("scripts/verify-static-budget.mjs", root), "utf8");
   for (const id of ["docs-total-transfer-compressed", "docs-js-compressed", "docs-css-compressed", "docs-fonts-compressed", "docs-images-compressed"]) {
     assert.match(verifier, new RegExp(id));
   }
   assert.match(verifier, /nomodule/);
+});
+
+test("docs build rejects executable MDX before source generation", async () => {
+  const fixture = await temporaryContent();
+  const unsafeSource = join(fixture.root, catalogFixture().pages[0].sourcePath);
+  try {
+    await writeFile(unsafeSource, "---\ntitle: Unsafe\ndescription: Unsafe\n---\n\n## Unsafe\n\n{process.exit(0)}\n", "utf8");
+    const result = await runDocsBuild(fixture.root);
+    assert.notEqual(result.code, 0);
+    assert.equal(result.signal, null);
+    assert.match(result.output, /not safe public Markdown/);
+    assert.doesNotMatch(result.output, /\[MDX\] generated files/);
+  } finally {
+    await rm(fixture.root, { recursive: true, force: true });
+  }
 });

@@ -3,10 +3,11 @@ import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { buildSearchPartition, compressedSearchBytes, stableJson } from "../src/lib/search-index.ts";
 import { loadDocsContentCatalog, primaryVersions } from "../src/lib/content-catalog.ts";
+import { resolveDocsContentRoot } from "../src/lib/docs-content-root.ts";
 import { publicMarkdown } from "../src/lib/static-discovery.ts";
 
 const appRoot = resolve(import.meta.dirname, "..");
-const contentRoot = resolve(appRoot, "content");
+const contentRoot = resolveDocsContentRoot(appRoot);
 const outRoot = resolve(appRoot, "out/search");
 const budgetPath = resolve(appRoot, "../../tests/benchmarks/performance-budgets.json");
 
