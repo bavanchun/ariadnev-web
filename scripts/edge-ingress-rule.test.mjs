@@ -21,9 +21,12 @@ test("rendered expression satisfies the declared block and allow corpus", () => 
   }
 });
 
-test("production stays disabled and each environment has a distinct digest", () => {
-  assert.equal(policy.environments.production.enabled, false);
-  assert.equal(ruleBody(policy, "production").enabled, false);
+test("both environments are enabled since the cutover and each has a distinct digest", () => {
+  // Production was held disabled until the candidate-b cutover; the policy
+  // records who enabled it and when.
+  assert.equal(policy.environments.production.enabled, true);
+  assert.match(policy.environments.production.enabledBy, /cutover/);
+  assert.equal(ruleBody(policy, "production").enabled, true);
   assert.equal(ruleBody(policy, "staging").enabled, true);
   assert.notEqual(digestPolicy(policy, "staging"), digestPolicy(policy, "production"));
 });

@@ -13,8 +13,8 @@
     },
     "production": {
       "hostname": "ariadnev.com",
-      "enabled": false,
-      "enabledBy": "production cutover only (plans/260816-1437-ariadnev-candidate-b-cutover, phase 6)"
+      "enabled": true,
+      "enabledBy": "production cutover 2026-08-16 (plans/260816-1437-ariadnev-candidate-b-cutover, phase 6)"
     }
   },
   "rule": {
