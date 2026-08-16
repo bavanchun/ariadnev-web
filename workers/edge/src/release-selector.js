@@ -1,7 +1,7 @@
-// Pure release-selector parsing for the vcskill public edge.
+// Pure release-selector parsing for the ariadnev public edge.
 //
 // The optional `version=<semver>` selector pins `/version` and `/download/<asset>`
-// to one exact `vcskill@<version>` release identity. It never applies to the
+// to one exact `ariadnev@<version>` release identity. It never applies to the
 // installer routes, and an invalid selector always fails closed rather than
 // silently resolving `latest`.
 
@@ -11,7 +11,11 @@ const STABLE_SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 const MAX_SELECTOR_LENGTH = 32;
 
 export const SELECTOR_PARAM = "version";
-export const TAG_PREFIX = "vcskill@";
+// Only post-rename releases are addressable. `?version=<semver>` resolves the
+// `ariadnev@<semver>` tag and nothing else. Pre-rename `vcskill@` tags are not
+// addressable through this edge; a pinned request for one answers 404, never a
+// fallback to some other release.
+export const TAG_PREFIX = "ariadnev@";
 
 /** Routes that accept the selector. Installer routes are deliberately absent. */
 export const SELECTOR_ROUTES = Object.freeze(["version", "download"]);
@@ -59,7 +63,7 @@ export function parseReleaseSelector(searchParams) {
  * Mirrors the frozen legacy behavior exactly.
  */
 export function versionFromTag(tagName) {
-  return String(tagName || "").replace(/^vcskill@/, "").replace(/^v/, "");
+  return String(tagName || "").replace(/^ariadnev@/, "").replace(/^v/, "");
 }
 
 /**

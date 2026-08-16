@@ -1,0 +1,48 @@
+---
+title: "Your first install"
+description: "Install the kit into one or more providers, choose project or global scope, and check the result with doctor."
+---
+
+`ariadnev install` writes the kit into the providers you choose. Run it once per project, or once globally, and it records exactly what it wrote in a receipt.
+
+## Interactive
+
+```bash
+av install
+```
+
+You pick providers and scope from a list. Nothing is written until you confirm.
+
+## Non-interactive
+
+```bash
+ariadnev install --provider codex,cursor
+ariadnev install --provider claude-code --global
+ariadnev install --provider opencode --dry-run     # preview, write nothing
+```
+
+Global flags work everywhere: `--home <dir>`, `--cwd <dir>`, `--dry-run`, `--yes`.
+
+## Scope
+
+- **Project** (default) writes into the current repository — for example `.claude/skills/` for Claude Code — and records `.ariadnev/receipt.json` there.
+- **Global** (`--global`) writes into your home directory and records `~/.ariadnev/receipt.json`.
+
+## What lands where
+
+Each provider has its own conventions. Claude Code receives the widest surface: skills, agents, commands, rules, scripts, hooks, and the statusline. Codex receives skills and scripts at the shared agent home and rules as `AGENTS.md`. Where a target path or format is not verified for a provider, ariadnev **skips** that artifact and names it in the install summary rather than writing a guess. The complete matrix is in the [provider reference](%ROOT%reference/providers/), and `ariadnev kit install-path <provider>` prints it for one provider.
+
+Claude Code hooks are an event contract: installing to claude-code copies the hook files and, after a y/n confirmation, merges their event bindings into settings.
+
+## Check it
+
+```bash
+ariadnev list            # kit contents and per-provider install state
+ariadnev doctor          # health-check the install against its receipt
+```
+
+`doctor` exits `0` healthy, `1` degraded, `2` unhealthy, so CI can gate on it.
+
+## Then, in your agent
+
+With Claude Code, try the daily loop: `/av:brainstorm <idea>` to explore an approach, `/av:plan` to phase it, `/av:cook <plan path>` to implement with tests and review built in. `/av:scout <question>` answers "where does X live"; `/av:fix <bug>` proves a root cause before touching code. The full list is the [skill catalog](%ROOT%reference/skills/).

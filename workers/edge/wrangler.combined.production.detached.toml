@@ -1,0 +1,24 @@
+# Candidate B — production Worker without the apex bound.
+#
+# Used only during the production cutover: deploys `ariadnev-edge` (same
+# identity and secret namespace as wrangler.combined.production.toml) with no
+# hostname, so it can be smoke-tested on its workers.dev URL while
+# `ariadnev-bridge` still serves ariadnev.com. The cutover then deletes the
+# bridge and redeploys with the production profile, which binds the apex.
+
+name = "ariadnev-edge"
+main = "src/index.js"
+compatibility_date = "2026-07-20"
+workers_dev = true
+preview_urls = false
+
+routes = []
+
+[assets]
+directory = "../../apps/site/dist"
+binding = "ASSETS"
+run_worker_first = true
+not_found_handling = "404-page"
+
+[observability]
+enabled = true

@@ -1,0 +1,52 @@
+---
+title: "Cài đặt"
+description: "Cài CLI ariadnev độc lập trên macOS, Linux hoặc Windows bằng một lệnh đã được xác minh."
+---
+
+Bộ cài tải binary cho nền tảng của bạn từ `ariadnev.com`, xác minh sha256 với checksums đã công bố, cài đặt, rồi tạo bí danh ngắn `av` ngay cạnh. CLI không cần Node runtime.
+
+## macOS và Linux
+
+```bash
+curl -fsSL https://ariadnev.com/install | bash
+```
+
+Cài vào `~/.local/bin`. Đổi thư mục đích bằng `ARIADNEV_INSTALL_DIR`.
+
+## Windows (PowerShell)
+
+```powershell
+irm https://ariadnev.com/install.ps1 | iex
+```
+
+Cài vào `%LOCALAPPDATA%\Programs\ariadnev`.
+
+## Bộ cài làm gì
+
+1. Lấy phiên bản phát hành hiện tại từ `https://ariadnev.com/version`.
+2. Tải `ariadnev-<os>-<arch>` và `checksums.txt` từ `https://ariadnev.com/download/`.
+3. Xác minh sha256 của binary trước khi ghi ra bất kỳ đâu.
+4. Tạo `av` cạnh binary. Bỏ qua bằng `ARIADNEV_ALIAS=off`; một `av` có sẵn không bao giờ bị ghi đè.
+
+Muốn đọc script trước? Mở [https://ariadnev.com/install](https://ariadnev.com/install) — chính là đường dẫn ẩn danh mà lệnh trên tải về.
+
+## Gatekeeper trên macOS
+
+Binary chưa được notarize, nên lần chạy đầu có thể bị chặn. Cho phép bằng:
+
+```bash
+xattr -d com.apple.quarantine "$(command -v ariadnev)"
+```
+
+## Tùy chọn: hook cho Claude Code
+
+Bản thân CLI tự chứa. Các hook Claude Code tùy chọn mà kit đóng gói là các tiến trình `.cjs` riêng và cần `node` trong PATH khi bạn bật chúng.
+
+## Kiểm tra
+
+```bash
+ariadnev --version
+av --version
+```
+
+Rồi tiếp tục với [lần cài đầu tiên](%ROOT%get-started/first-install/).

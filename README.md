@@ -1,4 +1,4 @@
-# vcskill-web
+# ariadnev-web
 
 The public web surface for **ariadnev** (formerly vcskill): an Astro marketing
 site, a static Fumadocs documentation product, and the Cloudflare Worker that
@@ -21,14 +21,18 @@ CLOUDFLARE_API_TOKEN=… node scripts/manage-legacy-host-redirect.mjs --remove  
 ```
 
 Behind the redirect, `vcskill.vchun.dev` still runs the frozen legacy Worker
-described under [Legacy runtime](#legacy-runtime); the candidate-b cutover has
-not shipped. See
+described under [Legacy runtime](#legacy-runtime). The candidate-b cutover that
+moves `ariadnev.com` from the interim bridge Worker to the combined edge Worker
+and stands up `docs.ariadnev.com` is tracked in
+[`plans/260816-1437-ariadnev-candidate-b-cutover/`](./plans/260816-1437-ariadnev-candidate-b-cutover/plan.md).
+See
 [`docs/decisions/ariadnev-bridge-and-legacy-redirect.md`](./docs/decisions/ariadnev-bridge-and-legacy-redirect.md)
-for why `ariadnev.com` is served by an interim Worker and when it retires.
+for why `ariadnev.com` was first served by an interim Worker.
 
-The vcskill source repository is private. This repository is its **only** public
-face: it proxies the private repository's GitHub Releases with a server-side
-token, so anyone can `curl … | bash` without touching GitHub.
+The ariadnev source repository (`bavanchun/ariadnev-kit`) is private. This
+repository is its **only** public face: it proxies the private repository's
+GitHub Releases with a server-side token, so anyone can `curl … | bash` without
+touching GitHub.
 
 ```
 GET /                 → marketing site
@@ -51,12 +55,14 @@ every dependency is an exact version and `pnpm-lock.yaml` is committed.
 
 | Package | What |
 |---|---|
-| `apps/site` | Astro marketing site (Phase 6) |
-| `apps/docs` | Static Next/Fumadocs documentation (Phase 7) |
+| `apps/site` | Astro marketing site |
+| `apps/docs` | Static Next/Fumadocs documentation, EN + VI, versioned by release |
 | `packages/contracts` | Trusted docs-bundle schema, archive policy, verify-first atomic extractor |
-| `packages/tokens` | Shared design tokens (Phase 5) |
-| `workers/edge` | Release edge Worker: install, version, download |
+| `packages/tokens` | Shared design tokens |
+| `workers/edge` | Release edge Worker: install, version, download, plus the site assets under candidate B |
 | `workers/bridge` | Interim Worker serving `ariadnev.com`; deleted at the candidate-b cutover |
+| `releases/` | The release pin (`ariadnev.json`) and the synchronised docs bundle it names |
+| `scripts/docs-content/` | Turns the pinned release bundle + authored EN/VI pages into the docs content root |
 
 ```sh
 pnpm install --frozen-lockfile
@@ -66,7 +72,27 @@ pnpm run typecheck          # strict TypeScript across the workspace
 pnpm run build              # every package build
 pnpm run contracts          # compatibility, deployment, and contracts suites
 pnpm run test:qualification # the full gate a deploy runs
+pnpm run docs:content       # regenerate apps/docs/content/generated from the release pin
 ```
+
+## Documentation content
+
+`apps/docs` builds from a content root, never from ad-hoc files:
+
+- `releases/ariadnev.json` pins one exact release and names the committed
+  `docs-bundle.tar.gz` + manifest synchronised from it. Nothing is fetched at
+  build time.
+- `scripts/docs-content/build-content-root.mjs` verifies that bundle with
+  `packages/contracts`, renders the reference pages (CLI, providers, skills,
+  workflows, release notes) from it, and merges the authored pages under
+  `apps/docs/content/authored/{en,vi}/`. Every authored page must exist in both
+  locales, must not carry an H1, and links to sibling pages with `%ROOT%`.
+- The output under `apps/docs/content/generated/` is gitignored and
+  byte-reproducible; `tests/docs/content-pipeline.test.mjs` asserts it.
+
+Bumping to a new release is: download the release's `docs-bundle.tar.gz` and
+`docs-bundle.manifest.json` into `releases/ariadnev-<version>/`, update the
+pin, rebuild, and let the tests tell you what the new reference changed.
 
 ## Topology
 
@@ -102,7 +128,7 @@ config paths, build outputs, and smoke routes.
 ## Secrets
 
 The edge Worker needs one secret: a fine-grained GitHub PAT with **Contents:
-read** on the private `bavanchun/vcskill` repository.
+read** on the private `bavanchun/ariadnev-kit` repository.
 
 ```sh
 wrangler secret put GH_TOKEN --config workers/edge/wrangler.combined.toml
@@ -110,7 +136,7 @@ wrangler secret put GH_TOKEN --config workers/edge/wrangler.combined.toml
 
 Secrets live on the deployed Worker in Cloudflare, never in this repository.
 The combined Worker uses a secret namespace separate from the retained legacy
-Worker, so rotating one cannot invalidate the other.
+Worker and from the interim bridge, so rotating one cannot invalidate another.
 
 ## Legacy runtime
 

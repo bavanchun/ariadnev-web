@@ -23,22 +23,22 @@ const repoRoot = join(edgeRoot, "..", "..");
 const fixtureRoot = join(edgeRoot, "test", "fixtures", "site-dist");
 const contract = JSON.parse(readFileSync(join(repoRoot, "tests/contracts/public-edge-contracts.json"), "utf8"));
 
-const BASE = "https://staging.vcskill.vchun.dev";
+const BASE = "https://staging.ariadnev.com";
 const TOKEN = "test-token";
-const shellInstaller = '#!/usr/bin/env bash\nasset="vcskill-linux-x64"\n';
-const powershellInstaller = '$asset = "vcskill-windows-x64.exe"\n';
+const shellInstaller = '#!/usr/bin/env bash\nasset="ariadnev-linux-x64"\n';
+const powershellInstaller = '$asset = "ariadnev-windows-x64.exe"\n';
 const checksumsBody = [
-  "1111111111111111111111111111111111111111111111111111111111111111  vcskill-darwin-arm64",
-  "2222222222222222222222222222222222222222222222222222222222222222  vcskill-darwin-x64",
-  "3333333333333333333333333333333333333333333333333333333333333333  vcskill-linux-arm64",
-  "4444444444444444444444444444444444444444444444444444444444444444  vcskill-linux-x64",
-  "5555555555555555555555555555555555555555555555555555555555555555  vcskill-windows-x64.exe",
+  "1111111111111111111111111111111111111111111111111111111111111111  ariadnev-darwin-arm64",
+  "2222222222222222222222222222222222222222222222222222222222222222  ariadnev-darwin-x64",
+  "3333333333333333333333333333333333333333333333333333333333333333  ariadnev-linux-arm64",
+  "4444444444444444444444444444444444444444444444444444444444444444  ariadnev-linux-x64",
+  "5555555555555555555555555555555555555555555555555555555555555555  ariadnev-windows-x64.exe",
 ].join("\n");
 
 // ---------------------------------------------------------------- mock upstream
 
-const LATEST_URL = "https://api.github.com/repos/bavanchun/vcskill/releases/latest";
-const TAG_URL = (tag) => `https://api.github.com/repos/bavanchun/vcskill/releases/tags/${encodeURIComponent(tag)}`;
+const LATEST_URL = "https://api.github.com/repos/bavanchun/ariadnev-kit/releases/latest";
+const TAG_URL = (tag) => `https://api.github.com/repos/bavanchun/ariadnev-kit/releases/tags/${encodeURIComponent(tag)}`;
 const ASSET_URL = "https://api.github.com/assets/checksums.txt";
 const PINNED_ASSET_URL = "https://api.github.com/assets/checksums-0.10.0.txt";
 
@@ -54,20 +54,20 @@ function createMockFetch(options = {}) {
 
     if (url === LATEST_URL) {
       if (options.latestOk === false) return new Response("upstream release failure", { status: options.latestStatus || 503 });
-      return Response.json(releaseBody(options.latestTag || "vcskill@0.11.0", ASSET_URL));
+      return Response.json(releaseBody(options.latestTag || "ariadnev@0.11.0", ASSET_URL));
     }
-    if (url === TAG_URL("vcskill@0.10.0")) {
+    if (url === TAG_URL("ariadnev@0.10.0")) {
       if (options.tagOk === false) return new Response("no such release", { status: 404 });
       // `mismatchedTag` simulates a resolver returning another release identity.
-      return Response.json(releaseBody(options.mismatchedTag || "vcskill@0.10.0", PINNED_ASSET_URL));
+      return Response.json(releaseBody(options.mismatchedTag || "ariadnev@0.10.0", PINNED_ASSET_URL));
     }
-    if (url.startsWith(TAG_URL("vcskill@").slice(0, -3))) return new Response("no such release", { status: 404 });
+    if (url.startsWith(TAG_URL("ariadnev@").slice(0, -3))) return new Response("no such release", { status: 404 });
     if (url === ASSET_URL) return new Response(options.assetBody ?? checksumsBody, { status: options.assetStatus || 200 });
     if (url === PINNED_ASSET_URL) return new Response(options.pinnedAssetBody ?? "PINNED_0_10_0_CHECKSUMS", { status: 200 });
-    if (url === "https://api.github.com/repos/bavanchun/vcskill/contents/install.sh?ref=main") {
+    if (url === "https://api.github.com/repos/bavanchun/ariadnev-kit/contents/install.sh?ref=main") {
       return new Response(options.shellBody ?? shellInstaller, { status: options.shellStatus || 200 });
     }
-    if (url === "https://api.github.com/repos/bavanchun/vcskill/contents/install.ps1?ref=main") {
+    if (url === "https://api.github.com/repos/bavanchun/ariadnev-kit/contents/install.ps1?ref=main") {
       return new Response(options.powershellBody ?? powershellInstaller, { status: options.powershellStatus || 200 });
     }
     throw new Error(`unexpected upstream fetch: ${url}`);
@@ -147,9 +147,9 @@ test("parseReleaseSelector accepts absent and canonical stable selectors", () =>
   assert.deepEqual(parseReleaseSelector(new URLSearchParams("version=0.10.0")), {
     mode: "pinned",
     version: "0.10.0",
-    tag: "vcskill@0.10.0",
+    tag: "ariadnev@0.10.0",
   });
-  assert.deepEqual(parseReleaseSelector(new URLSearchParams("version=vcskill@0.10.0")).tag, "vcskill@0.10.0");
+  assert.deepEqual(parseReleaseSelector(new URLSearchParams("version=ariadnev@0.10.0")).tag, "ariadnev@0.10.0");
 });
 
 test("parseReleaseSelector rejects every invalid selector shape", () => {
@@ -180,14 +180,14 @@ test("parseReleaseSelector rejects every invalid selector shape", () => {
 });
 
 test("versionFromTag normalizes both frozen tag shapes", () => {
-  assert.equal(versionFromTag("vcskill@0.11.0"), "0.11.0");
+  assert.equal(versionFromTag("ariadnev@0.11.0"), "0.11.0");
   assert.equal(versionFromTag("v0.11.0"), "0.11.0");
   assert.equal(versionFromTag(undefined), "");
 });
 
 test("assertSafeAssetName rejects traversal, separators, and control characters", () => {
   assert.equal(assertSafeAssetName("checksums.txt"), "checksums.txt");
-  assert.equal(assertSafeAssetName("vcskill-windows-x64.exe"), "vcskill-windows-x64.exe");
+  assert.equal(assertSafeAssetName("ariadnev-windows-x64.exe"), "ariadnev-windows-x64.exe");
   for (const bad of ["", "..", "../checksums.txt", "a/b", "a\\b", "a b", "a%2Eb", ".hidden", "x".repeat(200)]) {
     assert.throws(() => assertSafeAssetName(bad), SelectorError, `${JSON.stringify(bad)} must be rejected`);
   }
@@ -214,14 +214,14 @@ test("classifyRoute identifies protected routes and preserves lookalikes", () =>
 function bodyClassOf(text, method) {
   if (method === "HEAD") return "empty-head";
   if (text.startsWith("#!/usr/bin/env bash")) return "installer-shell";
-  if (text.startsWith('$asset = "vcskill-windows-x64.exe"')) return "installer-powershell";
+  if (text.startsWith('$asset = "ariadnev-windows-x64.exe"')) return "installer-powershell";
   if (text === checksumsBody) return "download-stream";
   if (text === contract.globalBehavior.missingSecret.bodyText) return "missing-secret";
   if (text === "release lookup failed") return "release-lookup-failed";
   if (text.startsWith("asset not found: ")) return "asset-not-found";
   if (text === "") return "empty";
   if (text === "0.11.0") return "version-text";
-  if (text.includes("vcskill — install:")) return "plain-install-hint";
+  if (text.includes("ariadnev — install:")) return "plain-install-hint";
   if (text.includes("SITE_FIXTURE")) return "site-fixture-html";
   return "text";
 }
@@ -321,7 +321,7 @@ test("pinned selector resolves one exact release identity for /version and /down
 });
 
 test("pinned selector never falls back and fails closed on mismatch or unknown tag", async () => {
-  const mismatch = await call("/version?version=0.10.0", { mock: { mismatchedTag: "vcskill@0.11.0" } });
+  const mismatch = await call("/version?version=0.10.0", { mock: { mismatchedTag: "ariadnev@0.11.0" } });
   assert.equal(mismatch.status, 400);
   assert.match(mismatch.bodyText, /resolved-release-mismatch/);
 

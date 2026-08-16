@@ -1,0 +1,16 @@
+# Documentation unit — production. See wrangler.staging.toml for the shape;
+# the only differences are the Worker identity and the hostname it binds.
+
+name = "ariadnev-docs"
+compatibility_date = "2026-08-08"
+workers_dev = false
+preview_urls = false
+
+routes = [
+  { pattern = "docs.ariadnev.com", custom_domain = true }
+]
+
+[assets]
+directory = "./out"
+html_handling = "force-trailing-slash"
+not_found_handling = "404-page"

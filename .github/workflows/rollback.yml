@@ -1,4 +1,4 @@
-# Reusable rollback for the vcskill web surface.
+# Reusable rollback for the ariadnev web surface.
 #
 # Rehearsed in staging before it is ever needed in production, so the recovery
 # path is not written under pressure.

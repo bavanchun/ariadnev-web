@@ -10,7 +10,8 @@
 # `topology.json`'s `firstCutover.restoresLegacyBinding` exists to restore.
 #
 # Lifetime: deleted at the Phase 12 candidate-b cutover, when `ariadnev.com`
-# moves to `vcskill-edge-combined`. The `vcskill.vchun.dev` redirect rule in
+# moves to `ariadnev-edge` (workers/edge/wrangler.combined.production.toml). The
+# `vcskill.vchun.dev` redirect rule in
 # `rules/legacy-host-redirect.json` outlives this Worker and is not part of it.
 
 name = "ariadnev-bridge"

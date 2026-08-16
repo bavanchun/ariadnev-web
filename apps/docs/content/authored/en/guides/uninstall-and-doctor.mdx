@@ -1,0 +1,44 @@
+---
+title: "Uninstall, doctor, audit, and backups"
+description: "The receipt-based commands that check, repair, back up, and remove an install."
+---
+
+Everything here reads the receipt an install wrote — `.ariadnev/receipt.json` in a project, `~/.ariadnev/receipt.json` for global scope.
+
+## doctor
+
+```bash
+ariadnev doctor [--global]
+```
+
+Health-checks files, hooks, settings bindings, and version against the receipt. Exit codes are `0` healthy, `1` degraded, `2` unhealthy — kept stable on purpose so CI can gate on them.
+
+## audit
+
+```bash
+ariadnev audit kit [--global] [--json] [--strict]
+ariadnev audit scripts [--json] [--strict]
+```
+
+`audit kit` classifies every installed file as `ok`, `modified`, `missing`, or `untracked` and exits `1` on drift; `--strict` also fails on untracked files. `audit scripts` scans the scripts the kit ships for privilege escalation, remote code execution, and writes outside the skill.
+
+## backups
+
+```bash
+ariadnev backups list [--global]
+ariadnev backups restore <timestamp> [--file <rel>] [--global] [--dry-run]
+```
+
+Installs and uninstalls take timestamped backups. `restore` safety-backs-up the current state before writing.
+
+## uninstall
+
+```bash
+ariadnev uninstall [--provider a,b] [--global] [--dry-run]
+```
+
+Removes exactly what the receipt lists for the chosen providers and **preserves any file you edited** since install. It recovers an install that was interrupted before its receipt was written, and it fails rather than reporting success when there is no install record at all.
+
+## Exit codes
+
+Commands added after the CLI's first release share one table: `0` did what was asked; `1` ran and the answer is negative (drift found, verify failed); `2` could not run as invoked; `3` could not run because the environment is not ready. `doctor`, `audit`, `validate`, `eval`, `skill`, and `run` keep the codes they shipped with.

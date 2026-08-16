@@ -1,0 +1,37 @@
+---
+title: "Tài liệu ariadnev"
+description: "Cài một bộ workflow kit đã tuyển chọn vào các coding agent bạn dùng, rồi chạy các đồ thị workflow trung lập với provider qua một bộ thực thi cục bộ có cổng chính sách."
+---
+
+ariadnev là công cụ dòng lệnh local-first dành cho người làm việc với coding agent. Nó làm hai việc:
+
+- **Cài một kit đã tuyển chọn** gồm Agent Skill, agent chuyên biệt, rule, script và hook cho Claude Code vào các provider bạn dùng — Claude Code, Codex, Cursor, opencode, Antigravity, hoặc một cây agent tổng quát — và chỉ ghi mỗi artifact vào nơi đường dẫn lẫn định dạng đích đã được xác minh.
+- **Chạy đồ thị workflow trung lập với provider** qua `av run`: một bộ thực thi cục bộ, bền vững, biên dịch đồ thị chuẩn, quyết định chính sách trước khi bất kỳ provider nào hành động, và ghi trạng thái event-sourced có thể resume bên ngoài workspace của bạn.
+
+Binary độc lập không cần Node runtime. `ariadnev` và `av` là cùng một lệnh.
+
+## Bắt đầu
+
+- [Cài đặt](%ROOT%get-started/installation/) — một lệnh cho mỗi nền tảng, xác minh sha256.
+- [Lần cài đầu tiên](%ROOT%get-started/first-install/) — chọn provider và phạm vi, đọc receipt, kiểm tra bằng `doctor`.
+- [Nâng cấp](%ROOT%guides/upgrading/) — `av update` giữ binary luôn mới.
+
+## Hiểu cách hoạt động
+
+- [Kit và adapt engine](%ROOT%concepts/kit-and-adapt-engine/) — cài gì, vào đâu, và vì sao mục tiêu chưa xác minh bị bỏ qua thay vì đoán.
+- [Thực thi đồ thị](%ROOT%concepts/graph-execution/) — vòng đời `av run`: compile, policy, execute, checkpoint, proof.
+- [Đánh giá](%ROOT%concepts/evaluation/) — các tầng chất lượng chứng minh điều gì và cố ý không chứng minh điều gì.
+
+## Tham chiếu
+
+Sinh trực tiếp từ bản phát hành, nên không thể lệch với binary bạn đã cài:
+
+- [Tham chiếu CLI](%ROOT%reference/cli/)
+- [Tham chiếu provider](%ROOT%reference/providers/)
+- [Danh mục skill](%ROOT%reference/skills/)
+- [Tham chiếu workflow](%ROOT%reference/workflows/)
+- [Ghi chú phát hành](%ROOT%release-notes/)
+
+## Đang dùng vcskill?
+
+ariadnev là phần tiếp nối của vcskill dưới tên mới. Không có gì tự di trú, đó là chủ ý; [hướng dẫn di trú](%ROOT%guides/migration-from-vcskill/) là một lần dọn dẹp ngắn.

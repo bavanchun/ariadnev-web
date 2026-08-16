@@ -36,7 +36,7 @@ function baseInput(overrides = {}) {
     topology: "candidate-b",
     productSha: PRODUCT_SHA,
     qualificationEvidenceSha: EVIDENCE_SHA,
-    release: { tag: "vcskill@0.12.0", version: "0.12.0", coreSha: CORE_SHA },
+    release: { tag: "ariadnev@0.12.0", version: "0.12.0", coreSha: CORE_SHA },
     digests: { docsBundle: digest("a"), docsManifest: digest("b"), docsSchema: digest("c"), checksums: digest("d") },
     units: ["docs", "edge"],
     ingressPolicyDigest: digest("e"),
@@ -116,6 +116,58 @@ test("a machine route answering with HTML 200 fails its smoke check", async () =
   const healthy = await smokeRoute("https://example.test", "/version", "edge@v1", plain);
   assert.equal(healthy.pass, true);
   assert.equal(healthy.deploymentLabel, "edge@v1");
+});
+
+test("a document route accepts HTML 200 but a machine route never does", async () => {
+  const html = async () => new Response("<!doctype html><p>docs</p>", { status: 200, headers: { "content-type": "text/html; charset=utf-8" } });
+  assert.equal((await smokeRoute("https://docs.example.test", "/en/stable/", "docs@v1", html, "document")).pass, true);
+  assert.equal((await smokeRoute("https://docs.example.test", "/en/stable/", "docs@v1", html, "machine")).pass, false);
+  const missing = async () => new Response("nope", { status: 404, headers: { "content-type": "text/html" } });
+  assert.equal((await smokeRoute("https://docs.example.test", "/llms.txt", "docs@v1", missing, "document")).pass, false);
+});
+
+test("each unit is smoked on the host and response class its topology entry declares", async () => {
+  // A live (non-dry-run) deploy against a fake wrangler and a fake network:
+  // the docs unit must be probed on docsBaseUrl and accept HTML, the edge
+  // unit on baseUrl and reject HTML.
+  const topology = loadTopology();
+  const hosts = topology.environments.staging;
+  const probed = [];
+  const fetchImpl = async (url) => {
+    probed.push(url);
+    if (url.startsWith(hosts.docsBaseUrl)) return new Response("<!doctype html>", { status: 200, headers: { "content-type": "text/html; charset=utf-8" } });
+    return new Response("1.0.0", { status: 200, headers: { "content-type": "text/plain" } });
+  };
+  const runner = () => ({ status: 0, stdout: "Current Version ID: 00000000-0000-4000-8000-000000000000", stderr: "" });
+  const result = await deployUnits(baseInput(), { runner, fetchImpl, requireOutputs: false });
+  assert.equal(result.observations.every((observation) => observation.pass), true);
+  const docs = topology.units.find((unit) => unit.id === "docs");
+  const edge = topology.units.find((unit) => unit.id === "edge");
+  for (const route of docs.smokeRoutes) assert.ok(probed.includes(`${hosts.docsBaseUrl}${route}`), `docs ${route} must be probed on docsBaseUrl`);
+  for (const route of edge.smokeRoutes) assert.ok(probed.includes(`${hosts.baseUrl}${route}`), `edge ${route} must be probed on baseUrl`);
+  assert.ok(!probed.some((url) => url.startsWith(`${hosts.baseUrl}/en/`)), "docs pages must not be probed on the marketing host");
+});
+
+test("a unit whose smoke base is not declared for the environment halts the deploy", async () => {
+  const runner = () => ({ status: 0, stdout: "Current Version ID: 00000000-0000-4000-8000-000000000000", stderr: "" });
+  const original = loadTopology();
+  // Simulate an operator typo in topology.json without touching the file: the
+  // guard reads the unit's `smoke.base` against the environment's host map.
+  const unit = { ...original.units[0], smoke: { base: "nowhere", expects: "document" } };
+  const patched = { ...original, units: [unit, original.units[1]] };
+  await assert.rejects(
+    () => deployUnits(baseInput({ units: ["docs"] }), { runner, fetchImpl: async () => new Response("ok"), topology: patched, requireOutputs: false }),
+    /smoke base nowhere is not declared/,
+  );
+});
+
+test("the deploy job ships the artifact the build job qualified", () => {
+  const deploy = workflow("deploy.yml");
+  const deployJob = deploy.slice(deploy.indexOf("  deploy:"));
+  assert.match(deployJob, /actions\/download-artifact@[0-9a-f]{40}/, "the deploy job must download the qualified artifact by pinned SHA");
+  assert.match(deployJob, /name: web-product-\$\{\{ needs\.preflight\.outputs\.product_sha \}\}/);
+  assert.match(deployJob, /test -f apps\/site\/dist\/index\.html && test -f apps\/docs\/out\/index\.html/);
+  assert.doesNotMatch(deployJob, /pnpm run build|pnpm run test:qualification/, "the deploy job must not rebuild");
 });
 
 // ----------------------------------------------------------------- rollback

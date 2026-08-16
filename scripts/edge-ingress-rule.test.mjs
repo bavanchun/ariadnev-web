@@ -30,8 +30,8 @@ test("production stays disabled and each environment has a distinct digest", () 
 
 test("the rule is scoped to one hostname", () => {
   const expression = renderExpression(policy, "staging");
-  assert.ok(expression.includes('http.host eq "staging.vcskill.vchun.dev"'));
-  assert.ok(!expression.includes("vcskill.vchun.dev\" or"), "expression must not widen to other hosts");
+  assert.ok(expression.includes('http.host eq "staging.ariadnev.com"'));
+  assert.ok(!expression.includes("ariadnev.com\" or"), "expression must not widen to other hosts");
 });
 
 test("planChange detects creation, drift, and convergence", () => {

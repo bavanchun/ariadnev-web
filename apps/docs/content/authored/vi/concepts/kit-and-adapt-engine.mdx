@@ -1,0 +1,44 @@
+---
+title: "Kit và adapt engine"
+description: "Kit chứa gì, adapt engine chiếu nó vào từng provider ra sao, và vì sao mục tiêu chưa xác minh bị bỏ qua."
+---
+
+## Kit
+
+Kit được viết một lần, theo định dạng Agent Skills chuẩn, và nhúng vào binary độc lập. Nó gồm:
+
+- **Skill** — cài với tên `av:<name>`. Phần lớn được port từ kit mà dự án này phát triển lên và giữ nguyên ngoài việc đổi thương hiệu; skill do dự án này viết đạt một chuẩn: workflow thật, hợp đồng định dạng đầu ra, tự kiểm quality gate, và vị trí trong workflow để chúng đọc như một đồ thị.
+- **Agent** — `av-explore`, `av-planner`, `av-reviewer`, `av-tester`, `av-debugger`, `av-developer`, `av-git-manager`, `av-simplifier`, `av-brainstormer`, `av-researcher`, `av-docs-manager`, `av-project-manager`, `av-journal-writer`: persona, checklist hành vi, giao thức trạng thái, không phụ thuộc CLI ngoài.
+- **Rule, script và file env mẫu** dùng chung giữa các provider.
+- **Hook và statusline** chỉ cho Claude Code — session-init, rules-inject, privacy-block, scout-block, session-state, subagent-init — fail-open và có test.
+- **Workflow** — ba đồ thị chuẩn mà `av run` thực thi.
+
+`ariadnev validate` lint toàn bộ — hình dạng frontmatter, kích thước, tham chiếu chéo `av:<slug>` — và in số lượng hiện tại. Các con số đó cố ý không lặp lại ở đây; [danh mục skill](%ROOT%reference/skills/) được sinh từ bản phát hành thay vào đó.
+
+## Adapt engine
+
+Cài đặt là một phép chiếu, không phải sao chép. Adapt engine là tập hàm thuần ánh xạ mỗi loại artifact vào đường dẫn và định dạng đã xác minh của từng provider:
+
+| artifact | đích ví dụ (Claude Code) |
+|---|---|
+| skill | `.claude/skills/` |
+| agent | `.claude/agents/*.md` |
+| command | `.claude/commands/*.md` |
+| rules | `.claude/rules/*.md` |
+| scripts | `.claude/scripts/` |
+| hook | `.claude/hooks/av/*.cjs` |
+
+Nơi provider không có đích đã xác minh cho một artifact, engine **bỏ qua** và liệt kê trong bản tóm tắt cài đặt. Nó không bao giờ bịa đường dẫn. Bảng provider × artifact đầy đủ là [tham chiếu provider](%ROOT%reference/providers/), và `ariadnev contract` in ra từ chính binary.
+
+## Receipt
+
+Mỗi lần cài ghi `.ariadnev/receipt.json` (hoặc `~/.ariadnev/receipt.json` với phạm vi toàn cục): chính xác các file đã ghi, hash của chúng, và phiên bản đã ghi. Mọi thứ khác xây trên receipt:
+
+- `ariadnev doctor` kiểm tra sức khỏe bản cài so với nó.
+- `ariadnev audit` phân loại mọi file đã cài thành `ok`, `modified`, `missing` hoặc `untracked`.
+- `ariadnev uninstall` gỡ đúng những gì receipt liệt kê và giữ lại file bạn đã sửa.
+- `ariadnev adapters regenerate` dựng lại một phép chiếu cho công cụ khác đọc; không gì trong ariadnev đọc ngược lại.
+
+## Cache
+
+Binary giải nén kit nhúng vào một cache theo phiên bản dưới `~/.cache/ariadnev`. Cache đó là bản phân phối để cài, không phải workspace kit tùy chỉnh: `ariadnev kit refresh` xóa và giải nén lại, còn các lệnh soạn thảo như `ariadnev add-skill` được thiết kế để chạy từ source checkout.

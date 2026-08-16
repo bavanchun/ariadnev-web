@@ -13,23 +13,27 @@
 # rules/raw-download-path-guard.json, because Cloudflare normalizes RFC 3986 dot
 # segments before the Worker sees `Request.url`.
 
-name = "vcskill-edge-combined-staging"
+name = "ariadnev-edge-staging"
 main = "src/index.js"
 compatibility_date = "2026-07-20"
+# The only public origins are the bound hostnames: no workers.dev subdomain and
+# no preview URLs, which would sit outside the zone-level ingress rule.
+workers_dev = false
+preview_urls = false
 
 # Secret (set out of band, never committed):
 #   wrangler secret put GH_TOKEN --config workers/edge/wrangler.combined.toml
 # This Worker uses its own secret namespace, separate from the retained legacy
-# `vcskill` Worker, so provisioning or rotating this PAT cannot invalidate the
-# first-cutover rollback target.
+# `vcskill` Worker and from the interim `ariadnev-bridge`, so provisioning or
+# rotating this PAT cannot invalidate either of them.
 
 routes = [
-  { pattern = "staging.vcskill.vchun.dev", custom_domain = true }
+  { pattern = "staging.ariadnev.com", custom_domain = true }
 ]
 
 [assets]
-# Phase 6 replaces this fixture with the real Astro output contract.
-directory = "test/fixtures/site-dist"
+# The Astro output declared as this unit's `output` in deployment/topology.json.
+directory = "../../apps/site/dist"
 binding = "ASSETS"
 run_worker_first = true
 not_found_handling = "404-page"

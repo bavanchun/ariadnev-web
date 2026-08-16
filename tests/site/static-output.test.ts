@@ -45,8 +45,8 @@ describe("build shape", () => {
 
 describe("metadata", () => {
   it("declares a canonical URL on the production host", () => {
-    expect(html).toContain('<link rel="canonical" href="https://vcskill.vchun.dev/">');
-    expect(notFound).toContain('<link rel="canonical" href="https://vcskill.vchun.dev/404">');
+    expect(html).toContain('<link rel="canonical" href="https://ariadnev.com/">');
+    expect(notFound).toContain('<link rel="canonical" href="https://ariadnev.com/404">');
   });
 
   it("declares language, title, and description", () => {
@@ -59,7 +59,7 @@ describe("metadata", () => {
     for (const tag of [
       'property="og:type" content="website"',
       'property="og:url"',
-      'property="og:image" content="https://vcskill.vchun.dev/social-card.png"',
+      'property="og:image" content="https://ariadnev.com/social-card.png"',
       'property="og:image:width" content="1200"',
       'property="og:image:height" content="630"',
       'property="og:image:alt"',
@@ -74,7 +74,7 @@ describe("metadata", () => {
     expect(match).not.toBeNull();
     const data = JSON.parse(match![1]!) as Record<string, unknown>;
     expect(data["@type"]).toBe("SoftwareApplication");
-    expect(data["url"]).toBe("https://vcskill.vchun.dev");
+    expect(data["url"]).toBe("https://ariadnev.com");
     for (const forbidden of ["aggregateRating", "review", "offers", "price", "interactionStatistic"]) {
       expect(data, `structured data must not assert ${forbidden}`).not.toHaveProperty(forbidden);
     }
@@ -86,7 +86,7 @@ describe("crawl policy", () => {
   const sitemap = readFileSync(join(DIST_DIR, "sitemap.xml"), "utf8");
 
   it("points crawlers at the sitemap and away from machine routes", () => {
-    expect(robots).toContain("Sitemap: https://vcskill.vchun.dev/sitemap.xml");
+    expect(robots).toContain("Sitemap: https://ariadnev.com/sitemap.xml");
     for (const route of ["/install", "/install.sh", "/install.ps1", "/version", "/download/"]) {
       expect(robots).toContain(`Disallow: ${route}`);
     }
@@ -97,7 +97,7 @@ describe("crawl policy", () => {
     // Indexable documents are every generated page except the noindex 404.
     const indexable = DIST.pages
       .filter((page) => page !== "/404.html")
-      .map((page) => `https://vcskill.vchun.dev${page.replace(/index\.html$/, "")}`);
+      .map((page) => `https://ariadnev.com${page.replace(/index\.html$/, "")}`);
     expect(listed.sort()).toEqual(indexable.sort());
   });
 });
@@ -109,7 +109,7 @@ describe("no runtime dependency", () => {
       for (const url of urls) {
         const { host } = new URL(url);
         expect(
-          ["vcskill.vchun.dev", "docs.vcskill.vchun.dev", "github.com", "schema.org"].includes(host),
+          ["ariadnev.com", "docs.ariadnev.com", "schema.org"].includes(host),
           `unexpected external host: ${url}`,
         ).toBe(true);
       }

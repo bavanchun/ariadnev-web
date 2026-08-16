@@ -1,8 +1,8 @@
 {
-  "name": "vcskill-web",
+  "name": "ariadnev-web",
   "version": "0.0.0",
   "private": true,
-  "description": "Public web surface for vcskill: Astro marketing site, static Fumadocs documentation, and the release edge Worker.",
+  "description": "Public web surface for ariadnev: Astro marketing site, static Fumadocs documentation, and the release edge Worker.",
   "type": "module",
   "packageManager": "pnpm@10.33.2",
   "engines": {
@@ -10,9 +10,9 @@
   },
   "scripts": {
     "test": "pnpm run test:native && vitest run",
-    "test:native": "node --test tests/contracts/public-edge-contract.test.mjs landing-consistency.test.mjs scripts/edge-ingress-rule.test.mjs scripts/legacy-host-redirect.test.mjs workers/edge/src/index.test.mjs workers/bridge/src/index.test.mjs tests/deployment/deployment-control-plane.test.mjs tests/tokens/token-contract.test.mjs tests/tokens/font-contract.test.mjs tests/tokens/generated-css.test.mjs",
+    "test:native": "node --test tests/contracts/public-edge-contract.test.mjs landing-consistency.test.mjs scripts/edge-ingress-rule.test.mjs scripts/legacy-host-redirect.test.mjs workers/edge/src/index.test.mjs workers/bridge/src/index.test.mjs tests/deployment/deployment-control-plane.test.mjs tests/deployment/compose-deployment-input.test.mjs tests/tokens/token-contract.test.mjs tests/tokens/font-contract.test.mjs tests/tokens/generated-css.test.mjs && pnpm run test:docs",
     "test:qualification": "pnpm run contracts && pnpm run typecheck && pnpm run build && pnpm run test",
-    "typecheck": "tsc --build --force",
+    "typecheck": "tsc --build --force && pnpm --filter @ariadnev-web/docs typecheck",
     "build": "pnpm -r --workspace-concurrency=1 run build",
     "contracts": "vitest run tests/compatibility tests/deployment packages/contracts",
     "sync:release": "node scripts/deploy/validate-deployment-input.mjs",
@@ -21,11 +21,14 @@
     "verify:convergence": "node scripts/deploy/verify-convergence.mjs",
     "verify:soak": "node scripts/deploy/verify-soak.mjs",
     "verify:environment": "node scripts/deploy/verify-production-environment.mjs",
-    "site": "pnpm --filter @vcskill-web/site",
-    "docs": "pnpm --filter @vcskill-web/docs",
-    "edge": "pnpm --filter @vcskill-web/edge",
-    "contracts:pkg": "pnpm --filter @vcskill-web/contracts",
-    "tokens": "pnpm --filter @vcskill-web/tokens"
+    "site": "pnpm --filter @ariadnev-web/site",
+    "docs": "pnpm --filter @ariadnev-web/docs",
+    "edge": "pnpm --filter @ariadnev-web/edge",
+    "contracts:pkg": "pnpm --filter @ariadnev-web/contracts",
+    "tokens": "pnpm --filter @ariadnev-web/tokens",
+    "test:docs": "node --test tests/docs/*.test.mjs",
+    "docs:content": "node scripts/docs-content/build-content-root.mjs",
+    "compose:input": "node scripts/deploy/compose-deployment-input.mjs"
   },
   "devDependencies": {
     "@types/node": "26.2.0",

@@ -12,12 +12,17 @@
     "note": "Additive record of state that exists outside the units below. This does NOT change `selected`, reorder units, or constitute a cutover decision.",
     "host": {
       "hostname": "ariadnev.com",
-      "alsoBound": ["www.ariadnev.com"],
+      "alsoBound": [
+        "www.ariadnev.com"
+      ],
       "servedBy": "ariadnev-bridge",
       "wranglerConfig": "workers/bridge/wrangler.toml",
-      "secretNames": ["GH_TOKEN"],
+      "secretNames": [
+        "GH_TOKEN"
+      ],
       "reason": "Canonical host for ariadnev@1.0.0 installs. Stood up before the candidate-b cutover because install.sh, install.ps1, and packages/cli/src/cli/update-command.ts hardcode this domain with no environment override, so the release was uninstallable until it answered.",
-      "retireAt": "phase-12-cutover"
+      "retireAt": "phase-12-cutover",
+      "retirementProcedure": "plans/260816-1437-ariadnev-candidate-b-cutover/phase-06-production-cutover.md"
     },
     "legacyHostRedirect": {
       "policy": "rules/legacy-host-redirect.json",
@@ -31,18 +36,20 @@
   },
   "environments": {
     "staging": {
-      "baseUrl": "https://staging.vcskill.vchun.dev",
-      "docsBaseUrl": "https://staging.docs.vcskill.vchun.dev",
+      "baseUrl": "https://staging.ariadnev.com",
+      "docsBaseUrl": "https://staging.docs.ariadnev.com",
       "legacyWorker": null
     },
     "production": {
-      "baseUrl": "https://vcskill.vchun.dev",
-      "docsBaseUrl": "https://docs.vcskill.vchun.dev",
+      "baseUrl": "https://ariadnev.com",
+      "docsBaseUrl": "https://docs.ariadnev.com",
       "legacyWorker": {
         "name": "vcskill",
         "hostname": "vcskill.vchun.dev",
         "route": "vcskill.vchun.dev/*",
-        "secretNames": ["GH_TOKEN"],
+        "secretNames": [
+          "GH_TOKEN"
+        ],
         "credentialMutationFrozenUntil": "rollback-window-close",
         "note": "Retained first-cutover rollback target. Its secret namespace is separate from every unit below and must never be written by a deploy or rollback workflow."
       }
@@ -53,30 +60,64 @@
       "id": "docs",
       "order": 1,
       "kind": "worker-with-assets",
-      "workerName": { "staging": "vcskill-docs-staging", "production": "vcskill-docs" },
-      "wranglerConfig": "apps/docs/wrangler.docs.toml",
+      "workerName": {
+        "staging": "ariadnev-docs-staging",
+        "production": "ariadnev-docs"
+      },
+      "wranglerConfig": {
+        "staging": "apps/docs/wrangler.staging.toml",
+        "production": "apps/docs/wrangler.production.toml"
+      },
       "output": "apps/docs/out",
       "ownedByPhase": 7,
-      "smokeRoutes": ["/", "/en", "/llms.txt"],
-      "note": "Deployed first so the marketing site never links at a documentation host that does not answer yet."
+      "smokeRoutes": [
+        "/",
+        "/en/stable/",
+        "/vi/stable/",
+        "/llms.txt",
+        "/docs-bundle.manifest.json"
+      ],
+      "note": "Deployed first so the marketing site never links at a documentation host that does not answer yet.",
+      "smoke": {
+        "base": "docsBaseUrl",
+        "expects": "document"
+      }
     },
     {
       "id": "edge",
       "order": 2,
       "kind": "worker-with-assets",
-      "workerName": { "staging": "vcskill-edge-combined-staging", "production": "vcskill-edge-combined" },
+      "workerName": {
+        "staging": "ariadnev-edge-staging",
+        "production": "ariadnev-edge"
+      },
       "wranglerConfig": {
         "staging": "workers/edge/wrangler.combined.toml",
         "production": "workers/edge/wrangler.combined.production.toml"
       },
       "output": "apps/site/dist",
       "ownedByPhase": 6,
-      "secretNames": ["GH_TOKEN"],
-      "smokeRoutes": ["/version", "/install", "/install.sh", "/install.ps1", "/download/checksums.txt"],
-      "note": "Candidate B: this unit owns both the protected release routes and the marketing site assets, so it is deployed last and is the unit that takes the apex hostname at cutover."
+      "secretNames": [
+        "GH_TOKEN"
+      ],
+      "smokeRoutes": [
+        "/version",
+        "/install",
+        "/install.sh",
+        "/install.ps1",
+        "/download/checksums.txt"
+      ],
+      "note": "Candidate B: this unit owns both the protected release routes and the marketing site assets, so it is deployed last and is the unit that takes the apex hostname at cutover. In production it can only bind ariadnev.com once the interim bridge has released it; see plans/260816-1437-ariadnev-candidate-b-cutover/phase-06-production-cutover.md.",
+      "smoke": {
+        "base": "baseUrl",
+        "expects": "machine"
+      }
     }
   ],
-  "rollbackOrder": ["edge", "docs"],
+  "rollbackOrder": [
+    "edge",
+    "docs"
+  ],
   "firstCutover": {
     "restoresLegacyBinding": true,
     "removesDocsHostname": true,

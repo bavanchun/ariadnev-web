@@ -1,0 +1,44 @@
+---
+title: "The kit and the adapt engine"
+description: "What the kit contains, how the adapt engine projects it into each provider, and why an unverified target is skipped."
+---
+
+## The kit
+
+The kit is authored once, in the canonical Agent Skills format, and embedded into the standalone binary. It contains:
+
+- **Skills** — installed as `av:<name>`. Most are ported from the kit this project grew out of and are left alone apart from rebranding; skills this project authors meet one bar: a real workflow, an output-format contract, quality-gate self-checks, and a workflow position so they read as one graph.
+- **Agents** — `av-explore`, `av-planner`, `av-reviewer`, `av-tester`, `av-debugger`, `av-developer`, `av-git-manager`, `av-simplifier`, `av-brainstormer`, `av-researcher`, `av-docs-manager`, `av-project-manager`, `av-journal-writer`: persona, behavioural checklist, status protocol, no external CLI coupling.
+- **Rules, scripts, and an environment example** shared across providers.
+- **Hooks and a statusline** for Claude Code only — session-init, rules-inject, privacy-block, scout-block, session-state, subagent-init — fail-open and covered by tests.
+- **Workflows** — the three canonical graphs `av run` executes.
+
+`ariadnev validate` lints all of it — frontmatter shape, sizes, cross-skill `av:<slug>` references — and prints the live counts. Those counts are deliberately not repeated here; the [skill catalog](%ROOT%reference/skills/) is generated from the release instead.
+
+## The adapt engine
+
+Installation is a projection, not a copy. The adapt engine is a set of pure functions that map each artifact kind onto each provider's verified path and format:
+
+| artifact | example target (Claude Code) |
+|---|---|
+| skill | `.claude/skills/` |
+| agent | `.claude/agents/*.md` |
+| command | `.claude/commands/*.md` |
+| rules | `.claude/rules/*.md` |
+| scripts | `.claude/scripts/` |
+| hook | `.claude/hooks/av/*.cjs` |
+
+Where a provider has no verified target for an artifact, the engine **skips** it and lists the skip in the install summary. It never invents a path. The full provider × artifact table is the [provider reference](%ROOT%reference/providers/), and `ariadnev contract` prints it from the binary.
+
+## The receipt
+
+Every install writes `.ariadnev/receipt.json` (or `~/.ariadnev/receipt.json` for global scope): the exact files written, their hashes, and the version that wrote them. Everything else builds on the receipt:
+
+- `ariadnev doctor` health-checks the install against it.
+- `ariadnev audit` classifies every installed file as `ok`, `modified`, `missing`, or `untracked`.
+- `ariadnev uninstall` removes exactly what the receipt lists and preserves files you edited.
+- `ariadnev adapters regenerate` rebuilds a projection other tools can read; nothing in ariadnev reads it back.
+
+## The cache
+
+The binary extracts its embedded kit into a versioned cache under `~/.cache/ariadnev`. That cache is the install distribution, not a custom-kit workspace: `ariadnev kit refresh` discards and re-extracts it, and authoring commands such as `ariadnev add-skill` are meant to run from a source checkout.

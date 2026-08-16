@@ -1,30 +1,31 @@
-# Candidate B — production identity profile. NOT deployed in Phase 3.
+# Candidate B — production identity profile.
 #
-# This profile exists so the production topology is source-controlled and
-# dry-run validated ahead of the Phase 12 cutover. It uses a Worker identity and
-# secret namespace deliberately separate from the retained legacy `vcskill`
-# Worker, so provisioning this Worker's PAT cannot mutate the first-cutover
-# rollback target.
+# Same shape as the staging profile; a Worker identity and secret namespace
+# deliberately separate from the retained legacy `vcskill` Worker and from the
+# interim `ariadnev-bridge`, so provisioning this Worker's PAT cannot mutate
+# either rollback target.
 #
-# It is fail-closed until the real Astro output exists: `directory` points at
-# the Phase 6 build output, which is absent today, so a `deploy` cannot succeed
-# by accident. Dry-run validation overrides the directory explicitly:
-#   wrangler deploy --dry-run --config workers/edge/wrangler.combined.production.toml \
-#     --assets test/fixtures/site-dist
-#
-# No Phase 3 command deploys this profile and no production route is attached
-# here; Phase 12 owns attaching `vcskill.vchun.dev`.
+# The apex Custom Domain is bound to `ariadnev-bridge` until the production
+# cutover releases it (plans/260816-1437-ariadnev-candidate-b-cutover, phase 6).
+# Deploying this profile while the bridge still owns the hostname fails at the
+# Custom Domain step by design; the cutover deploys the `.detached` variant
+# first, then this one after the bridge is deleted.
 
-name = "vcskill-edge-combined"
+name = "ariadnev-edge"
 main = "src/index.js"
 compatibility_date = "2026-07-20"
+# The only public origins are the bound hostnames: no workers.dev subdomain and
+# no preview URLs, which would sit outside the zone-level ingress rule.
+workers_dev = false
+preview_urls = false
 
-# Intentionally empty. The production Custom Domain stays bound to the retained
-# legacy Worker until the qualified Phase 12 cutover moves it.
-routes = []
+routes = [
+  { pattern = "ariadnev.com", custom_domain = true },
+  { pattern = "www.ariadnev.com", custom_domain = true }
+]
 
 [assets]
-directory = "../../dist/site"
+directory = "../../apps/site/dist"
 binding = "ASSETS"
 run_worker_first = true
 not_found_handling = "404-page"

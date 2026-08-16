@@ -13,16 +13,16 @@ import { fileURLToPath } from "node:url";
 
 import { DEFAULT_ARCHIVE_POLICY, type ArchivePolicy, normalizeArchivePath, reject } from "./archive-policy.js";
 
-export const SCHEMA_ID = "https://vcskill.dev/schemas/docs-bundle-manifest-v1.schema.json";
+export const SCHEMA_ID = "https://ariadnev.com/schemas/docs-bundle-manifest-v1.schema.json";
 export const SCHEMA_VERSION = 1;
-export const BUNDLE_NAME = "vcskill-docs-bundle";
+export const BUNDLE_NAME = "ariadnev-docs-bundle";
 
 /**
  * SHA-256 of the trusted schema file as merged from the producer repository at
  * `packages/cli/schemas/docs-bundle-manifest-v1.schema.json`. Drift here means
  * the producer contract moved and this consumer has not been re-qualified.
  */
-export const TRUSTED_SCHEMA_DIGEST = "sha256:00ae8d0c53df5464ff99fbe0ab1b92e53860855e5627dd0658122b9b5a01158c";
+export const TRUSTED_SCHEMA_DIGEST = "sha256:822d438d4e96f6f5149b0f7b4e27edf60bd5a15c928396e8f569ed0adae38402";
 
 const schemaPath = join(dirname(fileURLToPath(import.meta.url)), "..", "schemas", "docs-bundle-manifest-v1.schema.json");
 
@@ -67,7 +67,7 @@ export interface ExpectedIdentity {
 }
 
 const VERSION_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$/;
-const TAG_PATTERN = /^vcskill@[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$/;
+const TAG_PATTERN = /^ariadnev@[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$/;
 const SHA_PATTERN = /^[a-f0-9]{40}$/;
 const DIGEST_PATTERN = /^sha256:[a-f0-9]{64}$/;
 const RFC3339 = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;

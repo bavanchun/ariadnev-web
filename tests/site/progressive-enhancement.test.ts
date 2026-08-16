@@ -19,7 +19,7 @@ const VIEWPORTS = [320, 375, 390, 768, 1280, 1440];
 /** Content that must be present before any script runs. */
 const ESSENTIAL = [
   "Agent work you can route, gate, and prove.",
-  "curl -fsSL https://vcskill.vchun.dev/install | bash",
+  "curl -fsSL https://ariadnev.com/install | bash",
   "safe-change-delivery",
   "bugfix-delivery",
   "read-only-delivery",
@@ -191,7 +191,7 @@ describe("keyboard and clipboard", () => {
 
     // The literal command is untouched and still selectable.
     expect(await page.locator("#final-install-unix").innerText()).toBe(
-      "curl -fsSL https://vcskill.vchun.dev/install | bash",
+      "curl -fsSL https://ariadnev.com/install | bash",
     );
     await context.close();
   });

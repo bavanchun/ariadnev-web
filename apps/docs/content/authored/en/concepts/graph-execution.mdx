@@ -1,0 +1,87 @@
+---
+title: "Graph execution"
+description: "How av run compiles a provider-neutral workflow, decides policy locally, and records durable, resumable state."
+---
+
+`av run` is ariadnev's local execution control plane. It compiles a canonical, provider-neutral workflow from the kit, enforces policy before any provider executes, and records enough private durable state to resume after interruption. Codex and Claude Code implement the same executor contract; provider settings never enter the graph.
+
+The public pipeline is narrow:
+
+```text
+GraphIRV1 -> compiler/lint -> policy -> event-sourced runner -> executor registry
+                                                           -> Codex
+                                                           -> Claude Code
+```
+
+## Lifecycle
+
+Validate a graph without probing any runtime:
+
+```bash
+av run read-only-delivery --validate --json
+```
+
+Probe a runtime and report whether the graph can run there, without creating a run:
+
+```bash
+av --dry-run run read-only-delivery --runtime claude-code --json
+```
+
+Start and operate a durable run:
+
+```bash
+av run read-only-delivery \
+  --runtime claude-code \
+  --instruction "Find the module that owns routing and cite the source file" \
+  --json
+
+av run status <run-id> --json
+av run resume <run-id> --runtime claude-code --instruction "..." --json
+av run cancel <run-id> --json
+```
+
+`resume` requires the original instruction digest, workspace identity, compiled graph digest, runner contract, runtime, runtime version, and model. A mismatch is reported; ariadnev never silently switches providers. A terminal run resumes idempotently without invoking a provider.
+
+## The five states, in one page's vocabulary
+
+- **Compile** — a canonical graph is compiled and linted from the kit; the result is a graph digest.
+- **Policy** — authority is resolved before any provider is contacted: which capabilities a node may use, whether it causes an effect, whether a human must approve. The decision is made locally.
+- **Execute** — the runner drives the graph through the executor registry; every transition is appended to an event log.
+- **Checkpoint** — durable state is written outside the inspected workspace, so a run survives interruption and can be resumed, inspected, or cancelled.
+- **Proof** — resume re-checks the pinned identity; a stable JSON envelope is the result you can diff.
+
+These names are this documentation's vocabulary for the behaviour above, not five stages the runtime reports under those labels.
+
+## What runs today
+
+The three canonical workflows are `read-only-delivery`, `bugfix-delivery`, and `safe-change-delivery` — see the [workflow reference](%ROOT%reference/workflows/) for their nodes and edges. Public active execution is **read-only**. `safe-change-delivery` validates, but dry-run and execution stay policy-denied until a real public side-effect executor and approval input surface exist; ariadnev does not simulate a successful mutation to look complete.
+
+## Runtime contract
+
+Runtime and model configuration stay outside the graph. Defaults are pinned and probed before use:
+
+| Provider | Runtime | Default model | Isolation |
+|---|---|---|---|
+| Codex | `0.147.0` | `gpt-5.4-mini` | Controller-owned home; only the auth file is linked |
+| Claude Code | `2.1.226` | `sonnet` | `--safe-mode`; only Read/Glob/Grep; isolated config for API-key auth, normal auth home for OAuth |
+
+Use `--runtime-version` and `--model` only with an explicit `--runtime`. If a newer local CLI does not match, the probe returns `runtime-version-drift` instead of attempting compatibility. Both adapters use argument arrays with no shell, send the untrusted instruction through stdin, require schema-bound output, restrict evidence to workspace-relative paths, bound output and time, and reap their whole process tree on success, failure, timeout, or cancellation.
+
+Optional overrides: `ARIADNEV_CODEX_HOME`, `ARIADNEV_CLAUDE_CONFIG_DIR`, `ARIADNEV_CLAUDE_AUTH_HOME`.
+
+## Durable state and privacy
+
+Run data lives under `~/.ariadnev/runs/<run-id>/` and must stay outside the inspected workspace.
+
+| File | Purpose | Content boundary |
+|---|---|---|
+| `manifest.json` | Immutable graph, runtime, workspace, and instruction identity | Digests and categorical metadata only |
+| `events.jsonl` | Append-only control transitions | No prompt or application-state values |
+| `checkpoint.json` | Durable reduced control state | Graph, node, status, version metadata |
+| `state-current.json` | Application state for exact resume | May contain sensitive task state |
+| `state-previous.json` | Previous write-ahead state | Crash-consistency fallback |
+| `cancel-request.json` | Cooperative cancellation marker | Timestamp and integrity seal |
+
+Directories are `0700` and files `0600` where the platform supports POSIX modes. Envelopes are strict, size-bounded, sealed, and fail closed on corruption. The command's JSON response may intentionally contain result state for the caller — do not redirect it to a public log when the task is sensitive.
+
+Every lifecycle response is a JSON object with `schemaVersion: 1`, `action`, `ok`, and `status`. Provider stdout, stderr, prompts, and raw traces are never forwarded into durable control records. There is no hosted control plane.

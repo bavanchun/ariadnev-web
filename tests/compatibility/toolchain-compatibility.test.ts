@@ -65,8 +65,8 @@ describe("app build graphs stay independent", () => {
     const siteDeps = Object.keys({ ...site.dependencies, ...site.devDependencies });
     const docsDeps = Object.keys({ ...docs.dependencies, ...docs.devDependencies });
 
-    expect(siteDeps).not.toContain("@vcskill-web/docs");
-    expect(docsDeps).not.toContain("@vcskill-web/site");
+    expect(siteDeps).not.toContain("@ariadnev-web/docs");
+    expect(docsDeps).not.toContain("@ariadnev-web/site");
     // A framework package appearing in both would couple the two build graphs.
     expect(siteDeps).not.toContain("next");
     expect(docsDeps).not.toContain("astro");

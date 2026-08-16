@@ -5,13 +5,13 @@
 // like a valid response to a script.
 import BaseLayout from "../layouts/base-layout.astro";
 import SiteHeader from "../components/site-header.astro";
-import { SITE, INSTALL } from "../data/marketing-facts";
+import { SITE, INSTALL, DOCS } from "../data/marketing-facts";
 import InstallCommand from "../components/install-command.astro";
 ---
 
 <BaseLayout
   title={`Not found — ${SITE.name}`}
-  description="This path does not exist on the vcskill site."
+  description="This path does not exist on the ariadnev site."
   path="/404"
   noindex={true}
 >
@@ -31,7 +31,7 @@ import InstallCommand from "../components/install-command.astro";
       <div class="action-row">
         <a class="action action--primary" href="/">Back to the start</a>
         <a class="action" href={SITE.docsEntry}>Documentation</a>
-        <a class="action" href={`${SITE.repository}/releases`}>Releases</a>
+        <a class="action" href={DOCS.releaseNotes}>Release notes</a>
       </div>
     </div>
   </main>

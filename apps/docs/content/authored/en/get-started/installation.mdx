@@ -1,0 +1,52 @@
+---
+title: "Installation"
+description: "Install the standalone ariadnev CLI on macOS, Linux, or Windows with one verified command."
+---
+
+The installer downloads the binary for your platform from `ariadnev.com`, verifies its sha256 against the published checksums, installs it, and links the short `av` alias next to it. No Node runtime is required for the CLI.
+
+## macOS and Linux
+
+```bash
+curl -fsSL https://ariadnev.com/install | bash
+```
+
+Installs to `~/.local/bin`. Change the target with `ARIADNEV_INSTALL_DIR`.
+
+## Windows (PowerShell)
+
+```powershell
+irm https://ariadnev.com/install.ps1 | iex
+```
+
+Installs to `%LOCALAPPDATA%\Programs\ariadnev`.
+
+## What the installer does
+
+1. Resolves the current release version from `https://ariadnev.com/version`.
+2. Downloads `ariadnev-<os>-<arch>` and `checksums.txt` from `https://ariadnev.com/download/`.
+3. Verifies the binary's sha256 before writing it anywhere.
+4. Links `av` beside the binary. Skip that with `ARIADNEV_ALIAS=off`; an existing `av` is never overwritten.
+
+Prefer to read the script first? Open [https://ariadnev.com/install](https://ariadnev.com/install) — it is the same anonymous path the command fetches.
+
+## macOS Gatekeeper
+
+The binary is not yet notarized, so the first run may be blocked. Allow it with:
+
+```bash
+xattr -d com.apple.quarantine "$(command -v ariadnev)"
+```
+
+## Optional: Claude Code hooks
+
+The CLI itself is self-contained. The optional Claude Code hooks the kit ships are separate `.cjs` processes and need `node` on your PATH when you enable them.
+
+## Verify
+
+```bash
+ariadnev --version
+av --version
+```
+
+Then continue with [your first install](%ROOT%get-started/first-install/).

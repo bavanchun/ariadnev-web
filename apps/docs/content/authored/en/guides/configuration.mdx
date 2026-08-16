@@ -1,0 +1,33 @@
+---
+title: "Configuration"
+description: "The two config layers, which keys each may set, and how to see what took effect."
+---
+
+Settings live in two files:
+
+- `~/.ariadnev/config.json` — yours.
+- `<project>/.ariadnev/config.json` — the repository's.
+
+The layers do **not** have equal rights. A project file may set workspace-shaped keys — `paths.*`, `plan.*`, `locale.*`, `docs.maxLoc`, `project.*`, `statusline.*`. Everything else is user-only: `privacyBlock`, `trust.enabled`, `assertions`, `scripts.executionPolicy`, and notification destinations. A project file that sets a user-only key has that key dropped and named in a warning, so a repository you cloned cannot turn off your privacy blocking or point your notifications elsewhere.
+
+Notification destinations must be `https` URLs on an allowlisted host: `discord.com`, `slack.com`, `api.telegram.org`.
+
+## See what took effect
+
+```bash
+ariadnev config prefs resolve [--json]
+```
+
+Prints the settings in effect after both layers, which files they came from, and every key that was rejected. Notification destinations print as `<redacted>`.
+
+## Editor completion
+
+The binary ships `schemas/av-config.schema.json`, generated from the TypeScript definition, so it cannot drift from what the CLI accepts.
+
+## Telemetry
+
+ariadnev has an anonymous, opt-out telemetry facility that is **off by default** — nothing is sent unless an ingest endpoint is configured, and none ships. When enabled it is stateless: no device id, no IP, no identifiers, only categorical enums. Check with `ariadnev telemetry status`; opt out any time with `ARIADNEV_TELEMETRY_DISABLED=1` or the standard `DO_NOT_TRACK=1`. It is off automatically in CI.
+
+## Security
+
+The installer verifies each binary's sha256 before installing, and the CLI redacts credential-shaped strings from all output.
