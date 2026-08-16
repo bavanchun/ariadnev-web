@@ -1,5 +1,5 @@
 {
-  "name": "@vcskill-web/docs",
+  "name": "@ariadnev-web/docs",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -14,8 +14,8 @@
   "dependencies": {
     "@mdx-js/mdx": "3.1.1",
     "@orama/orama": "3.1.18",
-    "@vcskill-web/contracts": "workspace:*",
-    "@vcskill-web/tokens": "workspace:*",
+    "@ariadnev-web/contracts": "workspace:*",
+    "@ariadnev-web/tokens": "workspace:*",
     "fumadocs-core": "16.14.3",
     "fumadocs-mdx": "15.2.3",
     "fumadocs-ui": "16.14.3",

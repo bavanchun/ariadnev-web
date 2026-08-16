@@ -1,4 +1,4 @@
-// vcskill public edge — release routes extracted from the legacy root Worker.
+// ariadnev public edge — release routes extracted from the legacy root Worker.
 //
 // Two deployment profiles share this handler:
 //   Candidate A (wrangler.edge.toml)     — edge owns only the protected routes;
@@ -17,7 +17,7 @@
 //     `/install.ps1`, `/version`, and `/download/<asset>` is preserved exactly.
 //
 // Requires one secret: GH_TOKEN — a fine-grained PAT with Contents: read on
-// bavanchun/vcskill. Under Candidate B this lives in a Worker secret namespace
+// bavanchun/ariadnev-kit. Under Candidate B this lives in a Worker secret namespace
 // separate from the retained legacy Worker.
 
 import { SelectorError, parseReleaseSelector } from "./release-selector.js";
@@ -25,7 +25,7 @@ import { assertSafeAssetName, getInstaller, getReleaseAsset, getVersionText } fr
 import { applyStaticResponsePolicy } from "./static-response-policy.js";
 
 const MISSING_SECRET_BODY = "worker misconfigured: GH_TOKEN unset";
-const FALLTHROUGH_BODY = "vcskill — install:  curl -fsSL https://vcskill.vchun.dev/install | bash\n";
+const FALLTHROUGH_BODY = "ariadnev — install:  curl -fsSL https://ariadnev.com/install | bash\n";
 
 const DOWNLOAD_PREFIX = "/download/";
 

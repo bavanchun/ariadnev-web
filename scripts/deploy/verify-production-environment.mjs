@@ -20,8 +20,8 @@
 import { createHash } from "node:crypto";
 
 const API = "https://api.github.com";
-export const DEFAULT_WEB_REPO = "bavanchun/vcskill-web";
-export const DEFAULT_CORE_REPO = "bavanchun/vcskill";
+export const DEFAULT_WEB_REPO = "bavanchun/ariadnev-web";
+export const DEFAULT_CORE_REPO = "bavanchun/ariadnev-kit";
 export const WEB_ENVIRONMENT = "web-production";
 export const CORE_ENVIRONMENT = "core-release-production";
 export const FINALIZER_WORKFLOW = ".github/workflows/finalize-release.yml";
@@ -38,7 +38,7 @@ export function createClient({ token, fetchImpl = fetch }) {
   if (!token) throw new Error("GITHUB_TOKEN is not set");
   return async function request(path) {
     const response = await fetchImpl(`${API}${path}`, {
-      headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "User-Agent": "vcskill-web-preflight" },
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "User-Agent": "ariadnev-web-preflight" },
     });
     if (response.status === 404) return null;
     if (!response.ok) throw new Error(redact(`GitHub rejected ${path}: http ${response.status}`));

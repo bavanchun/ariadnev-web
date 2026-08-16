@@ -1,4 +1,4 @@
-// Token-isolated GitHub access for the vcskill public edge.
+// Token-isolated GitHub access for the ariadnev public edge.
 //
 // Every helper here receives the token explicitly and returns only sanitized
 // public responses. Upstream authorization headers, signed storage URLs, and
@@ -6,10 +6,13 @@
 
 import { SelectorError, assertSelectorMatch, versionFromTag } from "./release-selector.js";
 
-export const REPO = "bavanchun/vcskill";
+// Bound directly to the post-rename repository. The retained legacy Worker still
+// names the pre-rename repository and survives only on GitHub's rename redirect;
+// this Worker must not inherit that dependency.
+export const REPO = "bavanchun/ariadnev-kit";
 export const API = "https://api.github.com";
 
-const USER_AGENT = "vcskill-worker";
+const USER_AGENT = "ariadnev-edge";
 const MAX_ASSET_NAME_LENGTH = 128;
 // Release asset names are flat basenames: letters, digits, dot, dash, underscore.
 const SAFE_ASSET_NAME = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;

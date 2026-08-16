@@ -52,7 +52,11 @@ test("deployment configs are assets-only and topology exact", async () => {
     assert.match(config, /directory = ["']\.\/out["']/);
     assert.match(config, /workers_dev = false/);
     assert.match(config, /preview_urls = false/);
-    assert.doesNotMatch(config, /account_id|route\s*=|main\s*=|\[vars\]/i);
+    // Assets-only: no script entry point, no legacy `route =`, no vars, no account id.
+    // Anchored to line starts so the `custom_domain = true` of a Custom Domain
+    // binding is not mistaken for a `main =` entry.
+    assert.doesNotMatch(config, /account_id|^\s*route\s*=|^\s*main\s*=|\[vars\]/im);
+    assert.match(config, /custom_domain = true/);
   }
 });
 

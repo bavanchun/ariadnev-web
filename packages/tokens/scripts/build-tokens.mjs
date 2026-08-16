@@ -102,7 +102,7 @@ export function renderFontFaces(manifest, assetBase) {
 const HEADER = [
   "/*",
   " * Generated from packages/tokens/src/tokens.json by scripts/build-tokens.mjs.",
-  " * Do not edit. Run `pnpm --filter @vcskill-web/tokens run build` instead.",
+  " * Do not edit. Run `pnpm --filter @ariadnev-web/tokens run build` instead.",
   " */",
 ].join("\n");
 

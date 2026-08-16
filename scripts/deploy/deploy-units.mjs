@@ -43,15 +43,21 @@ export function deployUnit(unit, environment, { dryRun, runner = spawnSync } = {
   };
 }
 
-/** Probe one machine route and reduce it to a sanitized observation. */
-export async function smokeRoute(baseUrl, route, deploymentLabel, fetchImpl = fetch) {
+/**
+ * Probe one route and reduce it to a sanitized observation.
+ *
+ * `expects` is the unit's declared smoke class from topology.json: a
+ * `machine` route (edge unit) must answer 200 and must not be HTML — an HTML
+ * 200 means the site layer shadowed it, the exact failure the topology exists
+ * to prevent. A `document` route (docs unit) is HTML by nature and passes on
+ * any 200.
+ */
+export async function smokeRoute(baseUrl, route, deploymentLabel, fetchImpl = fetch, expects = "machine") {
   const response = await fetchImpl(`${baseUrl}${route}`, { redirect: "follow" });
   const contentType = response.headers.get("content-type") ?? "";
   const body = await response.text();
   const isHtml = contentType.startsWith("text/html");
-  // A machine route that answers with an HTML 200 has been shadowed by the
-  // site layer, which is the exact failure the topology exists to prevent.
-  const pass = response.status === 200 && !isHtml;
+  const pass = response.status === 200 && (expects === "document" || !isHtml);
   return {
     route,
     status: response.status,
@@ -68,7 +74,7 @@ export async function deployUnits(input, options = {}) {
   if (!valid) throw new Error(`deployment input rejected:\n  ${errors.join("\n  ")}`);
 
   const environment = input.environment;
-  const baseUrl = topology.environments[environment].baseUrl;
+  const environmentHosts = topology.environments[environment];
   const units = resolveUnits(input, topology);
   const observations = [];
   const deployments = [];
@@ -80,8 +86,13 @@ export async function deployUnits(input, options = {}) {
 
     if (options.dryRun) continue;
     const label = `${unit.id}@${deployment.workerVersionId ?? "unknown"}`;
+    // Each unit declares which environment host it answers on and what class
+    // of response its smoke routes must give; nothing here guesses either.
+    const smoke = unit.smoke ?? { base: "baseUrl", expects: "machine" };
+    const baseUrl = environmentHosts[smoke.base];
+    if (typeof baseUrl !== "string") throw new Error(`unit ${unit.id} smoke base ${smoke.base} is not declared for ${environment}`);
     for (const route of unit.smokeRoutes) {
-      const observation = { unit: unit.id, ...(await smokeRoute(baseUrl, route, label, options.fetchImpl)) };
+      const observation = { unit: unit.id, ...(await smokeRoute(baseUrl, route, label, options.fetchImpl, smoke.expects)) };
       observations.push(observation);
       if (!observation.pass) {
         throw new Error(`smoke check failed for ${unit.id} ${route} (status ${observation.status}); halting`);

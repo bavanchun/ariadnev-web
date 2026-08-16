@@ -1,4 +1,4 @@
-@import "@vcskill-web/tokens/docs.css";
+@import "@ariadnev-web/tokens/docs.css";
 
 * { box-sizing: border-box; }
 html { background: var(--vc-color-canvas); color: var(--vc-color-text); scroll-behavior: smooth; }

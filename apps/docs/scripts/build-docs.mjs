@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { realpath, stat } from "node:fs/promises";
+import { copyFile, realpath, stat } from "node:fs/promises";
 import { resolve } from "node:path";
 import { loadDocsContentCatalog } from "../src/lib/content-catalog.ts";
 import { DOCS_CONTENT_ROOT_ENV, resolveDocsContentRoot } from "../src/lib/docs-content-root.ts";
@@ -22,9 +22,11 @@ const requestedRoot = requestedContentRoot(process.argv.slice(2));
 // With no explicit root (flag or ARIADNEV_DOCS_CONTENT_ROOT) this is a product
 // build: generate the content root from the pinned release bundle first, so the
 // docs can never be built from stale generated files.
+let releaseManifestPath;
 if (requestedRoot === undefined && !process.env[DOCS_CONTENT_ROOT_ENV]) {
   const { buildContentRoot, parseArguments } = await import("../../../scripts/docs-content/build-content-root.mjs");
   const result = buildContentRoot(parseArguments([]));
+  releaseManifestPath = result.manifestPath;
   process.stdout.write(`docs content root: ${result.pageCount} pages for ${result.catalog.currentStable} (previous ${result.catalog.previousStable})\n`);
 }
 const unresolvedContentRoot = requestedRoot === undefined ? resolveDocsContentRoot(appRoot) : resolve(requestedRoot);
@@ -48,3 +50,8 @@ await run(process.execPath, ["--experimental-strip-types", "scripts/set-static-d
 await run(process.execPath, ["--experimental-strip-types", "scripts/build-search-index.mjs"]);
 await run(process.execPath, ["--experimental-strip-types", "scripts/export-static-discovery.mjs"]);
 await run(process.execPath, ["--experimental-strip-types", "scripts/verify-static-budget.mjs"]);
+// A product build serves the detached release manifest verbatim at
+// /docs-bundle.manifest.json; scripts/deploy/verify-convergence.mjs compares
+// its digest with the deployment input, which is how a deploy proves the docs
+// it published came from the release it claims.
+if (releaseManifestPath) await copyFile(releaseManifestPath, resolve(appRoot, "out", "docs-bundle.manifest.json"));

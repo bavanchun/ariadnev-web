@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://vcskill.vchun.dev/schemas/deployment-contract-v1.schema.json",
-  "title": "vcskill web deployment input v1",
+  "$id": "https://ariadnev.com/schemas/deployment-contract-v1.schema.json",
+  "title": "ariadnev web deployment input v1",
   "description": "Immutable input authority for a staging or production deployment. Every reference is a full commit SHA or a content digest; no branch name, tag alias, or 'latest' is representable.",
   "type": "object",
   "additionalProperties": false,
@@ -34,7 +34,7 @@
       "additionalProperties": false,
       "required": ["tag", "version", "coreSha"],
       "properties": {
-        "tag": { "type": "string", "pattern": "^vcskill@[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$" },
+        "tag": { "type": "string", "pattern": "^ariadnev@[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$" },
         "version": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$" },
         "coreSha": { "type": "string", "pattern": "^[a-f0-9]{40}$" }
       }

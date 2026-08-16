@@ -125,7 +125,7 @@ export function verifyPolicy(policy, environment) {
   }
   // A rule scoped to one hostname must not affect any other host on the zone.
   for (const path of policy.mustBlock) {
-    if (matches(expression, "other.vchun.dev", path)) failures.push({ path, expected: "host-scoped", actual: "cross-host block" });
+    if (matches(expression, "other.ariadnev.com", path)) failures.push({ path, expected: "host-scoped", actual: "cross-host block" });
   }
   return { environment, hostname, expression, failures, digest: digestPolicy(policy, environment) };
 }

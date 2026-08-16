@@ -16,7 +16,7 @@
 //   - `docs/{en,vi}/{version}/**.mdx` — one MDX file per catalog page.
 //   - `bundle/` — the verified payload of the bundle, for tests and audits.
 //
-// The bundle is verified with `@vcskill-web/contracts` before a single byte of
+// The bundle is verified with `@ariadnev-web/contracts` before a single byte of
 // it is read; the trusted schema digest lives in that package. The result is
 // deterministic: the same pin, bundle, and authored tree produce byte-identical
 // output, which `tests/docs/content-pipeline.test.mjs` asserts.
@@ -301,6 +301,8 @@ export function buildContentRoot(options) {
       pageCount: entries.length,
       bundleDigest: sha256(archive),
       publishedAt: toIsoInstant(pin.publishedAt),
+      /** Absolute path of the detached release manifest, for the docs deployment to serve verbatim. */
+      manifestPath: resolve(repositoryRoot, pin.manifest),
     };
   } catch (error) {
     rmSync(staging, { recursive: true, force: true });

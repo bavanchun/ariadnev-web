@@ -44,7 +44,7 @@ hand-edit anything in `dist/`.
 
 ```css
 /* apps/site */
-@import "@vcskill-web/tokens/site.css";
+@import "@ariadnev-web/tokens/site.css";
 ```
 
 Then reference semantic roles, never a raw palette step:
@@ -109,7 +109,7 @@ capped at `--vcs-size-prose-max`; marketing layout is capped at
 ## Changing a token
 
 1. Edit `packages/tokens/src/tokens.json`.
-2. Run `pnpm --filter @vcskill-web/tokens run build`.
+2. Run `pnpm --filter @ariadnev-web/tokens run build`.
 3. Commit both the source and the regenerated `dist/*.css`.
 
 `tests/tokens/` will fail if the committed CSS is stale, if a text role drops

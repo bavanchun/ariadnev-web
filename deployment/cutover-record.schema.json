@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://vcskill.vchun.dev/schemas/cutover-record-v1.schema.json",
-  "title": "vcskill web cutover record v1",
+  "$id": "https://ariadnev.com/schemas/cutover-record-v1.schema.json",
+  "title": "ariadnev web cutover record v1",
   "description": "Versioned, sanitized lifecycle evidence for one deployment attempt. Phase 11 rehearses this format, Phase 12 supplies live records, and Phase 13 consumes it read-only without inventing a new format.",
   "type": "object",
   "additionalProperties": false,

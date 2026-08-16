@@ -36,7 +36,7 @@ function baseInput(overrides = {}) {
     topology: "candidate-b",
     productSha: PRODUCT_SHA,
     qualificationEvidenceSha: EVIDENCE_SHA,
-    release: { tag: "vcskill@0.12.0", version: "0.12.0", coreSha: CORE_SHA },
+    release: { tag: "ariadnev@0.12.0", version: "0.12.0", coreSha: CORE_SHA },
     digests: { docsBundle: digest("a"), docsManifest: digest("b"), docsSchema: digest("c"), checksums: digest("d") },
     units: ["docs", "edge"],
     ingressPolicyDigest: digest("e"),

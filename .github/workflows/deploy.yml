@@ -1,4 +1,4 @@
-# Reusable deploy for the vcskill web surface.
+# Reusable deploy for the ariadnev web surface.
 #
 # The same workflow body runs staging and production; only the environment and
 # its protection rules differ. That is deliberate — Phase 11 qualifies exactly

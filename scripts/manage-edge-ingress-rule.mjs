@@ -108,7 +108,7 @@ export async function reconcile({ environment, apply, token, zoneId, fetchImpl =
   else {
     await request(`/zones/${resolvedZoneId}/rulesets`, {
       method: "POST",
-      body: { name: "vcskill edge ingress", kind: "zone", phase: RULESET_PHASE, rules: [desired] },
+      body: { name: "ariadnev edge ingress", kind: "zone", phase: RULESET_PHASE, rules: [desired] },
     });
   }
   outcome.applied = true;
