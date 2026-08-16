@@ -1,145 +1,191 @@
 ---
 phase: 1
-title: "Contract gate & measurement spike"
+title: "Contract gate and measurement spike"
 status: pending
 priority: P1
-effort: "3-4d"
+effort: "4-5d"
 dependencies: []
 ---
 
-# Phase 1: Contract gate & measurement spike
+# Phase 1: Contract gate and measurement spike
+
+## Context
+
+- [Plan](./plan.md)
+- [Audit](../reports/audit-260816-2007-ui-ux-whole-site.md)
+- [Brainstorm](../reports/brainstorm-260816-2324-living-execution-atlas.md)
 
 ## Overview
 
-Prove the machine-owned facts the rest of the plan depends on **before** any
-token, shell, or visual work lands. Kongming (via the Living Execution Atlas
-brainstorm) returned NO-GO for implementation until this phase passes: the
-binding concerns are CLI command identity, retired-route behavior, real
-content scale, and static bundle headroom. Every downstream phase adjusts
-based on numbers this phase measures.
+Resolve every load-bearing contract before product UI changes. This phase is a
+hard gate: downstream phases cannot start until command identity, catalog
+metadata, safe component boundaries, Fumadocs adoption, and independent
+performance budgets have measured decisions.
 
 ## Requirements
 
-- Functional: (a) a committed, machine-owned CLI command contract with
-  immutable identity, unique slug, and legacy anchor mapping; (b) a Fumadocs
-  UI spike that measures `DocsLayout` and primitive-level adoption against
-  localization, theming, keyboard, static-export, and size gates; (c)
-  measured route cardinality and byte budget for the projected +318 HTML
-  routes plus +318 Markdown discovery outputs; (d) a written historical
-  policy: when to generate per-command detail pages for previous stable.
-- Non-functional: no product code merged from the spike — the spike's
-  output is measurement and a recommendation. Only the contract files
-  (fixture, schema, retired-route mapping, historical policy) merge.
+- Define immutable command identity, canonical slug, legacy anchors, aliases,
+  edition availability, siblings, navigation visibility, and retired routes.
+- Define additive catalog metadata: `pageKind`, `screenKind`, `section`,
+  `navigationVisibility`, and sibling semantics.
+- Decide how safe docs components render while search and static discovery
+  continue receiving clean Markdown.
+- Compare current shell, full Fumadocs `DocsLayout`, and selective primitives.
+- Investigate whether aligning Fumadocs MDX 15.2.3 with Core/UI 16.14.3 is
+  officially supported and passes existing contracts.
+- Measure route transfer separately from total output, search/discovery, and
+  build cost.
+- Record pre-change outcome evidence for the eight critical user tasks so Phase
+  7 can compare usability without relying on subjective visual preference.
+- Preserve all locked scope. No implementation shortcut may remove historical
+  pages, aliases, locale/version variants, or no-JS behavior.
 
 ## Architecture
 
-Three separate but co-committed artifacts:
+### Command and route contract
 
-- **Command identity contract.** A machine-owned record per command with
-  `sourceIdentity`, immutable `commandId`, `canonicalSlug` (collision-checked
-  against the identity), zero or more `legacyAnchors`, per-locale/version
-  `availability`, `siblings` where they truly exist, `pageKind`, and
-  `navigationVisibility`. If the upstream release bundle cannot supply
-  `commandId`, this phase commits a slug registry under
-  `packages/contracts/src/cli-command-registry.ts` plus a retired-path map,
-  and downstream phases treat that as authority.
-- **Fumadocs UI spike.** A throwaway branch renders the same reference page
-  three ways: (1) current bespoke shell, (2) full `DocsLayout` adoption,
-  (3) primitive-level adoption for TOC, sidebar, code block, callout, tab.
-  Each variant measured against: (a) EN + VI chrome parity, (b) dark-only
-  theming without a light-mode leak, (c) keyboard journey (skip link → nav
-  → any page → back), (d) static export success on both apps, (e) shipped
-  bytes per route. The spike merges as a *decision doc*, not code — one
-  variant wins and Phase 3 knows which.
-- **Cardinality + budget measurement.** Generate the +318 detail pages
-  behind a feature flag in the spike branch, measure actual `apps/docs/out`
-  bytes, search-index size, `llms.txt` line count, and build wall time.
-  Compare to the current 300,000-byte cap and to the sampled 297,860-byte
-  observation. Write the numbers into the decision doc; propose a budget
-  bump only if the measurement forces it.
+Each command record contains:
 
-## Related Code Files
+- immutable `commandId` from upstream, or repository-owned registry identity;
+- `sourceIdentity`, collision-checked `canonicalSlug`, and `legacyAnchors`;
+- aliases as metadata, never extra routes;
+- locale/version availability and real previous/next siblings;
+- `pageKind: "command"` and `navigationVisibility: "reference-only"`;
+- retired slug → replacement/tombstone policy.
 
-- Create: `packages/contracts/src/cli-command-registry.ts` (only if the
-  release bundle cannot supply immutable `commandId`)
-- Create: `packages/contracts/src/cli-command.schema.ts` — schema for the
-  contract record, one export consumed by the docs content generator and
-  by the contract test
-- Create: `tests/contracts/cli-command-contract.test.ts` — asserts slug +
-  legacy-anchor uniqueness, no orphaned aliases, historical policy
-  consistency
+If upstream has no immutable ID, create a committed registry and retired-route
+map. A rename updates the map; it never silently changes an established URL.
+
+### Catalog contract
+
+Extend the generated catalog schema additively. Current page behavior remains
+valid while later phases gain stable page/screen metadata. Command detail pages
+remain discoverable by search and static discovery but absent from global
+sidebar enumeration.
+
+### Safe component contract
+
+Current `public-markdown.ts` rejects all MDX JSX. The spike compares:
+
+1. Pure Markdown plus global standard-element mappings.
+2. Exact-name safe MDX components with literal, schema-validated attributes and
+   a deterministic plain-Markdown transform for search/`llms.txt`.
+3. Screen-specific React chrome outside the MDX body.
+
+Expressions, imports/exports, arbitrary component names, event handlers, HTML,
+and URL-bearing unvalidated props stay forbidden. Choose the smallest model that
+can implement D03–D17 without duplicating source facts.
+
+### Fumadocs spike
+
+Render all three shell variants against the four stress frames:
+
+- CLI reference at 320px;
+- provider reference at 320px;
+- desktop CLI lookup/orientation;
+- complete VI shell and chrome.
+
+Measure localization, dark-only theming, keyboard behavior, no-JS fallback,
+static export, per-route transfer, and implementation surface. Full
+`DocsLayout` is not presumed to win.
+
+### Performance measurements
+
+Record:
+
+- compressed transfer for installation, docs home, CLI index, one command,
+  provider, skills, and workflow routes;
+- total `apps/docs/out` bytes and file count;
+- search-index bytes per locale/version partition;
+- `llms.txt`, `llms-full.txt`, and Markdown discovery count/bytes;
+- route cardinality, build wall time, and peak memory.
+
+Current data projects +212 HTML routes for current-only command details and
++318 HTML plus +318 Markdown outputs when previous stable is included. Measure,
+do not treat projection as proof.
+
+### Critical task baseline
+
+Record route correctness, purposeful interaction count, required-fact
+visibility, recovery success, and controlled-environment elapsed time for:
+locale choice, installation, first install, exact-command lookup, provider
+comparison, workflow understanding, unavailable-context recovery, and
+migration-risk recognition. Time is diagnostic, not a frozen gate unless the
+measurement environment is repeatable.
+
+## Related code files
+
+- Create conditionally: `packages/contracts/src/cli-command-registry.ts`
+- Create: `packages/contracts/src/cli-command-contract.ts`
+- Modify: `packages/contracts/src/index.ts`
+- Modify: `apps/docs/src/lib/content-catalog.ts`
+- Modify: `scripts/docs-content/build-content-root.mjs`
+- Create: `tests/contracts/cli-command-contract.test.ts`
+- Modify: `tests/docs/content-pipeline.test.mjs`
 - Create: `docs/decisions/cli-command-identity-and-retired-routes.md`
-- Create: `docs/decisions/fumadocs-ui-adoption-spike.md` — spike results,
-  the winning variant, and the exact reason it won
-- Create: `docs/decisions/docs-static-budget-after-cli-split.md` — measured
-  cardinality and bytes; explicit budget decision (keep vs bump vs shrink
-  shell)
-- Modify (spike branch only, not merged): `scripts/docs-content/
-  render-reference-pages.mjs`, `apps/docs/src/components/docs-shell.tsx`,
-  `packages/tokens/src/tokens.json` — enough to measure the three variants
+- Create: `docs/decisions/docs-catalog-and-safe-components.md`
+- Create: `docs/decisions/fumadocs-ui-adoption-spike.md`
+- Create: `docs/decisions/docs-performance-baselines.md`
+- Create: `docs/decisions/critical-user-task-baseline.md`
+- Spike only, do not merge: docs shell/reference/token experiments needed for
+  measurement.
 
-## Implementation Steps
+## Implementation steps
 
-1. **Command identity survey.** Enumerate every command the current release
-   bundle carries. If the bundle already supplies an immutable identity,
-   consume it. Otherwise stand up the slug registry and populate it from
-   the current 53 commands plus the 53 historical.
-2. **Legacy anchor mapping.** Read the current `/reference/cli/` monolith;
-   extract every `#anchor` a reader could deep-link to. Write the map
-   canonical → new detail URL. Legacy anchors stay as index targets in the
-   monolith; no JavaScript redirect.
-3. **Historical policy.** Codify the report's rule: generate detail pages
-   whenever the historical source contains the command; command aliases
-   remain searchable metadata and legacy anchors, not additional canonical
-   routes. Add this to the decision doc.
-4. **Contract test.** Assert slug + legacy-anchor uniqueness, alias
-   correctness, historical availability consistency, and that no test
-   fixture invents a sibling for a command a version does not have.
-5. **Fumadocs spike branch.** Render one representative reference page
-   three ways. Run the five gates against each. Record numbers and
-   qualitative observations.
-6. **Cardinality + budget measurement.** In the spike branch, generate
-   +318 detail pages behind a flag. Measure end-to-end. Compare to cap.
-7. **Decision docs.** Three files: CLI identity, spike winner, budget
-   decision. Each names the observation that forced the choice.
-8. **Merge.** Only the contract, schema, tests, and decision docs merge.
-   The spike branch is preserved as a git ref for review, not merged.
+1. Baseline current route counts, route-transfer budgets, output bytes, search
+   partitions, discovery outputs, build duration, and memory.
+2. Enumerate 53 current and 53 historical command records; confirm path sets and
+   source fields.
+3. Add immutable identity or registry, slug/anchor collision checks, alias
+   policy, sibling rules, and retired-route mapping.
+4. Add additive catalog metadata and tests for sidebar visibility, locale,
+   version, page kind, and screen kind.
+5. Prototype the three safe-component approaches; prove search and discovery
+   remain plain, deterministic, and public-safe.
+6. Render current/full/selective Fumadocs variants against all four stress
+   frames. Record bytes and behavior.
+7. Test the supported Fumadocs version-alignment option. Retain mixed-major pins
+   if alignment fails any gate.
+8. Generate projected command routes only in the spike; collect all four
+   performance metric groups.
+9. Capture the eight critical-task baselines using fixed routes, queries, and
+   expected facts.
+10. Write five decision records with observations, winner, rejected alternatives,
+   and stop conditions.
+11. Merge contracts, tests, and decisions only. Remove spike product code.
 
-## Success Criteria
+## Success criteria
 
-- [ ] CLI command contract exists with immutable identity per command and
-      passes uniqueness/consistency tests.
-- [ ] Legacy anchor map committed; every current `#anchor` maps to exactly
-      one canonical detail URL.
-- [ ] Historical policy written and consumed by the contract test.
-- [ ] Fumadocs UI spike decision doc names the winning variant and the
-      exact gate that decided it.
-- [ ] Budget decision doc reports actual measured bytes, search-index
-      growth, build wall time, and one of: **hold** (fits), **shrink**
-      shell (fits after trim), or **bump** (owner-approved).
-- [ ] `pnpm run test:qualification` green with the new contract test.
-- [ ] No production `apps/docs` code merged from the spike branch; only
-      contracts and decision docs.
+- [ ] Every command has immutable identity or registry identity.
+- [ ] Slug, page ID, and legacy anchors are unique.
+- [ ] Retired URL and historical availability behavior is tested.
+- [ ] Catalog metadata supports all page kinds and navigation visibility.
+- [ ] Safe-component decision preserves clean search/discovery Markdown.
+- [ ] All Fumadocs variants are measured on all four stress frames.
+- [ ] Version alignment is either qualified or explicitly rejected.
+- [ ] Route transfer, output, search/discovery, and build budgets are separate.
+- [ ] All eight critical tasks have reproducible pre-change outcome evidence.
+- [ ] No frozen budget is increased and no locked scope is removed.
+- [ ] `pnpm run test:qualification` passes with merged contract changes.
+- [ ] Downstream implementation gate is explicitly marked pass.
 
-## Risk Assessment
+## Risk assessment
 
-- **Upstream bundle has no immutable command identity.** Signal: the
-  release bundle only ships command names as strings that could be
-  renamed. Pre-decided response: commit the slug registry as authority
-  and treat renames as retired-route events; the historical policy already
-  accepts that shape.
-- **Fumadocs full adoption fails one gate; primitive-level fails another.**
-  Signal: no variant passes cleanly. Response: rank the failing gates by
-  cost to fix; pick the variant with the cheapest gate-repair; if all
-  three are cheap, keep the bespoke shell to avoid new transitive
-  dependencies.
-- **Measured bytes blow the budget.** Signal: docs page exceeds
-  300,000-byte cap with +318 detail pages. Pre-decided response, in order:
-  (1) shrink the shell (drop transitions, defer non-critical CSS,
-  virtualize sidebar); (2) reduce concurrent chunk load; (3) as a last
-  resort, propose a budget bump and require the deployment contract
-  owner to approve it explicitly — do not bump silently.
-- **Build wall time grows past the release runner's budget.** Signal:
-  qualification job doubles. Response: parallelize per-locale generation
-  in `build-content-root.mjs`; do not skip the historical projection to
-  paper over cost.
+- **No immutable upstream identity.** Use committed registry plus retired map.
+- **No safe component model preserves discovery output.** Keep source pure
+  Markdown and place visual structures outside MDX; do not relax safety.
+- **No Fumadocs option passes all gates.** Keep bespoke shell and selectively
+  copy only proven behavior.
+- **Per-route transfer exceeds the frozen cap.** Shrink shell/client behavior;
+  if still impossible, stop for user decision.
+- **Output/build cost grows too far.** Optimize deterministic generation and CI
+  sharding. Historical scope stays; unresolved cost blocks the phase.
+- **Spike leaves background processes.** Use deterministic ports, record every
+  PID, and stop all spike servers before phase completion.
+
+## Security considerations
+
+- Registry and catalog accept only normalized safe path segments.
+- Safe components prohibit expressions, imports, event handlers, arbitrary HTML,
+  and unvalidated URLs.
+- Spike artifacts contain no tokens, private release data, or local paths.

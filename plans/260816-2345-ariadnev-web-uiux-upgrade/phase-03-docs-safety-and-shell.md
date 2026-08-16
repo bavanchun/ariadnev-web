@@ -1,220 +1,176 @@
 ---
 phase: 3
-title: "Docs safety and shell"
+title: "Docs safety, shell, and shared interactions"
 status: pending
 priority: P1
-effort: "7-10d"
+effort: "7-9d"
 dependencies: [1, 2]
 ---
 
-# Phase 3: Docs safety and shell
+# Phase 3: Docs safety, shell, and shared interactions
+
+## Context
+
+- [Plan](./plan.md)
+- Phase 1 catalog/Fumadocs/safe-component decisions.
+- Phase 2 tokens.
 
 ## Overview
 
-Fix the docs product's structural defects in the order the brainstorm requires:
-**clipping and semantics first**, then navigation, search, active TOC,
-localization, and page templates. This phase absorbs the audit's P0/P1
-mobile-navigation work into the same PR range as the shell rewrite so the shell
-does not merge on top of a still-clipping surface.
+Fix every shared docs safety and navigation defect before page-specific visual
+work. Deliver one responsive shell and complete interaction grammar for
+navigation, search, locale/version switching, TOC, pager, headings, and copy.
 
 ## Requirements
 
-- Functional (safety, ships first inside this phase): no viewport ≤390px clips
-  content; all 15 authored pages discoverable without horizontal swipe; the
-  locale/version switcher's Lighthouse accessibility-name mismatch cleared;
-  `role="menu"` gets full keyboard behavior *or* is replaced with a disclosure
-  + `<a>`; dark `color-scheme` and `theme-color` set; anchored headings honor
-  a scroll-margin token; modal has `overscroll-behavior: contain`.
-- Functional (shell): sidebar groups pages under section headings and marks
-  the current one; mobile drawer exposes the same grouped tree and closes on
-  navigation; desktop TOC tracks the active heading via IntersectionObserver
-  with prefers-reduced-motion honored; breadcrumb reads `Docs / <section> /
-  <page>` in the active locale; every content page ends with a previous/next
-  pager honoring section boundaries; page-kind templates render landing,
-  concept, guide, reference, and release-note pages instead of forcing every
-  page through one composition; sticky header does not overlap anchored
-  headings.
-- Functional (VI): all application chrome — sidebar section names, TOC title,
-  pager labels, breadcrumb section, empty state, skip link, switcher labels,
-  search dialog copy, status announcements — is localized.
-- Non-functional: keyboard-only journey from skip link to any page and back;
-  screen-reader landmark structure retained; consumes only Phase 2 tokens
-  (no ad hoc CSS state layers); consumes the Fumadocs variant chosen by
-  Phase 1's spike; static-size budget from Phase 1's measurement respected.
+- No masked page overflow. Provider, CLI, workflow, code, and guide content stay
+  reachable at 320/375/390.
+- Grouped desktop sidebar and explicit mobile navigation expose every published
+  page for the selected locale/version.
+- Sticky header, viewport-safe rails, section-aware breadcrumb, active TOC, and
+  previous/next pager never obscure focus or anchors.
+- All application chrome and announcements are localized EN/VI.
+- Search supports empty suggestions, loading, grouped results, focused result,
+  zero result, partition failure, and focus restoration.
+- Locale/version controls use honest native semantics and explicit URL outcomes.
+- Copy states are local, stable, localized, and retain manual fallback.
+- Shell works with no JavaScript; JavaScript only enhances drawer, active TOC,
+  search, and copy.
+- Consume the Phase 1 Fumadocs decision and Phase 2 tokens.
 
 ## Architecture
 
-The shell splits into three responsibilities, sequenced so safety merges
-first:
+### Static shell
 
-- **Safety pass (internal step 1).** Overflow honesty on both apps; drawer
-  MVP replacing the horizontal nav strip; switcher semantics (visible ==
-  accessible; disclosure + `<a>` unless full menu keyboard behavior is
-  implemented); dark `color-scheme` and `theme-color`; scroll-margin on
-  anchored headings; modal overscroll; chrome strings module for VI.
-- **`docs-shell.tsx` (structural).** Owns the layout grid, sticky header
-  slot, sidebar mount, TOC mount, breadcrumb, and pager. Reads catalog page
-  metadata and current page from props; makes no fetches, no client-only
-  data. Consumes Phase 2 shell-dimension tokens.
-- **`docs-sidebar.tsx` (new).** Renders the grouped tree from catalog data.
-  Section headings derive from the first slug segment. On desktop, groups
-  are collapsible (`<details>`); the current section is always forced open
-  by URL, so no memory is needed to satisfy the URL-only rule. On mobile,
-  the sidebar is the drawer body.
-- **`docs-toc.tsx` (new).** Reads headings from the rendered article, wires
-  an IntersectionObserver to mark the active one, and renders nested `<ol>`
-  by heading level. Empty TOC renders nothing.
-- **`docs-pager.tsx` (new).** Derives sibling order from the catalog sort
-  key on `content-catalog.ts:287`, so pager order and sidebar order share
-  one authority. Section boundaries surface as
-  `Next section: <localized name>` not silent jumps.
-- **Page-kind templates.** `page.tsx` picks a template from the catalog
-  entry's `pageKind` (from Phase 1's contract): `landing`, `concept`,
-  `guide`, `reference`, `release-note`. Each template composes title,
-  description, primary action, and body slots differently. Command detail
-  pages stay out of the global sidebar to avoid navigation noise (per the
-  brainstorm's CLI contract).
+Server-render:
 
-If Phase 1's spike picked full `DocsLayout` or primitive-level Fumadocs
-adoption, the file list below reduces: sidebar, TOC, or code block ships as
-a Fumadocs primitive; the wrapper stays local for section grouping and VI
-chrome.
+- skip link and header;
+- docs-home brand for active locale/version;
+- grouped navigation from catalog section metadata;
+- main content with section breadcrumb;
+- static TOC when non-empty;
+- page footer actions and catalog-derived pager.
 
-## Related Code Files
+Desktop uses sticky header/sidebar/TOC with independent, bounded rail scrolling.
+The reading column remains primary.
 
-- Modify: `apps/docs/src/styles/docs.css` — overflow, `color-scheme: dark`,
-  `theme-color`, scroll-margin token, modal `overscroll-behavior`, table
-  wrapper, consume Phase 2 tokens for shell dimensions and state layers;
-  drop ad hoc equivalents
+### Mobile navigation
+
+The navigation tree exists in initial HTML. A native disclosure is the no-JS
+fallback. With JavaScript, enhance it to a modal drawer with:
+
+- focus containment, Escape/backdrop close, focus return;
+- inert/scroll-locked background;
+- current page and group visible on open;
+- locale/version controls after the page tree;
+- route navigation through ordinary links.
+
+Do not implement ARIA menu semantics for document navigation.
+
+### Search
+
+Keep static Orama partitions. Extend the result envelope with page kind/section
+metadata from Phase 1. Search UI groups Guides, Concepts, Commands, Skills,
+Providers, Workflows, and Releases. Focus is not `aria-current`.
+
+Suggested tasks are authored localized links, not search history. Errors retain
+the static navigation escape. Phase 5 adds command/skill-specific indexing and
+deduplication on top of this stable UI contract.
+
+### Locale and version
+
+Use disclosure plus ordinary links. Visible and accessible labels match.
+Sibling route wins when published; otherwise expose an explanatory link to the
+target locale/version root. Explicit URL always wins.
+
+### TOC and anchors
+
+Render nothing for an empty TOC. Desktop/mobile TOCs are bounded. Active heading
+tracking uses IntersectionObserver; reduced motion disables animation, not
+location tracking. Heading permalinks are authored in the render tree where the
+chosen MDX stack permits; hydration injection remains fallback only.
+
+## Related code files
+
+- Modify: `apps/docs/src/styles/docs.css`
+- Modify: `apps/docs/src/app/layout.tsx`
+- Modify: `apps/docs/src/app/[locale]/[version]/[[...slug]]/page.tsx`
 - Modify: `apps/docs/src/components/docs-shell.tsx`
-- Modify: `apps/docs/src/components/locale-version-switcher.tsx` — either
-  full menu keyboard behavior or `<details>` + `<a>` replacement; VI copy
-- Modify: `apps/docs/src/components/search-dialog.tsx` — `aria-current` fix,
-  VI copy, mobile hint, zero-state suggested queries
-- Modify: `apps/docs/src/app/layout.tsx` — `theme-color`, `color-scheme`
-  metadata, dedupe title template
-- Modify: `apps/docs/src/app/[locale]/[version]/[[...slug]]/page.tsx` — mount
-  pager and breadcrumb, pick page-kind template
-- Modify: `apps/docs/src/components/document-copy-enhancer.tsx` — reveal
-  heading link on hover/focus-within instead of the persistent `#` marker
-- Modify: `apps/docs/src/lib/content-catalog.ts` — derive `section` and
-  siblings if not already present; keep contract additive
-- Create: `apps/docs/src/lib/chrome-strings.ts` — EN/VI copy for every
-  chrome surface listed under VI Requirements
+- Modify: `apps/docs/src/components/locale-version-switcher.tsx`
+- Modify: `apps/docs/src/components/search-dialog.tsx`
+- Modify: `apps/docs/src/components/copy-actions.tsx`
+- Modify: `apps/docs/src/components/document-copy-enhancer.tsx`
+- Modify: `apps/docs/src/lib/content-catalog.ts`
+- Modify: `apps/docs/src/lib/search-index.ts`
+- Modify: `apps/docs/scripts/build-search-index.mjs`
+- Create: `apps/docs/src/lib/chrome-strings.ts`
 - Create: `apps/docs/src/components/docs-sidebar.tsx`
+- Create: `apps/docs/src/components/docs-mobile-navigation.tsx`
 - Create: `apps/docs/src/components/docs-toc.tsx`
 - Create: `apps/docs/src/components/docs-pager.tsx`
-- Create: `apps/docs/src/components/page-templates/{landing,concept,guide,reference,release-note}.tsx`
-- Modify: `tests/docs/*` — extend for overflow guard, drawer focus trap,
-  active TOC tracking, pager section boundaries, VI chrome parity,
-  switcher accessible name matches visible label, page-kind template
-  routing
+- Create: `apps/docs/src/components/docs-page-header.tsx`
+- Create: `apps/docs/src/components/previous-edition-notice.tsx`
+- Modify: `tests/docs/shell-accessibility.test.mjs`
+- Modify: `tests/docs/search-isolation.test.mjs`
+- Modify: `tests/docs/static-routing.test.mjs`
+- Add focused browser tests under `tests/docs/` using the existing temporary
+  export/browser helpers.
 
-## Implementation Steps
+## Implementation steps
 
-### Safety first (internal step 1, ships early in the phase)
+1. Write regression tests for current clipping, hidden mobile navigation,
+   switcher name mismatch, empty TOC, English VI chrome, and anchor overlap.
+2. Add one EN/VI chrome-string authority and remove hardcoded reachable labels.
+3. Remove body `overflow-x: hidden`; add local code/table/diagram containment
+   with visible edge affordance and focusable scroll regions.
+4. Add dark `color-scheme`, theme metadata, sticky offsets, anchor
+   scroll-margin, dialog overscroll containment, touch and pressed states.
+5. Implement grouped static sidebar and shared navigation-tree rendering.
+6. Implement no-JS mobile disclosure, then modal-drawer enhancement with full
+   focus and background behavior.
+7. Rebuild locale/version disclosures with available/unavailable route outcomes.
+8. Implement section breadcrumb, page header, previous-edition notice, and
+   section-aware pager.
+9. Implement active bounded TOC and accessible heading permalinks.
+10. Rebuild search UI states, grouping, keyboard behavior, localization, and
+    error recovery. Preserve locale/version partition isolation.
+11. Consolidate page/heading/Markdown copy actions into a compact action group.
+12. Apply the Phase 1 Fumadocs decision; delete superseded bespoke behavior.
+13. Run production static export and focused 320/390 keyboard/no-JS checks.
 
-1. **Chrome strings module.** Extract every hardcoded English label reachable
-   from a VI route into `chrome-strings.ts` keyed by locale. This unblocks
-   switcher, search dialog, drawer, and pager in one place.
-2. **Overflow sweep.** Remove `overflow-x: hidden` from both apps' body/html.
-   Add measured `overflow-x: auto` on `pre`, code blocks, `.docs-table`
-   wrapper, and every explicit wide asset. 320px render pass over provider,
-   CLI, workflows references and every guide.
-3. **Drawer MVP.** `<details>` disclosure at the top of the docs shell on
-   `< md`, listing catalog pages under section headings. This is the safety
-   floor; the polished grouped sidebar replaces it later in the same phase.
-4. **Switcher rework.** Prefer disclosure + `<a>` links; keep the menu only
-   if full keyboard handling (Arrow/Home/End/Escape/focus return/roving)
-   ships in the same edit. Either way, visible label == accessible name.
-5. **Meta.** `color-scheme: dark`, docs `theme-color`, scroll-margin token
-   on anchored headings, `overscroll-behavior: contain` on modal, dedupe
-   `layout.tsx` title template.
+## Success criteria
 
-### Shell (internal step 2)
+- [ ] No docs page-level overflow is masked.
+- [ ] Every published page is reachable in mobile nav without horizontal swipe.
+- [ ] Drawer/disclosure behavior passes pointer, keyboard, Escape, focus return,
+      scroll lock, and no-JS fallback checks.
+- [ ] Sidebar current page and section are distinct from focus/hover state.
+- [ ] Breadcrumb, pager, TOC, search, copy, locale, and version are fully EN/VI.
+- [ ] Previous-edition notice appears on every previous-edition page.
+- [ ] Empty TOC renders nothing; active TOC uses
+      `aria-current="location"`.
+- [ ] Anchored headings and focused controls are not hidden by sticky UI.
+- [ ] Search has deterministic states and never crosses a partition.
+- [ ] Switcher visible text matches its accessible name.
+- [ ] Docs metadata has dark color scheme/theme color and non-duplicated title.
+- [ ] Static export and `pnpm run test:qualification` pass within Phase 1
+      budgets.
 
-6. **Catalog derivations.** Add `section` and sibling links to catalog if
-   not derived already, additively.
-7. **Sidebar.** Ship the grouped desktop tree using `<details open>` per
-   section with the current section forced open; replace the drawer MVP
-   with the same grouped tree in mobile.
-8. **Drawer polish.** Add focus trap on open, restore focus on close,
-   dismiss on route change.
-9. **TOC.** Client component with IntersectionObserver; falls back to
-   static list without tracking dot if JS is disabled or reduced-motion
-   is set.
-10. **Pager.** Consume sibling metadata from the catalog; section boundaries
-    surface with a localized `Next section:` label.
-11. **Breadcrumb + heading link.** Rewrite breadcrumb to expose section;
-    swap the persistent `#` for a reveal-on-hover/focus icon.
+## Risk assessment
 
-### Page-kind templates (internal step 3)
+- **Fumadocs behavior conflicts with dark/localized shell.** Use the next proven
+  Phase 1 variant; do not ship a theming or keyboard leak.
+- **Drawer duplicates the nav tree.** Share one render/data function and test
+  route parity.
+- **Removing overflow mask reveals wide content.** Fix the owning primitive;
+  never restore the mask.
+- **Search grouping increases client bytes.** Keep grouping metadata static and
+  render simple lists; defer no required search state.
+- **Hydrated heading controls shift layout.** Prefer render-time links; reserve
+  geometry if fallback injection remains.
 
-12. **Templates.** One component per page kind (`landing`, `concept`,
-    `guide`, `reference`, `release-note`). `page.tsx` picks by
-    `catalog[currentPage].pageKind` from Phase 1's contract.
-13. **Consume Phase 2 tokens** everywhere; delete surviving ad hoc CSS.
-14. **Fumadocs adoption** to the level Phase 1's spike decided. If
-    `DocsLayout` won, wrap it and inject the grouped sidebar + VI chrome
-    strings; if primitive-level won, adopt TOC / code block / callout
-    from Fumadocs and keep the rest local; if bespoke won, ship as
-    designed above.
+## Security considerations
 
-### Tests (internal step 4)
-
-15. Extend the docs test suite for: no `overflow-x: hidden` on docs body,
-    drawer opens on click and traps focus, VI route renders VI chrome
-    strings, switcher's `aria-label` == visible text, `theme-color`
-    present, sidebar grouped tree in catalog order, TOC updates active
-    heading on simulated scroll, pager crosses section boundaries with
-    labeled hint, page-kind template routes correctly.
-
-## Success Criteria
-
-- [ ] Provider, CLI, and workflow references render without clipping at 320px.
-- [ ] All 15 catalog pages reachable from the drawer at 320px with zero
-      horizontal scroll.
-- [ ] Lighthouse label-content-name mismatch cleared.
-- [ ] `role="menu"` either has full keyboard behavior or has been replaced
-      with `<details>` + `<a>`.
-- [ ] `<html lang="vi">` on VI routes with a regression guard.
-- [ ] Docs `color-scheme: dark` and `theme-color` present in production HTML.
-- [ ] Sidebar groups all 15 pages under section headings in catalog order;
-      current page and section marked.
-- [ ] Mobile drawer traps focus, restores focus on close, dismisses on route
-      change.
-- [ ] Desktop TOC marks the active heading; empty TOC does not render.
-- [ ] Every content page ends with a working previous/next pager respecting
-      section boundaries.
-- [ ] Breadcrumb reads section + title in the active locale.
-- [ ] Sticky header does not overlap anchored headings; scroll-margin honors
-      the header-height token.
-- [ ] VI chrome complete across sidebar, TOC, pager, breadcrumb, switcher,
-      search, and empty states.
-- [ ] Page-kind templates route from `pageKind` metadata; each kind
-      renders a distinct composition.
-- [ ] `pnpm run test:qualification` green; static-size budget respects
-      Phase 1's decision.
-
-## Risk Assessment
-
-- **Fumadocs adoption arrives with unresolved theming leaks.** Signal: dark-
-  only guarantee breaks under `DocsLayout`. Response: fall back to the next
-  spike variant Phase 1 measured; the decision doc names it.
-- **Overflow removal exposes a real regression.** Signal: a route
-  horizontal-scrolls at 320px. Response: this is the intended outcome; fix
-  the underlying overflow (wrap the table, shorten a label) rather than
-  restoring the mask.
-- **Sidebar collapse state fights the URL-only rule.** Signal: users lose
-  expanded groups on navigation. Response: current section always forced
-  open by URL; other sections default closed. No memory needed.
-- **TOC IntersectionObserver mis-tracks on long single-section pages.**
-  Signal: two headings appear active. Response: use root-margin plus a
-  first-in-viewport tiebreak; document the algorithm in code.
-- **Static output budget breaks from added TS.** Signal: Wrangler size test
-  fails. Response: consult Phase 1's budget decision doc first; do not
-  silently bump.
-- **Page-kind template count balloons.** Signal: designs demand a sixth or
-  seventh kind. Response: reuse the existing five; new kinds require a
-  written justification in the Phase 1 contract, not template proliferation
-  in this phase.
+- Dialog/search never render raw HTML from index content.
+- Locale/version URLs come only from validated catalog entries.
+- Search errors expose no filesystem or bundle paths.

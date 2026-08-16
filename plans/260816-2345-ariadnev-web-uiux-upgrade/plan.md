@@ -1,10 +1,13 @@
 ---
 title: "ariadnev web UI/UX upgrade — Living Execution Atlas"
-description: "Rebuild the public web surface as a Living Execution Atlas — an expressive marketing atlas plus an operational field manual — following the delivery sequence in plans/reports/brainstorm-260816-2324-living-execution-atlas.md. Starts with a machine-owned contract gate before touching visuals, and ends with a verification harness the release gate runs on every PR."
+description: "Upgrade every marketing and documentation screen into one premium, static, bilingual Living Execution Atlas without weakening URLs, generated-source authority, accessibility, or performance."
 status: pending
 priority: P1
-effort: "3-4w wall time across six phases"
-tags: [web, docs, site, ux, accessibility, design-system]
+effort: "7-9w critical path with parallel site/docs ownership; 40-53 engineer-days"
+branch: main
+tags: [frontend, docs, ux, accessibility, design-system]
+blockedBy: []
+blocks: []
 created: 2026-08-16
 ---
 
@@ -12,199 +15,213 @@ created: 2026-08-16
 
 ## Overview
 
-Two documents drive this plan:
+This plan implements the complete whole-site audit and screen-by-screen
+brainstorm:
 
-1. **`plans/reports/audit-260816-2007-ui-ux-whole-site.md`** — the
-   whole-site UI/UX audit that graded the marketing site 7–8/10 and docs
-   4–5/10, and enumerated every P0–P3 finding with file paths.
-2. **`plans/reports/brainstorm-260816-2324-living-execution-atlas.md`** —
-   the direction-setting brainstorm that named the target ("Living
-   Execution Atlas"), the delivery sequence, the CLI contract this plan
-   must respect, and Kongming's NO-GO for implementation until a
-   contract-and-measurement phase passes.
+- [Whole-site UI/UX audit](../reports/audit-260816-2007-ui-ux-whole-site.md)
+- [Living Execution Atlas brainstorm](../reports/brainstorm-260816-2324-living-execution-atlas.md)
 
-The plan implements the brainstorm's six-step sequence. Phase 1 is the
-contract gate — no visuals move until command identity, retired-route
-behavior, Fumadocs adoption, and static bundle budget are measured and
-committed as decisions. Phase 3 folds the audit's mobile-safety fixes in
-front of the shell rewrite in the same phase so shell work never merges on
-top of a clipping surface.
+The target has two registers:
 
-## Contract (2026-08-16)
+- **Marketing is the expressive atlas:** memorable execution narrative,
+  truthful topology, distinct macro-compositions, native mobile art direction.
+- **Docs is the operational field manual:** fast orientation, exact lookup,
+  page-specific task structures, generated references, complete EN/VI chrome.
 
-**Outcome.** The docs product supports both tasks (guides) and lookup
-(references) at 320/375/390/768/1440 without clipping, hidden navigation, or
-locale-untranslated chrome. The marketing site leads with a live execution
-path across five distinct macro-compositions. Both surfaces share the same
-semantic state vocabulary through tokens, not through copied framework
-components.
+Phase 1 is a hard implementation gate. It resolves immutable command identity,
+retired URLs, Fumadocs adoption, safe MDX components, route cardinality, and
+separate performance budgets before product UI changes begin.
 
-**Constraints.**
+## Delivery contract
 
-- Preserve execution-cartography identity: ink, graphite, cool white,
-  spectral blue for live execution, copper for human gates, drafted
-  geometry. No new accent families, decorative gradients, glows, or
-  meaningless looping motion.
-- Preserve public URLs, verified claims, generated-source authority
-  (`packages/contracts`, `packages/tokens/dist/*`), locale/version
-  contracts, static delivery, and existing performance and accessibility
-  gates.
-- Continue supporting EN and VI with complete application-chrome
-  localization.
-- Treat real content scale as a design input: 132 TOC entries and 45 tables
-  on the CLI reference; +318 projected HTML routes with historical
-  projection; sampled 297,860 bytes against the 300,000-byte cap.
-- **Keep this redesign dark-only.** Light mode is a separate product and
-  token-system decision, not an incidental addition (brainstorm-locked).
-- Do not hand-edit generated MDX or `packages/tokens/dist/*`.
-- Do not replace semantic HTML with custom ARIA unless full keyboard
-  behavior is implemented (roving focus, Escape, focus return,
-  outside-click).
-- Do not weaken existing token, contrast, font, static-output, or
-  docs-content tests. New tests may be added; existing assertions stay.
-- Every change ships through `pnpm run test:qualification` and the same
-  deployment path the 1.1.0 cutover used.
+### Outcome
 
-**Non-goals.**
+- Upgrade M01–M02 and D00–D18 from the brainstorm, including shared shells,
+  overlays, error states, no-JS behavior, responsive variants, and verification.
+- Preserve one visual system across Astro marketing and Next/Fumadocs docs
+  without sharing framework components across apps.
+- Make every current docs route useful for its actual job: task completion,
+  conceptual understanding, lookup, historical reference, or recovery.
 
-- No rebrand, new positioning, invented metrics, testimonials, or backend
-  work.
-- No framework migration for prestige alone (Astro for site, Next+Fumadocs
-  for docs stay).
-- No cinematic WebGL/Three.js, perpetual animation, or dependency-heavy
-  interaction system.
-- No new locale beyond EN/VI.
-- No CMS. Authored content stays MDX; generated content stays
-  bundle-derived.
+### Constraints
 
-**Acceptance criteria (whole plan; each phase carries its own).**
+- Preserve execution cartography: ink, graphite, cool white, spectral blue for
+  live execution/witness, copper for human gates, drafted geometry.
+- Dark-only in this delivery. No new accent family, decorative body gradient,
+  glow, ambient loop, WebGL, Three.js, or framework migration.
+- Keep Astro 7 static marketing and Next 16/React 19/Fumadocs docs unless Phase
+  1 proves a narrow compatibility change is required.
+- Preserve verified claims, public URLs, locale/version routing, static output,
+  generated release authority, no-JS navigation, and EN/VI.
+- Do not hand-edit generated MDX or token output.
+- Any Radix, Motion, or other transitive capability imported by application code
+  must become a direct dependency of the owning package; do not rely on a
+  transitive install.
+- Do not weaken existing tests or frozen budgets. A budget change requires a
+  separate explicit user decision; a heavier shell alone is not justification.
+- No user-approved scope item may be deferred by a phase-level risk response.
 
-- Zero clipped content at 320/375/390/768/1440 across site, docs shell,
-  and all 15 authored pages plus every generated page.
-- All application chrome localized for VI in addition to EN.
-- CLI reference is split per Phase 1's contract: index at `/reference/cli/`
-  preserves every legacy anchor as a visible DOM target; per-command
-  detail at `/reference/cli/<slug>/`; historical stables carry detail
-  pages only where the source contains the command; no JavaScript
-  redirect.
-- Shared design tokens define state layers, code/data surfaces, and shell
-  dimensions; docs and site both consume them from `packages/tokens`.
-- Screenshot baselines exist at 320/375/768/1280/1440 for the routes
-  named in Phase 6; the harness fails a PR that regresses them without
-  an explicit baseline update.
-- The four brainstorm-mandated stress frames pass every run: CLI at
-  320px, provider at 320px, desktop CLI lookup, complete VI route.
-- Lighthouse accessibility ≥95 on production output for both apps.
-- A no-JavaScript journey reaches a CLI command detail page from
-  `/reference/cli/` in server HTML alone.
-- All existing `test:qualification` gates stay green; new tests added by
-  this plan run in the same command.
+### Non-goals
 
-## Goals
+- No rebrand, CMS, backend work, new locale, testimonials, invented data,
+  personalization, remembered locale, or automatic locale redirect.
+- No individual skill-detail pages. D15 remains a searchable static catalog.
+- No alias routes for commands. Aliases are search metadata and legacy anchors.
+- No visual-only replacement of semantic HTML or textual graph equivalents.
 
-| # | Goal | Priority |
-|---|------|----------|
-| 1 | Prove the CLI command contract, historical policy, Fumadocs adoption, and static bundle budget with measurement — no visuals until this passes | P1 |
-| 2 | Extend shared tokens so site and docs stop diverging invisibly | P1 |
-| 3 | Fix the docs product's P0 clipping/discoverability defects and ship the real shell in the same range | P1 |
-| 4 | Ship generated references through primitives with a per-command CLI URL and preserved legacy anchors | P1 |
-| 5 | Recompose the marketing home into five distinct macro-sections led by the execution path | P2 |
-| 6 | Prevent regression with a real screenshot + axe + no-JS + stress-frame harness | P1 |
+## Screen coverage
+
+| Surface | IDs | Owning phase |
+|---|---|---|
+| Marketing home + site 404 | M01–M02 | 6 |
+| Docs chooser, current/previous homes, authored screens, not-found | D00–D11, D18 | 4 |
+| CLI index/detail, providers, skills, workflows, release notes | D12–D17 | 5 |
+| Header, footer, docs shell, drawer, search, switchers, TOC, pager, copy states | Shared | 3, then consumed by 4–6 |
+| Deterministic visual, keyboard, no-JS, i18n, a11y, performance gates | All | 7 |
+
+All 36 catalog entries are route variants of these screen contracts.
+Current stable has 15 catalog pages per locale: 10 authored pages including the
+home plus five generated pages. Previous stable has three pages per locale.
+Command-detail routes add one D13 instance per available command.
 
 ## Phases
 
 | # | Phase | Depends on | Status |
-|---|-------|------------|--------|
-| 1 | [Contract gate & measurement spike](./phase-01-contract-gate-and-measurement-spike.md) | — | Pending |
-| 2 | [Shared design tokens and shell primitives](./phase-02-shared-design-tokens-and-shell-primitives.md) | 1 | Pending |
-| 3 | [Docs safety and shell](./phase-03-docs-safety-and-shell.md) | 1, 2 | Pending |
-| 4 | [Generated reference experience](./phase-04-generated-reference-experience.md) | 1, 2 | Pending |
-| 5 | [Marketing recomposition](./phase-05-marketing-recomposition.md) | 2 | Pending |
-| 6 | [Full verification](./phase-06-full-verification.md) | 1, 2, 3, 4, 5 | Pending |
+|---|---|---|---|
+| 1 | [Contract gate and measurement spike](./phase-01-contract-gate-and-measurement-spike.md) | — | Pending |
+| 2 | [Shared design tokens and foundations](./phase-02-shared-design-tokens-and-shell-primitives.md) | 1 | Pending |
+| 3 | [Docs safety, shell, and shared interactions](./phase-03-docs-safety-and-shell.md) | 1, 2 | Pending |
+| 4 | [Authored docs screen experiences](./phase-04-authored-docs-screen-experiences.md) | 1, 2, 3 | Pending |
+| 5 | [Generated reference experiences](./phase-05-generated-reference-experience.md) | 1, 2, 3, 4 | Pending |
+| 6 | [Marketing surfaces](./phase-06-marketing-surfaces.md) | 1, 2 | Pending |
+| 7 | [Full deterministic verification](./phase-07-full-deterministic-verification.md) | 1–6 | Pending |
 
-Phase 1 is Kongming's NO-GO gate: nothing downstream begins without its
-decision docs. Phases 3, 4, and 5 may run in parallel after Phases 1 and 2
-land — file ownership is disjoint (docs shell, generated renderer,
-marketing components). Phase 6 is deliberately last; adding a screenshot
-harness during composition churn produces churn, not signal.
+Phases 3→4→5 are sequential because they share catalog metadata, safe MDX
+components, search, and page templates. Phase 6 may run after Phase 2 in
+parallel with the docs sequence because it owns only `apps/site` and site tests.
+Phase 7 integrates both surfaces after composition stabilizes.
+
+The 7–9 week wall-time estimate assumes Phase 6 has an independent site owner
+after Phase 2. A single implementation stream is approximately 8–11 weeks.
+These ranges include design checkpoints and deterministic verification, not
+only coding time.
 
 ## Locked decisions
 
-- **Living Execution Atlas as target direction.** Marketing is the
-  expressive atlas; docs is the operational field manual. Same tokens,
-  typography, geometry, state vocabulary, and topology language; different
-  section templates and motion intensity (brainstorm-locked).
-- **Dark-only for this redesign.** Light mode is deliberately out of
-  scope. It becomes a separate product decision with its own token,
-  contrast, and metadata work — not an incidental addition here
-  (brainstorm-locked).
-- **CLI reference split per command with the aggregate preserved as an
-  index.** Every command has a canonical `/reference/cli/<slug>/`. The
-  aggregate at `/reference/cli/` becomes a summary index and keeps every
-  legacy `#anchor` as a visible DOM target linking to the canonical
-  detail. No JavaScript redirect (brainstorm-locked; user-confirmed
-  2026-08-16).
-- **VI locale is URL-only.** No cookie, no localStorage, no auto-redirect.
-  Deep links stay predictable and there is no cookie-banner question
-  to litigate (brainstorm-locked; user-confirmed 2026-08-16).
-- **Historical projection.** Detail pages are generated whenever the
-  historical bundle contains the command. Aliases stay as searchable
-  metadata + legacy anchors, not additional canonical routes
-  (brainstorm-locked; formalized in Phase 1's contract).
-- **`@axe-core/playwright` is a direct dev dep.** Not a transitive import
-  (brainstorm-locked; wired in Phase 6).
+- Living Execution Atlas; same tokens and semantics, different marketing/docs
+  expression.
+- Dark-only.
+- Explicit locale URLs; no cookie, localStorage, or redirect preference.
+- CLI aggregate stays at `/reference/cli/`; command details use
+  `/reference/cli/<slug>/`.
+- Existing CLI fragments remain visible index targets; no JavaScript redirect.
+- Historical detail pages ship whenever historical source contains the command.
+  If budgets fail, stop and replan; do not cut historical scope.
+- Command identity is immutable. Prefer upstream `commandId`; otherwise use a
+  committed registry plus retired-route map.
+- Command pages stay out of global sidebar and produce exactly one canonical
+  search result per locale/version partition.
+- Fumadocs UI is evaluated as behavior substrate, not adopted as a visual
+  template by default.
+- `@axe-core/playwright` becomes a direct dev dependency only in Phase 7.
+
+## Performance contract
+
+Phase 1 records four independent baselines and caps:
+
+1. **Per-route compressed transfer:** current budget script semantics; measure
+   installation plus representative shell-heavy/reference routes.
+2. **Total static output:** HTML + Markdown discovery output on disk.
+3. **Search/discovery:** bytes per locale/version index, `llms.txt` and
+   `llms-full.txt` size/cardinality.
+4. **Build cost:** route count, build wall time, and peak memory.
+
+The observed 297,860-byte value is per sampled route and referenced assets,
+not total `apps/docs/out`. Added routes primarily affect output, search, and
+build metrics; Fumadocs/client-shell choices affect route transfer.
+
+## Whole-plan acceptance
+
+- Every M01–M02/D00–D18 contract has an owning phase, related files, test
+  scenarios, and observable completion evidence.
+- No clipping or hidden page-level overflow at 320/375/390/768/1280/1440.
+  Local table/code scrollers are visible, keyboard reachable, and fully usable.
+- All docs navigation is discoverable without a horizontal link strip.
+- Complete VI application chrome and announcements; static `<html lang>`
+  remains correct.
+- A named CLI command reaches canonical detail in at most two purposeful
+  interactions at 320px and without JavaScript.
+- Legacy fragments and retired command URLs remain useful.
+- Search returns one canonical command result per locale/version; generated
+  command pages stay out of global navigation.
+- Marketing has five distinct macro-compositions while retaining workflow,
+  provider, evidence, install, shared header/footer, and M02 recovery content.
+- Every audit P0/P1 closes. Every P2/P3 maps to an implementation phase or an
+  explicit product-owner decision; verification is not a dumping ground for
+  unfinished polish.
+- Representative composition proofs are reviewed at the four mandatory stress
+  frames before a page family is multiplied. The review checks hierarchy,
+  task path, content truth, EN/VI fit, responsive art direction, and avoidance
+  of repeated-card-grid sameness.
+- Critical task outcomes are benchmarked before and after implementation:
+  choose locale, install, complete first install, find an exact command,
+  compare a provider, understand one workflow, recover from an unavailable
+  locale/version/page, and identify destructive migration boundaries.
+- `pnpm run test:qualification` includes deterministic visual, axe, keyboard,
+  no-JS, i18n, route, search, Lighthouse, and budget gates.
+
+## File ownership
+
+| Phase | Exclusive primary ownership |
+|---|---|
+| 1 | command/catalog contracts, spike fixtures, decision records |
+| 2 | `packages/tokens`, token tests, foundation decision |
+| 3 | docs shell, global docs CSS, shared interactions, catalog shell metadata |
+| 4 | language/not-found screens, authored MDX, authored screen components, safe component registry |
+| 5 | generated reference renderer, generated reference components, search indexing |
+| 6 | `apps/site` pages/components/styles/scripts and site tests |
+| 7 | Playwright/Lighthouse harness, baselines, qualification wiring, verification runbook |
+
+Later phases may consume earlier files but do not reopen their contracts without
+failing the owning phase and updating its decision record.
+
+## Audit traceability
+
+- Phase 1: contract, route, Fumadocs, performance uncertainty.
+- Phase 2: token state, type, code/data/callout surfaces, shell dimensions.
+- Phase 3: audit P0/P1 shell, mobile nav, clipping, switcher/search semantics,
+  sticky navigation, TOC, breadcrumb, pager, VI chrome.
+- Phase 4: D00–D11/D18 and authored-content-specific P2/P3.
+- Phase 5: D12–D17, generated reference scale, CLI anchors/routes/search.
+- Phase 6: marketing composition, 404, header/footer, pressed/touch/copy states.
+- Phase 7: regression proof only; defects found return to their owner phase.
+
+## Risks and stop conditions
+
+- Phase 1 cannot establish immutable command identity or retired-route behavior:
+  stop; do not generate canonical detail URLs.
+- No Fumadocs variant passes static export, localization, keyboard, and transfer
+  gates: keep bespoke shell and document why.
+- Safe MDX components cannot retain clean Markdown discovery output: keep source
+  pure Markdown and implement screen visuals outside MDX; do not weaken the
+  public-Markdown boundary.
+- A frozen budget cannot be met after measured optimization: stop and request a
+  user decision. No silent budget increase or scope cut.
+- A screen-specific visual duplicates machine-owned facts: replace its data
+  source before merge.
 
 ## Open questions
 
-None blocking. Phase 1's spike may surface follow-ups — a Fumadocs adoption
-level that requires a token addition, a byte-budget outcome that requires
-shrinking the shell — but those resolve inside Phase 1's decision docs and
-propagate to later phases mechanically.
+None blocking. Phase 1 resolves implementation choices through measured decision
+records; any outcome requiring a scope or frozen-budget change returns to the
+user.
 
-## Cost and honesty notes
+## Success criteria
 
-- **Byte budget is thin.** Docs page sampled at **297,860 bytes** against a
-  **300,000-byte cap** — ~2KB headroom before Phase 1's measurement. If
-  Phase 1's spike reports the +318 detail pages plus new shell primitives
-  break the cap, Phase 1's decision doc names the response (shrink,
-  parallelize, or bump with owner sign-off) and every later phase respects
-  that decision.
-- **Contract gate is not optional.** Kongming returned **GO with concerns**
-  for planning and **NO-GO for implementation** until Phase 1 passes. The
-  binding concerns are CLI identity, retired-route behavior, content-scale
-  proof, and bundle headroom — not visual ambition. Skipping Phase 1 to
-  "start faster" would rework Phases 2–4 after they merge.
-- **Phase 3 is intentionally large.** It touches `docs-shell.tsx`,
-  `locale-version-switcher.tsx`, `page.tsx`, `layout.tsx`, `docs.css`,
-  and creates the sidebar/TOC/pager plus page-kind templates in one
-  phase. Splitting further would push shell releases before keyboard/menu
-  semantics were fixed, which is the opposite of the audit's intent.
-- **Phase 4's CLI split is a URL-shape change.** The current
-  `/reference/cli/` URL is referenced from search indexes and external
-  links. The brainstorm's rule — legacy anchors as visible in-page
-  targets, no JavaScript redirect — is the cheapest way to preserve those
-  links; Phase 6's no-JS journey test enforces it.
-- **Phase 6 pays for itself only if it runs after composition churn.**
-  Adding it earlier would cost baseline resets on every phase.
-
-## Success Criteria
-
-- [ ] Every phase's own acceptance criteria met and checked off.
-- [ ] Phase 1's three decision docs (CLI identity + retired routes,
-      Fumadocs UI adoption spike, static budget after CLI split) exist and
-      are consumed by later phases.
-- [ ] `pnpm run test:qualification` green with the visual, axe, and
-      Lighthouse steps wired in (Phase 6).
-- [ ] Screenshot baselines at 320/375/768/1280/1440 exist and gate CI.
-- [ ] All four stress-frame specs pass on every run.
-- [ ] No-JS journey to a CLI command detail page passes.
-- [ ] Lighthouse ≥95 accessibility on docs production output.
-- [ ] Zero P0 findings from the audit remain open.
-- [ ] All P1 findings are either closed or explicitly deferred with a
-      written trade-off.
-- [ ] `docs.ariadnev.com/en/stable/` and `/vi/stable/` present a shell that
-      exposes all 15 pages without horizontal swiping on 320px.
-- [ ] `ariadnev.com` uses the five brainstorm-named macro-compositions in
-      order.
+- [ ] All seven phase contracts pass.
+- [ ] M01–M02 and D00–D18 coverage matrix has no unowned item.
+- [ ] All locked decisions remain consistent across every phase.
+- [ ] Full qualification passes from a clean production build.
+- [ ] Whole-plan consistency sweep reports zero unresolved contradictions.
 
 <!-- slug: ariadnev-web-uiux-upgrade -->

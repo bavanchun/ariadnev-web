@@ -1,106 +1,131 @@
 ---
 phase: 2
-title: "Shared design tokens and shell primitives"
+title: "Shared design tokens and foundations"
 status: pending
 priority: P1
 effort: "3-4d"
 dependencies: [1]
 ---
 
-# Phase 2: Shared design tokens and shell primitives
+# Phase 2: Shared design tokens and foundations
+
+## Context
+
+- [Plan](./plan.md)
+- [Execution cartography](../../docs/execution-cartography.md)
+- Phase 1 decisions: Fumadocs, safe components, and performance baselines.
 
 ## Overview
 
-Extend `packages/tokens` so site and docs stop reinventing surface, state, and
-dimension in app CSS. This phase adds tokens only — the site and docs still
-render as they did after Phase 1; Phase 3 and Phase 5 consume the new tokens.
-Doing it in one place keeps the drift the audit measured from returning.
+Extend the shared DTCG token system so both apps use the same semantic states,
+content surfaces, dimensions, typography roles, and motion grammar. This phase
+changes tokens and contracts only; Phases 3–6 consume them.
 
 ## Requirements
 
-- Functional: tokens define interactive state layers (hover/active/pressed/
-  selected/current/disabled/loading/focus), typographic weight roles beyond
-  regular/bold, code and data surfaces, callout roles, and docs shell
-  dimensions (sidebar width, TOC width, header height, table max column,
-  content prose width). Both apps consume tokens by name.
-- Non-functional: `packages/tokens/src/tokens.json` remains the single source;
-  `packages/tokens/dist/*.css` regenerates deterministically and stays
-  hand-edit-free (existing test enforces this). Contrast budget in the
-  existing token test does not weaken.
+- Preserve ink/graphite/cool/spectral/copper semantics and all existing contrast
+  guarantees.
+- Add tokens for interactive states, navigation/current state, code, data,
+  callouts, destructive boundaries, selection, shell dimensions, and responsive
+  reading constraints.
+- Add an honest medium UI role backed by the existing variable Inter asset.
+  Display Be Vietnam Pro remains its shipped 700 weight.
+- Keep 4px spacing, 44px touch targets, motion below 400ms, and reduced-motion
+  behavior.
+- Generate site/docs CSS deterministically from `tokens.json`; no hand edits.
+- Produce one implementation reference specimen at the four mandatory stress
+  frames before screen work: state layers, type hierarchy, code/data/callout
+  surfaces, shell density, EN/VI wrapping, focus, and reduced motion.
 
 ## Architecture
 
-Three additions, each behind a stable token key:
+### State vocabulary
 
-- **State layers.** `state.hover.layer`, `state.active.layer`,
-  `state.pressed.layer`, `state.selected.layer`, `state.current.layer`,
-  `state.disabled.layer`, `state.loading.layer`, `state.focus.ring`. Values
-  are OKLCH mixes on top of `surface.canvas` and `surface.raised`, tested for
-  ≥3:1 contrast against the surface they land on (interaction), ≥4.5:1 for
-  text.
-- **Typographic weights.** Add a `medium` role (weight 500 when the font
-  supports it; a variable-axis fallback for the self-hosted stack). Do not
-  alias "semibold" to 700 anymore. Existing content that used the old
-  semibold token continues to render at 700 by explicit opt-in during Phase 3.
-- **Surfaces and dimensions.** `surface.code`, `surface.data`,
-  `surface.callout.info`, `surface.callout.warn`, `surface.callout.gate`,
-  `dim.shell.sidebarWidth`, `dim.shell.tocWidth`, `dim.shell.headerHeight`,
-  `dim.content.proseWidth`, `dim.content.tableMaxColumn`. The audit's `P2` at
-  `tokens.json:133` names exactly this set; no more, no less.
+- hover, pressed, selected, current, disabled, loading, success, error;
+- focus ring on ink and light content surfaces;
+- navigation-current distinct from keyboard focus;
+- copy-success distinct from execution witness where visual meaning differs.
 
-A short design decision doc under `docs/decisions/` captures the state-layer
-palette and the "semibold no longer collapses to 700" rule so future work sees
-the intent.
+Not every state needs a unique color. Tokens define layer, border, text, and
+indicator roles so shape/text can carry meaning alongside color.
 
-## Related Code Files
+### Content surfaces
+
+- code and command surfaces;
+- table header, row, divider, and local-scroll affordance;
+- Note, Gate, Boundary, Destructive, and Evidence callouts;
+- topology node, edge, gate, checkpoint, and witness;
+- overlay, drawer, selection, and empty/error states.
+
+All aliases resolve through the accepted palette. No new accent family.
+
+### Layout dimensions
+
+- docs header, sidebar, TOC, reading measure, wide reference measure;
+- sticky offsets and viewport-safe rail height;
+- table minimum/maximum column constraints;
+- marketing content shell and split/path/ledger composition gaps;
+- compact, prose, and reference density modes.
+
+### Typography
+
+Add `medium: 500` for Inter UI text. Update the font manifest contract only if
+tests need to state intermediate variable-axis support; do not add another font
+file. Avoid a fake semibold alias for the non-variable display face.
+
+## Related code files
 
 - Modify: `packages/tokens/src/tokens.json`
-- Regenerated: `packages/tokens/dist/*.css` (via existing build; do not
-  hand-edit)
-- Create: `docs/decisions/state-layers-and-shell-dimensions.md`
-- Modify: `tests/tokens/token-contract.test.mjs` — extend to assert the new
-  keys exist and pass contrast; do not weaken existing budgets
-- Modify: `tests/tokens/generated-css.test.mjs` — drift guard covers the new
-  tokens automatically once regenerated
+- Modify if needed: `packages/tokens/src/font-manifest.json`
+- Regenerate: `packages/tokens/dist/site.css`
+- Regenerate: `packages/tokens/dist/docs.css`
+- Modify: `tests/tokens/token-contract.test.mjs`
+- Modify: `tests/tokens/font-contract.test.mjs`
+- Modify: `tests/tokens/generated-css.test.mjs`
+- Create: `docs/decisions/state-layers-content-surfaces-and-dimensions.md`
+- Create: `docs/design/living-execution-atlas-foundation-specimen.md`
 
-## Implementation Steps
+## Implementation steps
 
-1. Draft the state-layer values in a scratch file; verify contrast against
-   `surface.canvas` and `surface.raised` using the existing contrast helper.
-2. Add tokens to `tokens.json` under new namespaces so no existing key changes
-   meaning. Regenerate `dist/*.css`; verify the generated CSS drift test
-   passes.
-3. Add the medium weight role and update the font stack fallback (self-hosted;
-   no network font). Do not touch the shipped `dist` files by hand.
-4. Add dimensions and code/data/callout surfaces.
-5. Write the decision doc capturing rationale, contrast pairs, and the
-   "semibold aliases removed" callout.
-6. Extend the token contract test to assert every new key exists with the
-   declared `$type` and passes the contrast expectations.
-7. Do not consume the new tokens in app CSS yet — Phase 3 and Phase 5 do that.
-   Keep this phase's diff isolated to tokens + tests + decision doc.
+1. Inventory every ad hoc state/surface/dimension in site and docs CSS; map each
+   to one semantic token or mark it app-local.
+2. Add token aliases without removing or changing existing token meaning.
+3. Add Inter medium role and verify Vietnamese glyph rendering at 500.
+4. Add state contrast tests for text, focus, selected/current indicators, and
+   boundaries. Do not require decorative fills to satisfy a criterion that does
+   not apply; test the actual perceivable component boundary.
+5. Add content-surface and shell-dimension contract assertions.
+6. Regenerate both CSS outputs and run drift/font/contrast tests.
+7. Record naming, semantic meaning, and anti-patterns in the decision doc.
+8. Capture the implementation specimen at CLI 320px, provider 320px, desktop
+   CLI lookup, and complete VI shell. Record accepted hierarchy and responsive
+   rules rather than screenshots without rationale.
 
-## Success Criteria
+## Success criteria
 
-- [ ] `tokens.json` gains state layers, medium weight role, code/data/callout
-      surfaces, and shell dimensions with no removed or renamed existing keys.
-- [ ] Generated `dist/*.css` regenerates deterministically; drift test passes.
-- [ ] Token contract test asserts new keys and their contrast pairs.
-- [ ] Decision doc committed under `docs/decisions/`.
-- [ ] `pnpm run test:qualification` green.
+- [ ] Every brainstorm state and content surface has a semantic token contract.
+- [ ] Site and docs generated CSS expose the same shared vocabulary.
+- [ ] Inter 500 renders and passes Vietnamese/font-size budgets.
+- [ ] Display font is not falsely advertised as variable or medium.
+- [ ] Existing tokens retain meaning and contrast tests do not weaken.
+- [ ] Generated CSS is deterministic and hand-edit-free.
+- [ ] Decision record states which layout values are shared vs app-local.
+- [ ] Foundation specimen passes all four stress-frame reviews and gives later
+      phases one explicit visual-quality reference.
+- [ ] `pnpm run test:qualification` passes.
 
-## Risk Assessment
+## Risk assessment
 
-- **A new state layer collides with existing ad hoc CSS.** Signal: docs or
-  site loses hover feedback after Phase 3 consumes the tokens. Response:
-  Phase 3 replaces the ad hoc styles explicitly rather than layering; do not
-  patch it back into app CSS.
-- **Medium weight looks like regular on the self-hosted stack.** Signal:
-  visual QA in Phase 3 cannot distinguish 500 from 400. Response: raise the
-  role to 550 on the variable axis; if the font shipped does not support
-  variable weight, publish an explicit fallback that uses tracking + size
-  contrast rather than faking a weight.
-- **Contrast budget forces a color decision.** Signal: no state-layer palette
-  satisfies both the ink ground and the raised surface at ≥3:1. Response:
-  publish two palettes keyed by surface parent (`state.on-canvas.hover.layer`
-  vs `state.on-raised.hover.layer`) rather than compromising contrast.
+- **Token proliferation.** Merge aliases that have identical meaning; keep
+  screen composition app-local.
+- **State layer fails on one parent surface.** Define on-canvas/on-raised
+  variants rather than lowering contrast.
+- **Inter 500 is visually indistinct.** Use size, spacing, and color hierarchy;
+  do not invent a new font asset without a separate budget decision.
+- **Apps accidentally consume raw palette values.** Add grep/contract checks for
+  new code in later phases; shared tokens remain semantic.
+
+## Security considerations
+
+No runtime input or external asset is introduced. Font hashes, licenses, and
+Vietnamese coverage remain enforced.
