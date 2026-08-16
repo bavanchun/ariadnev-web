@@ -24,6 +24,17 @@ const siblingSchema = z.object({
   pageId: z.string().min(1),
 }).strict();
 
+// Additive Living Execution Atlas metadata. Existing catalog entries omit
+// these fields and continue to parse; later phases populate them page by
+// page. `pageKind` and `screenKind` name what the reader lands on; `section`
+// names the top-level shelf a global sidebar renders; `navigationVisibility`
+// controls whether the page enters that shelf at all. Command detail pages
+// are the reason `"reference-only"` exists: they must be discoverable by
+// search and static export, but never enumerated in the global sidebar.
+const PAGE_KINDS = ["home", "get-started", "concept", "guide", "reference-index", "release-notes", "not-found", "command"] as const;
+const NAVIGATION_VISIBILITIES = ["global-sidebar", "reference-only", "hidden"] as const;
+const SECTIONS = ["get-started", "concepts", "guides", "reference", "release-notes", "meta"] as const;
+
 const pageSchema = z.object({
   id: z.string().min(1),
   canonicalId: z.string().min(1),
@@ -34,6 +45,10 @@ const pageSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
   siblings: z.array(siblingSchema),
+  pageKind: z.enum(PAGE_KINDS).optional(),
+  screenKind: z.string().min(1).optional(),
+  section: z.enum(SECTIONS).optional(),
+  navigationVisibility: z.enum(NAVIGATION_VISIBILITIES).optional(),
 }).strict();
 
 const catalogSchema = z.object({
@@ -61,6 +76,15 @@ export interface DocsPageSibling {
   readonly pageId: string;
 }
 
+/** Broad page shape. Absent on legacy entries; call sites use `resolvePageKind` if a default is needed. */
+export type DocsPageKind = (typeof PAGE_KINDS)[number];
+
+/** Top-level docs shelf a global sidebar renders. Absent on legacy entries. */
+export type DocsSection = (typeof SECTIONS)[number];
+
+/** Sidebar enumeration policy. Absent on legacy entries; treated as `"global-sidebar"` by default. */
+export type DocsNavigationVisibility = (typeof NAVIGATION_VISIBILITIES)[number];
+
 export interface DocsCatalogPage {
   readonly id: string;
   readonly canonicalId: string;
@@ -71,6 +95,14 @@ export interface DocsCatalogPage {
   readonly title: string;
   readonly description: string;
   readonly siblings: readonly DocsPageSibling[];
+  /** Broad page contract from the Living Execution Atlas; optional during rollout. */
+  readonly pageKind?: DocsPageKind;
+  /** Screen-atlas identifier (e.g. `"D03"`, `"D13-cli-command-detail"`); optional during rollout. */
+  readonly screenKind?: string;
+  /** Top-level shelf; optional during rollout. */
+  readonly section?: DocsSection;
+  /** Sidebar enumeration policy; defaults to `"global-sidebar"` when absent. */
+  readonly navigationVisibility?: DocsNavigationVisibility;
 }
 
 export interface DocsContentCatalog extends VersionCatalog {
@@ -102,11 +134,26 @@ function routeKey(locale: string, version: string, slug: readonly string[]): str
 }
 
 function freezePage(page: z.infer<typeof pageSchema>): DocsCatalogPage {
-  return Object.freeze({
-    ...page,
+  // Strip absent additive fields explicitly. With `exactOptionalPropertyTypes`
+  // an interface member declared `readonly pageKind?: DocsPageKind` rejects
+  // `undefined` — a page that never emitted the field must simply not carry
+  // that property, so the spread cannot include it.
+  const base: Record<string, unknown> = {
+    id: page.id,
+    canonicalId: page.canonicalId,
+    locale: page.locale,
+    version: page.version,
     slug: Object.freeze([...page.slug]),
+    sourcePath: page.sourcePath,
+    title: page.title,
+    description: page.description,
     siblings: Object.freeze(page.siblings.map((sibling) => Object.freeze({ ...sibling }))),
-  });
+  };
+  if (page.pageKind !== undefined) base.pageKind = page.pageKind;
+  if (page.screenKind !== undefined) base.screenKind = page.screenKind;
+  if (page.section !== undefined) base.section = page.section;
+  if (page.navigationVisibility !== undefined) base.navigationVisibility = page.navigationVisibility;
+  return Object.freeze(base) as unknown as DocsCatalogPage;
 }
 
 export function parseDocsContentCatalog(value: unknown): DocsContentCatalog {
@@ -235,4 +282,30 @@ export function findDeclaredSibling(catalog: DocsContentCatalog, page: DocsCatal
 
 export function primaryVersions(catalog: DocsContentCatalog): readonly string[] {
   return navigableVersions(catalog);
+}
+
+/**
+ * Effective navigation visibility. A page with no declared visibility is
+ * `"global-sidebar"` so the current unadorned catalog continues to render
+ * exactly as it does today; later phases opt individual pages into
+ * `"reference-only"` (search-and-static-only, e.g. command details) or
+ * `"hidden"` (routed but never surfaced anywhere).
+ */
+export function resolveNavigationVisibility(page: DocsCatalogPage): DocsNavigationVisibility {
+  return page.navigationVisibility ?? "global-sidebar";
+}
+
+/**
+ * Pages a global sidebar should enumerate for the given locale/version. Command
+ * detail pages (`reference-only`) and hidden routes drop out; everything else
+ * is preserved in catalog order so the sidebar keeps its authored sequence.
+ */
+export function sidebarPages(catalog: DocsContentCatalog, locale: DocsLocale, version: string): readonly DocsCatalogPage[] {
+  const resolved = resolveVersion(catalog, version);
+  if (!resolved) return [];
+  return Object.freeze(
+    catalog.pages.filter(
+      (page) => page.locale === locale && page.version === resolved && resolveNavigationVisibility(page) === "global-sidebar",
+    ),
+  );
 }

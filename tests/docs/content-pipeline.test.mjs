@@ -5,7 +5,11 @@ import { join, resolve } from "node:path";
 import test from "node:test";
 import { buildContentRoot, loadAuthoredPages, parseArguments, parseFrontmatter } from "../../scripts/docs-content/build-content-root.mjs";
 import { code, escapeMarkdownProse, escapeMdx, renderReleaseNotes, renderSkillCatalog } from "../../scripts/docs-content/render-reference-pages.mjs";
-import { parseDocsContentCatalog } from "../../apps/docs/src/lib/content-catalog.ts";
+import {
+  parseDocsContentCatalog,
+  resolveNavigationVisibility,
+  sidebarPages,
+} from "../../apps/docs/src/lib/content-catalog.ts";
 import { publicMarkdown } from "../../apps/docs/src/lib/public-markdown.ts";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
@@ -96,6 +100,124 @@ test("bundle text is escaped so it cannot become MDX syntax", () => {
   assert.match(page, /### `av:one`/);
   assert.match(page, /### `av:two`/);
   assert.doesNotThrow(() => publicMarkdown(page));
+});
+
+// -------------------------------------------------- catalog metadata (P1)
+
+// Minimal well-formed catalog for the metadata tests. Keeps the fixture close
+// to the current build output so a legacy entry proves backward compatibility
+// AND a new entry proves the Living Execution Atlas fields round-trip.
+function metadataFixture(pages) {
+  return {
+    schemaVersion: 1,
+    sourceRelease: {
+      mode: "final",
+      version: "1.1.0",
+      releaseTag: "ariadnev@1.1.0",
+      sourceSha: "f".repeat(40),
+      generatorSha: "f".repeat(40),
+      schemaDigest: `sha256:${"a".repeat(64)}`,
+    },
+    locales: ["en", "vi"],
+    currentStable: "1.1.0",
+    previousStable: "1.0.0",
+    stableAlias: "stable",
+    pages,
+  };
+}
+
+function fixturePage(overrides) {
+  return {
+    id: overrides.id,
+    canonicalId: overrides.canonicalId ?? overrides.id,
+    locale: overrides.locale ?? "en",
+    version: overrides.version ?? "1.1.0",
+    slug: overrides.slug ?? [],
+    sourcePath: overrides.sourcePath ?? `generated/docs/${overrides.locale ?? "en"}/${overrides.version ?? "1.1.0"}/${overrides.id}.mdx`,
+    title: overrides.title ?? "Fixture page",
+    description: overrides.description ?? "A page used to exercise catalog behavior.",
+    siblings: overrides.siblings ?? [],
+    ...(overrides.pageKind !== undefined ? { pageKind: overrides.pageKind } : {}),
+    ...(overrides.screenKind !== undefined ? { screenKind: overrides.screenKind } : {}),
+    ...(overrides.section !== undefined ? { section: overrides.section } : {}),
+    ...(overrides.navigationVisibility !== undefined ? { navigationVisibility: overrides.navigationVisibility } : {}),
+  };
+}
+
+test("legacy catalog entries without Living Atlas metadata still parse", () => {
+  // Both locales × both versions need a root page; four legacy entries with
+  // no pageKind/screenKind/section/navigationVisibility must parse cleanly
+  // and resolve to the global-sidebar default. This proves the rollout is
+  // additive: existing catalogs do not need to change to keep working.
+  const catalog = parseDocsContentCatalog(metadataFixture([
+    fixturePage({ id: "en-current-index", locale: "en", version: "1.1.0" }),
+    fixturePage({ id: "vi-current-index", locale: "vi", version: "1.1.0" }),
+    fixturePage({ id: "en-previous-index", locale: "en", version: "1.0.0" }),
+    fixturePage({ id: "vi-previous-index", locale: "vi", version: "1.0.0" }),
+  ]));
+  for (const page of catalog.pages) {
+    assert.equal(page.pageKind, undefined);
+    assert.equal(page.screenKind, undefined);
+    assert.equal(page.section, undefined);
+    assert.equal(page.navigationVisibility, undefined);
+    assert.equal(resolveNavigationVisibility(page), "global-sidebar");
+  }
+});
+
+test("catalog entries with Living Atlas metadata round-trip and filter correctly", () => {
+  const catalog = parseDocsContentCatalog(metadataFixture([
+    // A reference-only page (like a future /reference/cli/<slug>/) plus the
+    // required roots. The sidebar filter must drop the reference-only page
+    // but keep the root, and the metadata fields must survive parse+freeze.
+    fixturePage({
+      id: "en-current-index",
+      locale: "en",
+      version: "1.1.0",
+      pageKind: "home",
+      screenKind: "D03-current-docs-home",
+      section: "get-started",
+      navigationVisibility: "global-sidebar",
+    }),
+    fixturePage({
+      id: "en-current-cli-detail-adapters",
+      canonicalId: "reference/cli/adapters",
+      locale: "en",
+      version: "1.1.0",
+      slug: ["reference", "cli", "adapters"],
+      pageKind: "command",
+      screenKind: "D13-cli-command-detail",
+      section: "reference",
+      navigationVisibility: "reference-only",
+    }),
+    fixturePage({ id: "vi-current-index", locale: "vi", version: "1.1.0" }),
+    fixturePage({ id: "en-previous-index", locale: "en", version: "1.0.0" }),
+    fixturePage({ id: "vi-previous-index", locale: "vi", version: "1.0.0" }),
+  ]));
+  const home = catalog.pages.find((page) => page.id === "en-current-index");
+  const cliDetail = catalog.pages.find((page) => page.id === "en-current-cli-detail-adapters");
+  assert.equal(home.pageKind, "home");
+  assert.equal(home.screenKind, "D03-current-docs-home");
+  assert.equal(home.section, "get-started");
+  assert.equal(home.navigationVisibility, "global-sidebar");
+  assert.equal(cliDetail.navigationVisibility, "reference-only");
+  assert.equal(resolveNavigationVisibility(cliDetail), "reference-only");
+  const sidebar = sidebarPages(catalog, "en", "1.1.0");
+  assert.equal(sidebar.length, 1, "reference-only pages must not enter the global sidebar");
+  assert.equal(sidebar[0].id, "en-current-index");
+  const sidebarStableAlias = sidebarPages(catalog, "en", "stable");
+  assert.equal(sidebarStableAlias.length, 1, "stable alias resolves to the current version's sidebar");
+});
+
+test("catalog rejects an unknown pageKind value", () => {
+  assert.throws(
+    () => parseDocsContentCatalog(metadataFixture([
+      fixturePage({ id: "en-current-index", pageKind: "misc" }),
+      fixturePage({ id: "vi-current-index", locale: "vi" }),
+      fixturePage({ id: "en-previous-index", locale: "en", version: "1.0.0" }),
+      fixturePage({ id: "vi-previous-index", locale: "vi", version: "1.0.0" }),
+    ])),
+    /invalid/i,
+  );
 });
 
 test("release-notes prose is escaped but code spans and fences are left literal", () => {
