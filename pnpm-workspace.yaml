@@ -2,10 +2,12 @@
 #
 # The Astro marketing site and the Next/Fumadocs documentation app keep
 # independent build graphs; they may share `packages/*` only, never framework
-# components. `workers/edge` holds the release edge extracted in Phase 3.
+# components. `workers/edge` holds the release edge extracted in Phase 3, and
+# `workers/bridge` the interim Worker serving ariadnev.com until that cutover.
 packages:
   - apps/site
   - apps/docs
   - workers/edge
+  - workers/bridge
   - packages/contracts
   - packages/tokens
