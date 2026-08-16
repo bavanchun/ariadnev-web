@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "recordId": "production-1-0-0-4eb05ab1dc41",
+  "environment": "production",
+  "phase": "deploy",
+  "input": {
+    "productSha": "4eb05ab1dc4121c718607c0cfcf33e8c5a269de7",
+    "qualificationEvidenceSha": "ae8b1215f439fcc9c78b87f3333437e0289d8d9e",
+    "topology": "candidate-b",
+    "units": [
+      "edge"
+    ]
+  },
+  "startedAtUtc": "2026-08-16T11:12:04Z",
+  "completedAtUtc": "2026-08-16T11:12:14Z",
+  "result": "pass",
+  "observations": [
+    {
+      "unit": "edge",
+      "route": "/version",
+      "status": 200,
+      "contentClass": "text/plain",
+      "cacheControl": "no-store",
+      "workerVersionId": "4f1e61b6-d3b3-4bd9-b514-7bdcbd1dc53e",
+      "deploymentLabel": "edge@4f1e61b6-d3b3-4bd9-b514-7bdcbd1dc53e",
+      "pass": true
+    },
+    {
+      "unit": "edge",
+      "route": "/install",
+      "status": 200,
+      "contentClass": "text/x-shellscript",
+      "cacheControl": "no-store",
+      "workerVersionId": "4f1e61b6-d3b3-4bd9-b514-7bdcbd1dc53e",
+      "deploymentLabel": "edge@4f1e61b6-d3b3-4bd9-b514-7bdcbd1dc53e",
+      "pass": true
+    },
+    {
+      "unit": "edge",
+      "route": "/install.sh",
+      "status": 200,
+      "contentClass": "text/x-shellscript",
+      "cacheControl": "no-store",
+      "workerVersionId": "4f1e61b6-d3b3-4bd9-b514-7bdcbd1dc53e",
+      "deploymentLabel": "edge@4f1e61b6-d3b3-4bd9-b514-7bdcbd1dc53e",
+      "pass": true
+    },
+    {
+      "unit": "edge",
+      "route": "/install.ps1",
+      "status": 200,
+      "contentClass": "text/plain",
+      "cacheControl": "no-store",
+      "workerVersionId": "4f1e61b6-d3b3-4bd9-b514-7bdcbd1dc53e",
+      "deploymentLabel": "edge@4f1e61b6-d3b3-4bd9-b514-7bdcbd1dc53e",
+      "pass": true
+    },
+    {
+      "unit": "edge",
+      "route": "/download/checksums.txt",
+      "status": 200,
+      "contentClass": "application/octet-stream",
+      "cacheControl": "no-store",
+      "workerVersionId": "4f1e61b6-d3b3-4bd9-b514-7bdcbd1dc53e",
+      "deploymentLabel": "edge@4f1e61b6-d3b3-4bd9-b514-7bdcbd1dc53e",
+      "pass": true
+    }
+  ]
+}
