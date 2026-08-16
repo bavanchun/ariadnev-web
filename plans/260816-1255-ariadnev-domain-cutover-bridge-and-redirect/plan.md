@@ -1,7 +1,7 @@
 ---
 title: "ariadnev domain cutover bridge and redirect"
 description: "Serve ariadnev.com from a new bridge Worker to unblock ariadnev@1.0.0 installs, then redirect vcskill.vchun.dev to it — without touching the four frozen legacy files."
-status: pending
+status: completed
 priority: P1
 effort: "1-2d"
 tags: [infra, cloudflare, domain, release]
@@ -58,7 +58,7 @@ The full rationale, rejected options, and advisory review are in
 |---|---|
 | `ariadnev.com` + `vchun.dev` both **active in the same Cloudflare account** | `wrangler` OAuth, account `Hoangbavan4478@gmail.com's Account`, 4 zones |
 | `ariadnev.com` has no apex address record | DoH: NOERROR/NODATA, SOA only |
-| CF API token authenticates against the rulesets API | POST probe returned validation error `kind must be given`, not an auth error. **This proves authentication only** — the request was rejected during body validation before phase-scoped permission was checked, so Single-Redirect-Edit on `http_request_dynamic_redirect` is confirmed at the first real `--apply` (Phase 4), which may still 403 |
+| CF API token carries **Zone → Single Redirect → Edit** | **Confirmed by write in Phase 4**: `--apply` created the entrypoint ruleset and the rule with no 403. The earlier POST probe (`kind must be given`) had proved *authentication only*, since the request was rejected during body validation before phase-scoped permission was ever checked |
 | `vchun.dev` has **no** `http_request_dynamic_redirect` ruleset yet | `GET /zones/<id>/rulesets` → only `http_request_sanitize`, `http_request_firewall_managed`, `ddos_l7` |
 | GH PAT reads `ariadnev-kit` releases | `releases/latest` → `ariadnev@1.0.0`, 9 assets |
 | Legacy worker untouched since 2026-08-08 | `wrangler deployments list --name vcskill` → `b93d9d2`, tag `vcskill-0.11.0` |
@@ -66,26 +66,46 @@ The full rationale, rejected options, and advisory review are in
 
 ## Phases
 
-| # | Phase | Status |
-|---|-------|--------|
-| 1 | [Phase 1: Bridge worker implementation](./phase-01-start.md) | Pending |
-| 2 | [Phase 2: Deploy bridge and provision ariadnev.com](./phase-02-deploy-bridge-and-provision-ariadnevcom.md) | Pending |
-| 3 | [Phase 3: Redirect rule tooling](./phase-03-redirect-rule-tooling.md) | Pending |
-| 4 | [Phase 4: Apply redirect and verify ordering](./phase-04-apply-redirect-and-verify-ordering.md) | Pending |
-| 5 | [Phase 5: Docs, decision record, topology note](./phase-05-docs-decision-record-and-topology-note.md) | Pending |
+| # | Phase | Status | Commit |
+|---|-------|--------|--------|
+| 1 | [Phase 1: Bridge worker implementation](./phase-01-start.md) | **Completed** | `bd51aeb`, `656e07d` |
+| 2 | [Phase 2: Deploy bridge and provision ariadnev.com](./phase-02-deploy-bridge-and-provision-ariadnevcom.md) | **Completed** | deploy-only |
+| 3 | [Phase 3: Redirect rule tooling](./phase-03-redirect-rule-tooling.md) | **Completed** | `3cc90e4`, `82fea6a` |
+| 4 | [Phase 4: Apply redirect and verify ordering](./phase-04-apply-redirect-and-verify-ordering.md) | **Completed** | operational |
+| 5 | [Phase 5: Docs, decision record, topology note](./phase-05-docs-decision-record-and-topology-note.md) | **Completed** | `6ff2f98` |
 
 Phase 2 blocks 4. Phase 3 may run in parallel with 1–2; Phase 4 requires both 2 and 3.
 
 ## Success Criteria
 
-- [ ] `curl -fsSL https://ariadnev.com/install | bash` succeeds on clean darwin-arm64; sha256 verifies
-- [ ] `https://ariadnev.com/version` returns the 1.0.0 tag; `av update --check` resolves against it
-- [ ] `curl -sI https://vcskill.vchun.dev/install` → `302`, `Location: https://ariadnev.com/install`
-- [ ] Piped-bash install still works end-to-end *through* the old host
-- [ ] Deleting the redirect rule restores direct legacy serving within seconds (tested, then re-applied)
-- [ ] `git diff` shows zero changes to the four frozen files; `wrangler deployments list --name vcskill` still shows `b93d9d2`
-- [ ] `pnpm run test:qualification` green
-- [ ] Path-traversal attempts against `ariadnev.com/download/*` are rejected in-Worker
+- [x] `curl -fsSL https://ariadnev.com/install | bash` succeeds on clean darwin-arm64; sha256 verifies
+- [x] `https://ariadnev.com/version` returns the 1.0.0 tag; `av update --check` resolves against it
+- [x] `curl -sI https://vcskill.vchun.dev/install` → `302`, `Location: https://ariadnev.com/install`
+- [x] Piped-bash install still works end-to-end *through* the old host
+- [x] Deleting the redirect rule restores direct legacy serving within seconds (tested, then re-applied)
+- [x] `git diff` shows zero changes to the four frozen files; `wrangler deployments list --name vcskill` still shows `b93d9d2`
+- [x] `pnpm run test:qualification` green — 149 native, 158 vitest
+- [x] Path-traversal attempts against `ariadnev.com/download/*` are rejected in-Worker
+
+## Outcome
+
+Goals 1–5 all delivered. The ordering assumption the plan was written to settle **holds**: a Single
+Redirect executes before a Worker holding the host via a Custom Domain. The decision record scopes
+that finding to Custom Domains and prescribes a re-probe if Phase 12 binds the legacy host by route.
+
+Two corrections the execution forced, both recorded in their phase files:
+
+- **Phase 1's `mustBlock` criterion was unsatisfiable as written** and was amended to the property
+  that is actually provable. Literal dot segments are collapsed before any handler reads the path, so
+  two `mustBlock` entries normalize into a `mustAllow` entry.
+- **A drift-detection bug in the Phase 3 manager**, caught only by running `--inspect` against the
+  live zone: Cloudflare re-serializes `action_parameters` in its own key order, and the original
+  `JSON.stringify` comparison would have made `--inspect` exit 2 forever and `--apply`
+  non-idempotent.
+
+Scope added beyond the plan: `workers/bridge` registered in `pnpm-workspace.yaml` so wrangler is
+pinned rather than an `npx` download; seven hostile-vector tests covering the previously untested
+`malformed-encoding` branch and a CRLF `content-disposition` injection.
 
 ## Risks
 
@@ -98,7 +118,21 @@ Phase 2 blocks 4. Phase 3 may run in parallel with 1–2; Phase 4 requires both 
 
 ## Open questions
 
-1. Legacy `GH_TOKEN` PAT expiry date — not readable via API; needs manual check.
-2. Should `www.ariadnev.com` also be bound? Plan assumes yes via a second custom domain (no extra permission needed).
+1. **Still open.** Legacy `GH_TOKEN` PAT expiry date — not readable via API; needs manual check. If it
+   expires inside the rollback window the rollback target fails closed with `502`. Recorded in the
+   decision record as the one sanctioned exception to the freeze's letter.
+2. **Resolved.** `www.ariadnev.com` is bound, as a second custom domain in the same deploy. No
+   pre-existing `www` record conflicted; it answers `200`.
+
+## Follow-ups this work surfaced (out of scope, not actioned)
+
+- The raw dot-segment ingress guard in `edge-routing-topology.md` is listed as blocked on a Cloudflare
+  token with Zone → WAF → Edit. A working zone-scoped token now exists, so the gate is no longer
+  credential-blocked — but applying it is candidate-b work.
+- Pre-rename `vcskill` 0.11.x clients cannot self-update: the 1.0.0 release publishes only
+  `ariadnev-*` assets, so their computed `vcskill-<os>-<arch>` names 404. Manual reinstall is the only
+  path. Broken by the rename itself, not by this work.
+- `update-command.ts:9` hardcodes `const DOMAIN` with no environment override, which is why the domain
+  was mandatory rather than a preference. Worth an override for testability, in `ariadnev-kit`.
 
 <!-- slug: ariadnev-domain-cutover-bridge-and-redirect -->
