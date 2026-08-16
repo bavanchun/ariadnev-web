@@ -40,3 +40,10 @@ node_modules/.cache/
 
 # Release locks and lockfiles stay tracked on purpose:
 #   pnpm-lock.yaml, deployment/topology.json, docs/decisions/*.json
+
+# Docs app: Next static export, the fumadocs-mdx collection, and the generated
+# content root the release docs bundle produces. Authored content stays tracked.
+apps/docs/out/
+apps/docs/.source/
+apps/docs/content/generated/
+*.tsbuildinfo

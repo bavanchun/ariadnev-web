@@ -3,14 +3,16 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Static Next/Fumadocs documentation app. Implementation arrives in Phase 7; this manifest pins its dependency and script surface now so parallel phases never edit the shared lockfile.",
+  "description": "Static Next/Fumadocs documentation product: versioned EN/VI pages built from a docs content root that the release docs bundle generates.",
   "scripts": {
-    "build": "node -e \"const {existsSync}=require('fs');if(!existsSync('next.config.mjs')){console.log('@vcskill-web/docs: no app source yet (Phase 7 owns it); skipping build');process.exit(0)}require('child_process').execSync('next build',{stdio:'inherit'})\"",
-    "check": "node -e \"const {existsSync}=require('fs');if(!existsSync('next.config.mjs')){console.log('@vcskill-web/docs: no app source yet (Phase 7 owns it); skipping build');process.exit(0)}require('child_process').execSync('next build',{stdio:'inherit'})\"",
+    "build": "node scripts/build-docs.mjs",
+    "check": "node scripts/build-docs.mjs",
     "dev": "next dev",
-    "start": "next start"
+    "typecheck": "fumadocs-mdx source.config.ts .source && tsc --noEmit",
+    "check:deploy": "wrangler deploy --dry-run --config wrangler.staging.toml"
   },
   "dependencies": {
+    "@mdx-js/mdx": "3.1.1",
     "@orama/orama": "3.1.18",
     "@vcskill-web/contracts": "workspace:*",
     "@vcskill-web/tokens": "workspace:*",
@@ -19,11 +21,16 @@
     "fumadocs-ui": "16.14.3",
     "next": "16.3.0",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "tailwindcss": "4.3.3",
+    "zod": "4.4.3"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/mdx": "2.0.14",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.4",
-    "postcss": "8.5.26"
+    "postcss": "8.5.26",
+    "wrangler": "4.120.0"
   }
 }

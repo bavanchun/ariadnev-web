@@ -12,7 +12,7 @@
     "test": "pnpm run test:native && vitest run",
     "test:native": "node --test tests/contracts/public-edge-contract.test.mjs landing-consistency.test.mjs scripts/edge-ingress-rule.test.mjs scripts/legacy-host-redirect.test.mjs workers/edge/src/index.test.mjs workers/bridge/src/index.test.mjs tests/deployment/deployment-control-plane.test.mjs tests/tokens/token-contract.test.mjs tests/tokens/font-contract.test.mjs tests/tokens/generated-css.test.mjs",
     "test:qualification": "pnpm run contracts && pnpm run typecheck && pnpm run build && pnpm run test",
-    "typecheck": "tsc --build --force",
+    "typecheck": "tsc --build --force && pnpm --filter @vcskill-web/docs typecheck",
     "build": "pnpm -r --workspace-concurrency=1 run build",
     "contracts": "vitest run tests/compatibility tests/deployment packages/contracts",
     "sync:release": "node scripts/deploy/validate-deployment-input.mjs",
@@ -25,7 +25,8 @@
     "docs": "pnpm --filter @vcskill-web/docs",
     "edge": "pnpm --filter @vcskill-web/edge",
     "contracts:pkg": "pnpm --filter @vcskill-web/contracts",
-    "tokens": "pnpm --filter @vcskill-web/tokens"
+    "tokens": "pnpm --filter @vcskill-web/tokens",
+    "test:docs": "node --test tests/docs/*.test.mjs"
   },
   "devDependencies": {
     "@types/node": "26.2.0",
