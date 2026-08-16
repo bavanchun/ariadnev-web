@@ -85,7 +85,7 @@ describe("transfer budgets", () => {
   it("stays inside the total transfer budget for a first load", () => {
     // A first load pulls the document, the stylesheet, the enhancer, the fonts,
     // and the favicon. The social card is fetched by crawlers, not by readers.
-    const firstLoad = totalFor((file) => /\.(html|css|js|woff2)$/.test(file) && file !== "/404.html") + compressedBytesOf("/favicon.svg");
+    const firstLoad = totalFor((file) => /\.(html|css|js|woff2)$/.test(file) && file !== "/404.html") + compressedBytesOf("/favicon.png");
     expect(firstLoad).toBeLessThanOrEqual(capOf("marketing-total-transfer-compressed"));
   });
 });

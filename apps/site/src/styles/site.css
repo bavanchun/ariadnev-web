@@ -220,6 +220,18 @@ pre {
   text-decoration: none;
 }
 
+.site-header__logo {
+  width: calc(var(--vcs-space-8) + var(--vcs-space-4));
+  height: var(--vcs-space-8);
+  object-fit: contain;
+}
+
+@media (max-width: 22rem) {
+  .site-header__mark > span {
+    display: none;
+  }
+}
+
 .site-header__nav {
   display: flex;
   align-items: center;

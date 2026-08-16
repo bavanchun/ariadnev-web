@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://docs.ariadnev.com"),
   title: { default: "ariadnev documentation", template: "%s | ariadnev documentation" },
   description: "Versioned English and Vietnamese documentation for ariadnev.",
+  icons: { icon: [{ url: "/favicon.png", type: "image/png", sizes: "128x128" }] },
   robots: { index: true, follow: true },
 };
 
