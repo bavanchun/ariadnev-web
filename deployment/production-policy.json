@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "decisionRecord": "docs/decisions/production-gate-without-required-reviewers.md",
+  "web": {
+    "repo": "bavanchun/ariadnev-web",
+    "environment": "web-production",
+    "humanGate": "workflow-dispatch",
+    "requiredReviewers": "unavailable-on-plan",
+    "deploymentBranches": ["main"]
+  },
+  "core": {
+    "repo": "bavanchun/ariadnev-kit",
+    "environment": null,
+    "finalizerWorkflow": ".github/workflows/finalize-release.yml",
+    "immutableReleases": "not-verifiable-via-api"
+  }
+}

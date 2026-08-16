@@ -400,9 +400,54 @@ test("the environment preflight fails closed on a missing immutable-release poli
     if (path.includes("/contents/")) return Response.json({ content: Buffer.from("name: finalize\n").toString("base64") });
     return Response.json({ immutable_releases: false });
   };
-  const result = await verifyProductionEnvironment({ token: "t", fetchImpl });
+  const strictPolicy = {
+    schemaVersion: 1,
+    web: { repo: "o/web", environment: "web-production", humanGate: "required-reviewers", requiredReviewers: "required" },
+    core: { repo: "o/core", environment: "core-release-production", finalizerWorkflow: ".github/workflows/finalize-release.yml", immutableReleases: "required" },
+  };
+  const result = await verifyProductionEnvironment({ token: "t", fetchImpl, policy: strictPolicy });
   assert.equal(result.ready, false);
   assert.match(result.findings.join(" "), /immutable releases/);
+});
+
+test("the committed production policy accepts the workflow-dispatch gate only with an exact branch policy", async () => {
+  // Required reviewers are unavailable for a private repository on the current
+  // plan; the committed policy declares the compensating control (manual
+  // dispatch + deployments only from main) and names its decision record.
+  const policy = JSON.parse(readFileSync(join(process.cwd(), "deployment/production-policy.json"), "utf8"));
+  assert.equal(policy.web.requiredReviewers, "unavailable-on-plan");
+  assert.deepEqual(policy.web.deploymentBranches, ["main"]);
+  assert.match(readFileSync(join(process.cwd(), policy.decisionRecord), "utf8"), /workflow_dispatch/);
+
+  const environment = { protection_rules: [{ type: "branch_policy" }], can_admins_bypass: true, deployment_branch_policy: { protected_branches: false, custom_branch_policies: true } };
+  const client = (branches) => async (url) => {
+    const path = String(url);
+    if (path.endsWith("/deployment-branch-policies")) return Response.json({ branch_policies: branches.map((name) => ({ name, type: "branch" })) });
+    if (path.includes("/environments/")) return Response.json(environment);
+    if (path.includes("/contents/")) return Response.json({ content: Buffer.from("name: finalize\n").toString("base64") });
+    return Response.json({ immutable_releases: null });
+  };
+  const ready = await verifyProductionEnvironment({ token: "t", coreToken: "c", fetchImpl: client(["main"]), policy });
+  assert.deepEqual(ready.findings, []);
+  assert.equal(ready.humanGate, "workflow-dispatch");
+
+  const widened = await verifyProductionEnvironment({ token: "t", coreToken: "c", fetchImpl: client(["main", "dev"]), policy });
+  assert.match(widened.findings.join(" "), /deployment branches/);
+
+  const unrestricted = await verifyProductionEnvironment({ token: "t", coreToken: "c", fetchImpl: async (url) => String(url).includes("/environments/") ? Response.json({ ...environment, deployment_branch_policy: null }) : client([])(url), policy });
+  assert.match(unrestricted.findings.join(" "), /any branch/);
+
+  // The strict gate is unchanged: without the compensating declaration, no reviewers is a finding.
+  assert.match(assessEnvironment(environment, "web-production").join(" "), /no required reviewers/);
+});
+
+test("the deploy workflow is human-triggered only and its policy job reads two scoped credentials", () => {
+  const deploy = workflow("deploy.yml");
+  assert.match(deploy, /^on:\n  workflow_dispatch:/m);
+  assert.doesNotMatch(deploy, /^\s+(push|pull_request|schedule):/m);
+  const policyJob = deploy.slice(deploy.indexOf("  environment-policy:"), deploy.indexOf("  build:"));
+  assert.match(policyJob, /GITHUB_TOKEN: \$\{\{ github\.token \}\}/);
+  assert.match(policyJob, /CORE_POLICY_READ_TOKEN: \$\{\{ secrets\.CORE_POLICY_READ_TOKEN \}\}/);
 });
 
 test("an unexpected finalizer workflow digest blocks the cutover", async () => {

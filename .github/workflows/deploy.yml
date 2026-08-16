@@ -78,9 +78,12 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Require protected environments and an immutable release policy
+      - name: Verify the declared production controls
         env:
-          GITHUB_TOKEN: ${{ secrets.CORE_POLICY_READ_TOKEN }}
+          # The job token reads this repository's environments; the core token
+          # is read-only on the core repository and never reaches build/deploy.
+          GITHUB_TOKEN: ${{ github.token }}
+          CORE_POLICY_READ_TOKEN: ${{ secrets.CORE_POLICY_READ_TOKEN }}
         run: node scripts/deploy/verify-production-environment.mjs
 
   build:

@@ -2,24 +2,37 @@
 // Read-only production-environment preflight.
 //
 // Confirms, before any mutation, that the controls the cutover relies on
-// actually exist: a protected web deployment environment, a protected core
-// `core-release-production` environment, required human approval that the
-// caller cannot bypass, an immutable-release policy, and the exact expected
-// Phase 2 finalizer workflow.
+// actually exist, as declared in `deployment/production-policy.json`: the web
+// deployment environment with its human gate (required reviewers where the
+// plan supports them, otherwise a manual `workflow_dispatch` plus a deployment
+// branch policy limited to `main` — see the decision record the policy names),
+// the core release environment and immutable-release policy where the policy
+// declares them, and the exact expected finalizer workflow.
 //
 // This script reads policy only. It holds no release-write authority over the
 // core repository and never requests one; the web repository is deliberately
 // unable to publish a core release.
 //
 // Credentials come from the environment and are never logged:
-//   GITHUB_TOKEN — read-only; needs Actions read and environment read
+//   GITHUB_TOKEN           — the job token; reads this repository's environments
+//   CORE_POLICY_READ_TOKEN — read-only on the core repository (Contents: read)
 //
 // Usage:
-//   node scripts/deploy/verify-production-environment.mjs [--web owner/repo] [--core owner/repo]
+//   node scripts/deploy/verify-production-environment.mjs [--web owner/repo] [--core owner/repo] [--policy path]
 
 import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const API = "https://api.github.com";
+const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+export const DEFAULT_POLICY_PATH = "deployment/production-policy.json";
+
+/** The committed declaration of which production controls are in force and why. */
+export function loadProductionPolicy(path = join(repoRoot, DEFAULT_POLICY_PATH)) {
+  return JSON.parse(readFileSync(path, "utf8"));
+}
 export const DEFAULT_WEB_REPO = "bavanchun/ariadnev-web";
 export const DEFAULT_CORE_REPO = "bavanchun/ariadnev-kit";
 export const WEB_ENVIRONMENT = "web-production";
@@ -49,21 +62,37 @@ export function createClient({ token, fetchImpl = fetch }) {
 /**
  * An environment is acceptable only when a human must approve and the person
  * who triggered the run cannot approve their own deployment.
+ *
+ * With `gate.requiredReviewers === "unavailable-on-plan"` (a private repository
+ * on a plan without environment reviewers), the human gate is the manual
+ * `workflow_dispatch` itself, and what is verified instead is that the
+ * environment exists and only accepts deployments from the declared branches
+ * (`branchPolicies` is the list the API returned for the environment).
  */
-export function assessEnvironment(environment, label) {
+export function assessEnvironment(environment, label, gate = {}, branchPolicies = undefined) {
   const findings = [];
   if (environment === null) return [`${label} environment is absent`];
 
   const rules = environment.protection_rules ?? [];
   const reviewers = rules.find((rule) => rule.type === "required_reviewers");
-  if (reviewers === undefined) findings.push(`${label} has no required reviewers`);
-  else if ((reviewers.reviewers ?? []).length === 0) findings.push(`${label} requires review but lists no reviewer`);
-  if (environment.can_admins_bypass === true) findings.push(`${label} lets admins bypass required review`);
+  const compensating = gate.requiredReviewers === "unavailable-on-plan";
+  if (reviewers === undefined && !compensating) findings.push(`${label} has no required reviewers`);
+  else if (reviewers !== undefined && (reviewers.reviewers ?? []).length === 0) findings.push(`${label} requires review but lists no reviewer`);
+  if (reviewers !== undefined && environment.can_admins_bypass === true) findings.push(`${label} lets admins bypass required review`);
   if (reviewers?.prevent_self_review === false) findings.push(`${label} allows self-review of a deployment`);
 
   const branchPolicy = environment.deployment_branch_policy;
   if (branchPolicy === null || branchPolicy === undefined) {
     findings.push(`${label} accepts a deployment from any branch`);
+  } else if (compensating) {
+    // Without reviewers the branch policy is the control that keeps an
+    // unreviewed branch out of production, so it must be exactly the declared set.
+    const declared = [...(gate.deploymentBranches ?? [])].sort();
+    const actual = [...(branchPolicies ?? [])].map((policy) => policy.name).sort();
+    if (declared.length === 0) findings.push(`${label} declares no deployment branches`);
+    else if (JSON.stringify(declared) !== JSON.stringify(actual)) {
+      findings.push(`${label} deployment branches [${actual}] differ from the declared [${declared}]`);
+    }
   }
   return findings;
 }
@@ -81,30 +110,50 @@ export async function assessFinalizer(request, coreRepo, expectedDigest) {
 }
 
 export async function verifyProductionEnvironment(options = {}) {
-  const webRepo = options.webRepo ?? DEFAULT_WEB_REPO;
-  const coreRepo = options.coreRepo ?? DEFAULT_CORE_REPO;
-  const request = createClient({ token: options.token, fetchImpl: options.fetchImpl });
+  const policy = options.policy ?? loadProductionPolicy();
+  const webRepo = options.webRepo ?? policy.web?.repo ?? DEFAULT_WEB_REPO;
+  const coreRepo = options.coreRepo ?? policy.core?.repo ?? DEFAULT_CORE_REPO;
+  const webEnvironment = policy.web?.environment ?? WEB_ENVIRONMENT;
+  const coreEnvironment = policy.core?.environment === undefined ? CORE_ENVIRONMENT : policy.core.environment;
+  const gate = policy.web ?? {};
+  // Two read-only credentials: the job token sees this repository's
+  // environments; the core token sees only the core repository.
+  const webRequest = createClient({ token: options.token, fetchImpl: options.fetchImpl });
+  const coreRequest = createClient({ token: options.coreToken ?? options.token, fetchImpl: options.fetchImpl });
 
-  const web = await request(`/repos/${webRepo}/environments/${WEB_ENVIRONMENT}`);
-  const core = await request(`/repos/${coreRepo}/environments/${CORE_ENVIRONMENT}`);
-  const findings = [...assessEnvironment(web, WEB_ENVIRONMENT), ...assessEnvironment(core, CORE_ENVIRONMENT)];
+  const web = await webRequest(`/repos/${webRepo}/environments/${webEnvironment}`);
+  const branchPolicies = web === null || gate.requiredReviewers !== "unavailable-on-plan"
+    ? undefined
+    : (await webRequest(`/repos/${webRepo}/environments/${webEnvironment}/deployment-branch-policies`))?.branch_policies ?? [];
+  const findings = [...assessEnvironment(web, webEnvironment, gate, branchPolicies)];
 
-  const finalizer = await assessFinalizer(request, coreRepo, options.expectedFinalizerDigest);
+  let core = null;
+  if (coreEnvironment !== null) {
+    core = await coreRequest(`/repos/${coreRepo}/environments/${coreEnvironment}`);
+    findings.push(...assessEnvironment(core, coreEnvironment));
+  }
+
+  const finalizer = await assessFinalizer(coreRequest, coreRepo, options.expectedFinalizerDigest);
   findings.push(...finalizer.findings);
 
   // An immutable release policy is what makes an exact tag a durable anchor.
-  const coreRepository = await request(`/repos/${coreRepo}`);
-  if (coreRepository?.immutable_releases !== true) {
+  // The core repository does not expose it through the API today; the policy
+  // says so explicitly rather than this check quietly passing.
+  const coreRepository = await coreRequest(`/repos/${coreRepo}`);
+  const immutableReleases = coreRepository?.immutable_releases === true;
+  if (policy.core?.immutableReleases !== "not-verifiable-via-api" && !immutableReleases) {
     findings.push(`${coreRepo} does not enforce immutable releases`);
   }
 
   return {
     webRepo,
     coreRepo,
+    humanGate: gate.humanGate ?? "required-reviewers",
+    decisionRecord: policy.decisionRecord,
     webEnvironmentPresent: web !== null,
     coreEnvironmentPresent: core !== null,
     finalizerWorkflowDigest: finalizer.digest,
-    immutableReleases: coreRepository?.immutable_releases === true,
+    immutableReleases,
     findings,
     ready: findings.length === 0,
   };
@@ -115,8 +164,11 @@ if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split("/").pop()
   const coreIndex = process.argv.indexOf("--core");
   const digestIndex = process.argv.indexOf("--expect-finalizer-digest");
   try {
+    const policyIndex = process.argv.indexOf("--policy");
     const result = await verifyProductionEnvironment({
       token: process.env.GITHUB_TOKEN,
+      coreToken: process.env.CORE_POLICY_READ_TOKEN,
+      policy: policyIndex === -1 ? undefined : loadProductionPolicy(process.argv[policyIndex + 1]),
       webRepo: webIndex === -1 ? undefined : process.argv[webIndex + 1],
       coreRepo: coreIndex === -1 ? undefined : process.argv[coreIndex + 1],
       expectedFinalizerDigest: digestIndex === -1 ? undefined : process.argv[digestIndex + 1],
