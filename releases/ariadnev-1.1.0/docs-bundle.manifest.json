@@ -1,0 +1,58 @@
+{
+  "bundle": "ariadnev-docs-bundle",
+  "fileCount": 8,
+  "generatedAt": "2026-08-16T20:03:37+07:00",
+  "generatorSha": "64100bb815d1cc8fb3c70118d1cfbf5d93d32ace",
+  "mode": "final",
+  "payload": [
+    {
+      "bytes": 505,
+      "digest": "sha256:e657ecae76d6f086d2e22479206a5574f3518fe44b30de22ac43bfee4ffa46f3",
+      "path": "proof/release-summary.json"
+    },
+    {
+      "bytes": 39966,
+      "digest": "sha256:6c63e3a42b878a6d180399eaed89948a053f369a4568e7a1028b188a6e65de52",
+      "path": "reference/cli/commands.json"
+    },
+    {
+      "bytes": 150537,
+      "digest": "sha256:a6ab9e63b95b888600d183b208bee2fcbd3c7c372606e336965978fb3cd9e2a4",
+      "path": "reference/previous-stable/bootstrap.json"
+    },
+    {
+      "bytes": 4011,
+      "digest": "sha256:266f941b65e895b6861844cd7cc78658cd19e10afee0cc5f004339e99914be70",
+      "path": "reference/providers/providers.json"
+    },
+    {
+      "bytes": 74658,
+      "digest": "sha256:973d6180194a9dac9a0201ccd92ed2c22b8aafa8492a587dd15afc63028ddcb7",
+      "path": "reference/skills/skills.json"
+    },
+    {
+      "bytes": 11832,
+      "digest": "sha256:441dfefcd6cda5f5f2f7038d82c493d4d55170b8f995f02ab1342aa329c1e157",
+      "path": "reference/workflows/workflows.json"
+    },
+    {
+      "bytes": 2012,
+      "digest": "sha256:cdf19e9f2dc6116b673d89af28902bec7f9d12f0dbcd4edd77d606e7945b562a",
+      "path": "release-notes.md"
+    },
+    {
+      "bytes": 3296,
+      "digest": "sha256:822d438d4e96f6f5149b0f7b4e27edf60bd5a15c928396e8f569ed0adae38402",
+      "path": "schemas/docs-bundle-manifest-v1.schema.json"
+    }
+  ],
+  "proofBoundary": "allowlist:v1",
+  "publishable": true,
+  "releaseTag": "ariadnev@1.1.0",
+  "schemaId": "https://ariadnev.com/schemas/docs-bundle-manifest-v1.schema.json",
+  "schemaVersion": 1,
+  "sourceDateEpoch": 1786885417,
+  "sourceSha": "64100bb815d1cc8fb3c70118d1cfbf5d93d32ace",
+  "totalBytes": 286817,
+  "version": "1.1.0"
+}

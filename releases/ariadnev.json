@@ -1,10 +1,10 @@
 {
-  "version": "1.0.0",
-  "tag": "ariadnev@1.0.0",
-  "releaseUrl": "https://docs.ariadnev.com/en/1.0.0/release-notes/",
-  "publishedAt": "2026-08-16T00:42:42Z",
-  "sourceSha": "6bde11684e2c2719e7e0c69be7613a7a690b8a0c",
-  "bundle": "releases/ariadnev-1.0.0/docs-bundle.tar.gz",
-  "manifest": "releases/ariadnev-1.0.0/docs-bundle.manifest.json",
-  "bundleSha256": "c8f2b0841b8c3044c32122c5c2398f8128aac64d6cf761c06b44cd0e1f873815"
+  "version": "1.1.0",
+  "tag": "ariadnev@1.1.0",
+  "releaseUrl": "https://docs.ariadnev.com/en/1.1.0/release-notes/",
+  "publishedAt": "2026-08-16T13:06:48Z",
+  "sourceSha": "64100bb815d1cc8fb3c70118d1cfbf5d93d32ace",
+  "bundle": "releases/ariadnev-1.1.0/docs-bundle.tar.gz",
+  "manifest": "releases/ariadnev-1.1.0/docs-bundle.manifest.json",
+  "bundleSha256": "5d6a813664985a94d62941e5f8726a85b6445af4ed73208f8dab806894ee9752"
 }
