@@ -101,6 +101,10 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # tests/site drives the built pages in a real browser (progressive
+      # enhancement, performance budget); the qualification gate is not
+      # complete without it.
+      - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm run test:qualification
       - uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v5
         with:
