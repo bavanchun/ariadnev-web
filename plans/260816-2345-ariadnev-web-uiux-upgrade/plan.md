@@ -88,7 +88,7 @@ Command-detail routes add one D13 instance per available command.
 
 | # | Phase | Depends on | Status |
 |---|---|---|---|
-| 1 | [Contract gate and measurement spike](./phase-01-contract-gate-and-measurement-spike.md) | — | Pending |
+| 1 | [Contract gate and measurement spike](./phase-01-contract-gate-and-measurement-spike.md) | — | In progress (session 1: contract, catalog, decisions #1 + baselines shipped; session 2: spikes) |
 | 2 | [Shared design tokens and foundations](./phase-02-shared-design-tokens-and-shell-primitives.md) | 1 | Pending |
 | 3 | [Docs safety, shell, and shared interactions](./phase-03-docs-safety-and-shell.md) | 1, 2 | Pending |
 | 4 | [Authored docs screen experiences](./phase-04-authored-docs-screen-experiences.md) | 1, 2, 3 | Pending |
