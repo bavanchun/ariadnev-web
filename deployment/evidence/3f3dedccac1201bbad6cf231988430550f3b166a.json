@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "productSha": "3f3dedccac1201bbad6cf231988430550f3b166a",
+  "gate": "pnpm run test:qualification",
+  "ranAt": "2026-08-16T13:08:25Z",
+  "node": "v24.15.0",
+  "pnpm": "10.33.2",
+  "results": {
+    "contracts": { "files": 2, "tests": 69, "failed": 0 },
+    "native": { "tests": 191, "failed": 0 },
+    "docs": { "tests": 23, "failed": 0 },
+    "vitest": { "files": 7, "tests": 159, "failed": 0 }
+  },
+  "outputs": {
+    "site": "apps/site/dist",
+    "docs": "apps/docs/out",
+    "docsManifestSha256": "332bbd32293faa3d88797c6414b8cab874891b03df315f102f647cdb3f0a4b47"
+  }
+}
