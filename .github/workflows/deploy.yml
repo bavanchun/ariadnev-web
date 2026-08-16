@@ -141,7 +141,9 @@ jobs:
       - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: web-product-${{ needs.preflight.outputs.product_sha }}
-          path: .
+          # upload-artifact roots the archive at the paths' least common
+          # ancestor (`apps/`), so it must be restored under `apps/`.
+          path: apps
       - name: Refuse to deploy without both unit outputs
         run: test -f apps/site/dist/index.html && test -f apps/docs/out/index.html
       - name: Reconcile the source-owned ingress rule
