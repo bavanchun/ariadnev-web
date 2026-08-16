@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "environment": "staging",
+  "topology": "candidate-b",
+  "productSha": "3f3dedccac1201bbad6cf231988430550f3b166a",
+  "qualificationEvidenceSha": "74ac40c08694d39e6bb9e06845eb3787f1f4bf1e",
+  "release": {
+    "tag": "ariadnev@1.1.0",
+    "version": "1.1.0",
+    "coreSha": "64100bb815d1cc8fb3c70118d1cfbf5d93d32ace"
+  },
+  "digests": {
+    "docsBundle": "sha256:5d6a813664985a94d62941e5f8726a85b6445af4ed73208f8dab806894ee9752",
+    "docsManifest": "sha256:332bbd32293faa3d88797c6414b8cab874891b03df315f102f647cdb3f0a4b47",
+    "docsSchema": "sha256:822d438d4e96f6f5149b0f7b4e27edf60bd5a15c928396e8f569ed0adae38402",
+    "checksums": "sha256:95d81619db077f09d803bfbc3503c9541113789151ab65c2940920c9d5b9f1f7"
+  },
+  "units": [
+    "docs",
+    "edge"
+  ],
+  "ingressPolicyDigest": "sha256:94360a75bd1505c6c95a475f2513e11072fa4727bef7f7a4ff7553bb9116b6ab"
+}
