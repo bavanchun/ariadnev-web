@@ -70,8 +70,11 @@ export async function smokeRoute(baseUrl, route, deploymentLabel, fetchImpl = fe
 }
 
 export async function deployUnits(input, options = {}) {
-  const { valid, errors, topology } = validateDeploymentInput(input, { requireOutputs: !options.dryRun });
-  if (!valid) throw new Error(`deployment input rejected:\n  ${errors.join("\n  ")}`);
+  const validated = validateDeploymentInput(input, { requireOutputs: options.requireOutputs ?? !options.dryRun });
+  if (!validated.valid) throw new Error(`deployment input rejected:\n  ${validated.errors.join("\n  ")}`);
+  // `options.topology` exists for tests that need to exercise a malformed unit
+  // declaration without editing the committed topology.
+  const topology = options.topology ?? validated.topology;
 
   const environment = input.environment;
   const environmentHosts = topology.environments[environment];

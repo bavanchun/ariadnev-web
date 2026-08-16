@@ -11,6 +11,10 @@ const STABLE_SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 const MAX_SELECTOR_LENGTH = 32;
 
 export const SELECTOR_PARAM = "version";
+// Only post-rename releases are addressable. `?version=<semver>` resolves the
+// `ariadnev@<semver>` tag and nothing else. Pre-rename `vcskill@` tags are not
+// addressable through this edge; a pinned request for one answers 404, never a
+// fallback to some other release.
 export const TAG_PREFIX = "ariadnev@";
 
 /** Routes that accept the selector. Installer routes are deliberately absent. */

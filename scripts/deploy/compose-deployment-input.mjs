@@ -33,6 +33,7 @@ const sha256 = (buffer) => `sha256:${createHash("sha256").update(buffer).digest(
 export function composeDeploymentInput({ environment, productSha, evidenceSha, units, pinPath }) {
   const pin = JSON.parse(readFileSync(resolve(repoRoot, pinPath), "utf8"));
   const bundle = readFileSync(resolve(repoRoot, pin.bundle));
+  if (pin.bundleSha256 && sha256(bundle) !== `sha256:${pin.bundleSha256}`) throw new Error("bundle bytes do not match the release pin's bundleSha256");
   const manifest = readFileSync(resolve(repoRoot, pin.manifest));
   const checksums = readFileSync(resolve(repoRoot, pin.bundle.replace(/[^/]+$/, "checksums.txt")));
   return {

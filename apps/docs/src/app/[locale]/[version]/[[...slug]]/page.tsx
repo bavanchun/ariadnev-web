@@ -18,7 +18,11 @@ export async function generateMetadata({ params }: { params: Promise<RouteParams
   const { locale, version, slug = [] } = await params;
   const page = await getDocsPage(locale, version, slug);
   if (!page) return {};
-  const canonical = `/${[locale, version, ...slug].join("/")}/`;
+  // The physical current-version route and the `stable` alias serve the same
+  // document; both canonicalise to the alias so search engines index one URL,
+  // and the one that does not go stale at the next release.
+  const routeVersion = version === page.catalog.currentStable ? page.catalog.stableAlias : version;
+  const canonical = `/${[locale, routeVersion, ...slug].join("/")}/`;
   return { title: page.catalogPage.title, description: page.catalogPage.description, alternates: { canonical } };
 }
 

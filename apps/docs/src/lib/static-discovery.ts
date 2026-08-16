@@ -67,6 +67,10 @@ export async function exportStaticDiscovery(catalog: DocsContentCatalog, content
     await mkdir(dirname(target), { recursive: true });
     await writeFile(target, rendered.markdown, { encoding: "utf8", flag: "wx" });
     written.push(url);
+    // The physical current-version route is the same document as its `stable`
+    // alias, so it is written (links into it must resolve) but listed once:
+    // llms.txt and llms-full.txt name each document by one URL only.
+    if (route.version === catalog.currentStable) continue;
     concise.push(`- [${escapeMarkdownInline(page.title)}](${url}) - ${escapeMarkdownInline(page.description)}`);
     fullSections.push(`Source: ${url}\n\n${rendered.markdown.trim()}\n`);
     renderedPages.push({ markdown: rendered.body, pageUrl });

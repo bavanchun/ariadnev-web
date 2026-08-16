@@ -36,9 +36,11 @@ afterEach(() => {
 });
 
 describe("an absent pin", () => {
-  it("is not an error, in either mode", () => {
+  it("is not an error in a normal build", () => {
     expect(loadReleasePin({ path, releaseMode: false })).toBeNull();
-    expect(loadReleasePin({ path, releaseMode: true })).toBeNull();
+  });
+  it("is an error in a release build", () => {
+    expect(() => loadReleasePin({ path, releaseMode: true })).toThrow(ReleasePinError);
   });
 });
 

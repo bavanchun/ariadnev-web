@@ -46,4 +46,5 @@ node_modules/.cache/
 apps/docs/out/
 apps/docs/.source/
 apps/docs/content/generated/
+apps/docs/content/.staging/
 *.tsbuildinfo

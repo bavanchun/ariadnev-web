@@ -10,6 +10,7 @@ name = "ariadnev-edge"
 main = "src/index.js"
 compatibility_date = "2026-07-20"
 workers_dev = true
+preview_urls = false
 
 routes = []
 

@@ -62,12 +62,12 @@ export const SITE = {
  * does not exist. The source repository is private, so nothing links there.
  */
 export const DOCS = {
-  installation: `${SITE.docsEntry}get-started/installation`,
-  graphExecution: `${SITE.docsEntry}concepts/graph-execution`,
-  evaluation: `${SITE.docsEntry}concepts/evaluation`,
-  workflows: `${SITE.docsEntry}reference/workflows`,
-  providers: `${SITE.docsEntry}reference/providers`,
-  releaseNotes: `${SITE.docsEntry}release-notes`,
+  installation: `${SITE.docsEntry}get-started/installation/`,
+  graphExecution: `${SITE.docsEntry}concepts/graph-execution/`,
+  evaluation: `${SITE.docsEntry}concepts/evaluation/`,
+  workflows: `${SITE.docsEntry}reference/workflows/`,
+  providers: `${SITE.docsEntry}reference/providers/`,
+  releaseNotes: `${SITE.docsEntry}release-notes/`,
 } as const;
 
 /**
@@ -343,7 +343,8 @@ const ISO_INSTANT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/;
  * Read the optional machine-generated release pin, which the docs content
  * build produces from the release docs bundle.
  *
- * Absent pin  -> `null`, and the release-specific row is omitted entirely.
+ * Absent pin  -> `null` in a normal build, and the release-specific row is
+ *                omitted entirely; throws in a release build.
  * Malformed   -> `null` in a normal build; throws in a release build, so a
  *                broken sync cannot quietly ship a page with no release identity.
  *
@@ -352,17 +353,20 @@ const ISO_INSTANT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/;
 export function loadReleasePin(
   { path = join(repoRoot, "releases", "ariadnev.json"), releaseMode = process.env.ARIADNEV_RELEASE_MODE === "1" } = {},
 ): ReleasePin | null {
-  let raw: string;
-  try {
-    raw = readFileSync(path, "utf8");
-  } catch {
-    return null; // Absent is a supported state, not a failure.
-  }
-
   const reject = (reason: string): null => {
     if (releaseMode) throw new ReleasePinError(`release pin at ${path} is invalid: ${reason}`);
     return null;
   };
+
+  let raw: string;
+  try {
+    raw = readFileSync(path, "utf8");
+  } catch {
+    // Absent is a supported state in a normal build. A release build must
+    // find its pin: silently shipping no release row is exactly the failure
+    // this function exists to prevent.
+    return reject("absent");
+  }
 
   let parsed: unknown;
   try {

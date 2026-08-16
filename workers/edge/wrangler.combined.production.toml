@@ -14,6 +14,10 @@
 name = "ariadnev-edge"
 main = "src/index.js"
 compatibility_date = "2026-07-20"
+# The only public origins are the bound hostnames: no workers.dev subdomain and
+# no preview URLs, which would sit outside the zone-level ingress rule.
+workers_dev = false
+preview_urls = false
 
 routes = [
   { pattern = "ariadnev.com", custom_domain = true },

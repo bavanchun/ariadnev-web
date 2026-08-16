@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import test from "node:test";
 import { buildContentRoot, loadAuthoredPages, parseArguments, parseFrontmatter } from "../../scripts/docs-content/build-content-root.mjs";
-import { code, escapeMdx, renderSkillCatalog } from "../../scripts/docs-content/render-reference-pages.mjs";
+import { code, escapeMarkdownProse, escapeMdx, renderReleaseNotes, renderSkillCatalog } from "../../scripts/docs-content/render-reference-pages.mjs";
 import { parseDocsContentCatalog } from "../../apps/docs/src/lib/content-catalog.ts";
 import { publicMarkdown } from "../../apps/docs/src/lib/public-markdown.ts";
 
@@ -96,4 +96,17 @@ test("bundle text is escaped so it cannot become MDX syntax", () => {
   assert.match(page, /### `av:one`/);
   assert.match(page, /### `av:two`/);
   assert.doesNotThrow(() => publicMarkdown(page));
+});
+
+test("release-notes prose is escaped but code spans and fences are left literal", () => {
+  const notes = "# 1.0.0\n\nAssets are `ariadnev-{os}-{arch}` and <b> is {c}.\n\n```bash\n# comment {x} <y>\nav install\n```\n";
+  const escaped = escapeMarkdownProse(notes);
+  assert.match(escaped, /^## 1\.0\.0$/m);
+  assert.match(escaped, /`ariadnev-\{os\}-\{arch\}`/);
+  assert.match(escaped, /\\<b> is \\\{c\\\}\./);
+  assert.match(escaped, /```bash\n# comment \{x\} <y>\nav install\n```/);
+  const page = renderReleaseNotes("en", notes);
+  assert.doesNotThrow(() => publicMarkdown(page));
+  assert.ok(!page.includes("\\{os\\}"), "braces inside a code span must not be escaped");
+  assert.equal(code("--format <json|text>"), "`--format <json\\|text>`");
 });

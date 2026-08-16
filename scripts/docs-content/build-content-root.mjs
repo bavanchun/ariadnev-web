@@ -2,7 +2,7 @@
 // Build the docs content root from a release docs bundle.
 //
 //   node scripts/docs-content/build-content-root.mjs \
-//     [--pin releases/ariadnev.json] [--out apps/docs/content] [--release-pin-only]
+//     [--pin releases/ariadnev.json] [--out apps/docs/content] [--authored <dir>]
 //
 // Inputs
 //   - The release pin (`releases/ariadnev.json`) names the exact release and
@@ -207,8 +207,8 @@ export function buildContentRoot(options) {
   const archive = readFileSync(resolve(repositoryRoot, pin.bundle));
   if (pin.bundleSha256 && sha256(archive) !== `sha256:${pin.bundleSha256}`) throw new Error("bundle bytes do not match the release pin's bundleSha256");
   const manifestBytes = readFileSync(resolve(repositoryRoot, pin.manifest));
-  mkdirSync(outRoot, { recursive: true });
-  const staging = mkdtempSync(join(outRoot, ".generated-staging-"));
+  mkdirSync(join(outRoot, ".staging"), { recursive: true });
+  const staging = mkdtempSync(join(outRoot, ".staging", "generated-"));
   try {
     const bundleDir = join(staging, "bundle");
     const extracted = extractDocsBundle({

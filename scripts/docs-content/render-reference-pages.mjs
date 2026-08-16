@@ -148,14 +148,72 @@ export function escapeMdx(value) {
     .trim();
 }
 
-/** Inline code from untrusted text: backticks cannot be escaped inside a code span, so widen the fence. */
+/**
+ * Inline code from untrusted text. Backticks cannot be escaped inside a code
+ * span, so the fence is widened past the longest run; `|` is escaped because
+ * GFM splits table cells on it even inside a code span.
+ */
 export function code(value) {
-  const text = String(value ?? "").replace(/\r?\n/g, " ");
+  const text = String(value ?? "").replace(/\r?\n/g, " ").replace(/\|/g, "\\|");
   if (text.length === 0) return "";
   const longest = Math.max(0, ...[...text.matchAll(/`+/g)].map((match) => match[0].length));
   const fence = "`".repeat(longest + 1);
   const padded = text.startsWith("`") || text.endsWith("`") ? ` ${text} ` : text;
   return `${fence}${padded}${fence}`;
+}
+
+/**
+ * Escape MDX-significant characters in authored-style Markdown while leaving
+ * fenced blocks and inline code spans untouched — MDX already treats code
+ * content literally, and an escape written there renders as a backslash.
+ * Also demotes H1s outside fences, because the page title is the H1.
+ */
+export function escapeMarkdownProse(markdown) {
+  const out = [];
+  let inFence = null;
+  for (const line of String(markdown).split(/\r?\n/)) {
+    const fence = /^(\s*)(`{3,}|~{3,})/.exec(line);
+    if (inFence) {
+      out.push(line);
+      if (fence && fence[2][0] === inFence[0] && fence[2].length >= inFence.length) inFence = null;
+      continue;
+    }
+    if (fence) {
+      inFence = fence[2];
+      out.push(line);
+      continue;
+    }
+    const demoted = line.startsWith("# ") ? `## ${line.slice(2)}` : line;
+    out.push(escapeOutsideCodeSpans(demoted));
+  }
+  return out.join("\n");
+}
+
+function escapeOutsideCodeSpans(line) {
+  let result = "";
+  let index = 0;
+  while (index < line.length) {
+    const open = /`+/.exec(line.slice(index));
+    if (!open) {
+      result += escapeProseSegment(line.slice(index));
+      break;
+    }
+    const start = index + open.index;
+    const closeAt = line.indexOf(open[0], start + open[0].length);
+    result += escapeProseSegment(line.slice(index, start));
+    if (closeAt === -1) {
+      // An unclosed run of backticks is prose, not a span.
+      result += escapeProseSegment(line.slice(start));
+      break;
+    }
+    result += line.slice(start, closeAt + open[0].length);
+    index = closeAt + open[0].length;
+  }
+  return result;
+}
+
+function escapeProseSegment(text) {
+  return text.replace(/<(?=[^\s`])/g, "\\<").replace(/\{/g, "\\{").replace(/\}/g, "\\}");
 }
 
 function frontmatter(title, description) {
@@ -265,13 +323,7 @@ export function renderWorkflowReference(locale, workflows) {
 /** Release notes ship as Markdown with H2 headings per version; H1s, if any, are demoted. */
 export function renderReleaseNotes(locale, notesMarkdown) {
   const t = STRINGS[locale].releaseNotes;
-  const body = String(notesMarkdown)
-    .replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, "")
-    .split(/\r?\n/)
-    .map((line) => (line.startsWith("# ") ? `## ${line.slice(2)}` : line))
-    .map((line) => line.replace(/<(?=[^\s`])/g, "\\<").replace(/\{/g, "\\{").replace(/\}/g, "\\}"))
-    .join("\n")
-    .trim();
+  const body = escapeMarkdownProse(String(notesMarkdown).replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, "")).trim();
   return `${frontmatter(t.title, t.description)}${t.intro}\n\n${body}\n`;
 }
 

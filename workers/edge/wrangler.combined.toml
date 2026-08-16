@@ -16,6 +16,10 @@
 name = "ariadnev-edge-staging"
 main = "src/index.js"
 compatibility_date = "2026-07-20"
+# The only public origins are the bound hostnames: no workers.dev subdomain and
+# no preview URLs, which would sit outside the zone-level ingress rule.
+workers_dev = false
+preview_urls = false
 
 # Secret (set out of band, never committed):
 #   wrangler secret put GH_TOKEN --config workers/edge/wrangler.combined.toml

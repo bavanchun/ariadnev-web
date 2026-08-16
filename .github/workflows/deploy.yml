@@ -131,6 +131,15 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # The deploy step ships exactly the bytes the build job qualified: the
+      # artifact is downloaded, never rebuilt here, so a second build cannot
+      # diverge from the one the qualification gate passed.
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          name: web-product-${{ needs.preflight.outputs.product_sha }}
+          path: .
+      - name: Refuse to deploy without both unit outputs
+        run: test -f apps/site/dist/index.html && test -f apps/docs/out/index.html
       - name: Reconcile the source-owned ingress rule
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WAF_TOKEN }}

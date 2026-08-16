@@ -51,6 +51,10 @@ ariadnev install
 
 Hai trình đọc vẫn tương thích vì chúng chạm vào dữ liệu đã có trên đĩa của bạn: khối quản lý `AGENTS.md` viết bằng marker cũ được thay thế thay vì nhân đôi, và receipt schema-1 vẫn đọc được nên `doctor` và `uninstall` tiếp tục hoạt động với nó.
 
+## Tải về theo phiên bản ghim
+
+`https://ariadnev.com/version?version=<semver>` và `/download/<asset>?version=<semver>` chỉ phân giải các bản phát hành `ariadnev@<semver>`. Ghim vào một phiên bản trước khi đổi tên sẽ trả về 404 thay vì âm thầm phục vụ thứ khác.
+
 ## Nếu bạn bỏ qua
 
 Các file cũ là trơ — không tiến trình nào đọc chúng — nhưng chúng vẫn nằm trong thư mục provider của bạn, nơi model đọc chúng như chỉ dẫn cạnh các file mới. Hai phiên bản của cùng một skill trong một thư mục `skills/` mới là vấn đề đáng tránh, không phải dung lượng đĩa.
