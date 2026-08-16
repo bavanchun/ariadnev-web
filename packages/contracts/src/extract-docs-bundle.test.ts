@@ -83,7 +83,7 @@ interface BundleOptions {
 }
 
 function buildBundle(options: BundleOptions = {}): Buffer {
-  const files = options.files ?? { "index.md": "# vcskill\n", "guide/start.md": "start here\n" };
+  const files = options.files ?? { "index.md": "# ariadnev\n", "guide/start.md": "start here\n" };
   const payload = Object.entries(files).map(([path, content]) => ({
     path,
     bytes: Buffer.byteLength(content, "utf8"),
@@ -91,12 +91,12 @@ function buildBundle(options: BundleOptions = {}): Buffer {
   }));
   const manifest = {
     schemaVersion: 1,
-    schemaId: "https://vcskill.dev/schemas/docs-bundle-manifest-v1.schema.json",
-    bundle: "vcskill-docs-bundle",
+    schemaId: "https://ariadnev.com/schemas/docs-bundle-manifest-v1.schema.json",
+    bundle: "ariadnev-docs-bundle",
     mode: "final",
     publishable: true,
     version: "0.12.0",
-    releaseTag: "vcskill@0.12.0",
+    releaseTag: "ariadnev@0.12.0",
     sourceSha: SOURCE_SHA,
     generatorSha: GENERATOR_SHA,
     generatedAt: "2026-08-10T00:00:00Z",
@@ -134,7 +134,7 @@ function expectRejection(run: () => unknown, code: string): void {
 describe("trusted schema anchor", () => {
   it("loads only when the on-disk schema still matches the pinned digest", () => {
     const schema = loadTrustedSchema() as { $id: string };
-    expect(schema.$id).toBe("https://vcskill.dev/schemas/docs-bundle-manifest-v1.schema.json");
+    expect(schema.$id).toBe("https://ariadnev.com/schemas/docs-bundle-manifest-v1.schema.json");
     expect(TRUSTED_SCHEMA_DIGEST).toMatch(/^sha256:[a-f0-9]{64}$/);
   });
 
@@ -175,12 +175,12 @@ describe("path normalization", () => {
 describe("manifest validation", () => {
   const valid = {
     schemaVersion: 1,
-    schemaId: "https://vcskill.dev/schemas/docs-bundle-manifest-v1.schema.json",
-    bundle: "vcskill-docs-bundle",
+    schemaId: "https://ariadnev.com/schemas/docs-bundle-manifest-v1.schema.json",
+    bundle: "ariadnev-docs-bundle",
     mode: "final" as const,
     publishable: true,
     version: "0.12.0",
-    releaseTag: "vcskill@0.12.0",
+    releaseTag: "ariadnev@0.12.0",
     sourceSha: SOURCE_SHA,
     generatorSha: GENERATOR_SHA,
     generatedAt: "2026-08-10T00:00:00Z",
@@ -192,12 +192,12 @@ describe("manifest validation", () => {
   };
 
   it("accepts a well-formed final manifest", () => {
-    expect(parseDocsBundleManifest(valid).releaseTag).toBe("vcskill@0.12.0");
+    expect(parseDocsBundleManifest(valid).releaseTag).toBe("ariadnev@0.12.0");
   });
 
   it("enforces the expected release identity", () => {
-    expect(() => parseDocsBundleManifest(valid, { releaseTag: "vcskill@0.12.0" })).not.toThrow();
-    expectRejection(() => parseDocsBundleManifest(valid, { releaseTag: "vcskill@0.11.0" }), "release-identity-mismatch");
+    expect(() => parseDocsBundleManifest(valid, { releaseTag: "ariadnev@0.12.0" })).not.toThrow();
+    expectRejection(() => parseDocsBundleManifest(valid, { releaseTag: "ariadnev@0.11.0" }), "release-identity-mismatch");
     expectRejection(() => parseDocsBundleManifest(valid, { sourceSha: "f".repeat(40) }), "release-identity-mismatch");
     expectRejection(() => parseDocsBundleManifest(valid, { mode: "provisional" }), "release-identity-mismatch");
   });
@@ -216,7 +216,7 @@ describe("manifest validation", () => {
   });
 
   it("rejects a provisional manifest that claims a tag", () => {
-    const provisional = { ...valid, mode: "provisional" as const, publishable: false, releaseTag: "vcskill@0.12.0" };
+    const provisional = { ...valid, mode: "provisional" as const, publishable: false, releaseTag: "ariadnev@0.12.0" };
     expectRejection(() => parseDocsBundleManifest(provisional), "manifest-invalid");
   });
 
@@ -294,13 +294,13 @@ describe("end-to-end extraction", () => {
     const result = extractDocsBundle({
       archive: buildBundle(),
       destination,
-      expected: { releaseTag: "vcskill@0.12.0", sourceSha: SOURCE_SHA },
+      expected: { releaseTag: "ariadnev@0.12.0", sourceSha: SOURCE_SHA },
       trustedSchemaDigest: TRUSTED_SCHEMA_DIGEST,
     });
 
     expect(result.manifest.version).toBe("0.12.0");
     expect(result.fileCount).toBe(2);
-    expect(readFileSync(join(destination, "index.md"), "utf8")).toBe("# vcskill\n");
+    expect(readFileSync(join(destination, "index.md"), "utf8")).toBe("# ariadnev\n");
     expect(readFileSync(join(destination, "guide", "start.md"), "utf8")).toBe("start here\n");
     // The manifest and schema members are proof, not payload, so they are not
     // installed into the served tree.
@@ -311,11 +311,11 @@ describe("end-to-end extraction", () => {
   it("rejects a payload digest that does not match the manifest", () => {
     const archive = buildBundle({
       manifestOverrides: {
-        payload: [{ path: "index.md", bytes: 10, digest: `sha256:${"d".repeat(64)}` }],
+        payload: [{ path: "index.md", bytes: 11, digest: `sha256:${"d".repeat(64)}` }],
         fileCount: 1,
-        totalBytes: 10,
+        totalBytes: 11,
       },
-      files: { "index.md": "# vcskill\n" },
+      files: { "index.md": "# ariadnev\n" },
     });
     expectRejection(
       () => extractDocsBundle({ archive, destination: join(scratch(), "docs") }),
@@ -333,12 +333,12 @@ describe("end-to-end extraction", () => {
 
   it("rejects a manifest entry with no archive member", () => {
     const archive = buildBundle({
-      files: { "index.md": "# vcskill\n" },
+      files: { "index.md": "# ariadnev\n" },
       manifestOverrides: {
         fileCount: 2,
-        totalBytes: 10 + 7,
+        totalBytes: 11 + 7,
         payload: [
-          { path: "index.md", bytes: 10, digest: digestOf("# vcskill\n") },
+          { path: "index.md", bytes: 11, digest: digestOf("# ariadnev\n") },
           { path: "ghost.md", bytes: 7, digest: digestOf("ghost\n\n") },
         ],
       },
@@ -368,7 +368,7 @@ describe("end-to-end extraction", () => {
         extractDocsBundle({
           archive: buildBundle(),
           destination: join(scratch(), "docs"),
-          expected: { releaseTag: "vcskill@9.9.9" },
+          expected: { releaseTag: "ariadnev@9.9.9" },
         }),
       "release-identity-mismatch",
     );
