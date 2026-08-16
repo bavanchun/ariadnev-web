@@ -11,12 +11,25 @@
 //   3. Release identity is never authored. It is read at build time from the
 //      optional machine-generated pin (see `loadReleasePin`) or omitted.
 
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-const siteRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
-const repoRoot = join(siteRoot, "..", "..");
+/**
+ * The workspace root, found by walking up from the build's working directory
+ * to the pnpm workspace manifest. `import.meta.url` is not usable here: Astro
+ * executes this module from a bundled chunk whose location differs between
+ * a dev server, a build, and a test run.
+ */
+function findWorkspaceRoot(start = process.cwd()): string {
+  let current = start;
+  for (;;) {
+    if (existsSync(join(current, "pnpm-workspace.yaml"))) return current;
+    const parent = dirname(current);
+    if (parent === current) return start;
+    current = parent;
+  }
+}
+const repoRoot = findWorkspaceRoot();
 
 /** A claim that can be checked against a source a reader can open. */
 export interface SourcedClaim {
