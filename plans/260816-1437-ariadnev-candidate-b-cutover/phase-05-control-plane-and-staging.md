@@ -22,3 +22,8 @@
 ## Validation
 - Successful `deploy.yml` staging run with `cutover-record-staging` artifact.
 - `verify-convergence.mjs` green against staging.
+
+## Findings from the first run (2026-08-16)
+
+- `gh api PUT /environments/web-production` with `reviewers` → **422 "billing plan does not support required reviewers"** (private repo, free plan). `web-staging` and `web-production` exist without protection rules. `scripts/deploy/verify-production-environment.mjs` requires required reviewers + `prevent_self_review` + a branch policy on both `web-production` (this repo) and `core-release-production` (`ariadnev-kit`, which has **no environments** and reports `immutable_releases: null`). Options: (a) make the repos public (reviewers available on free plan), (b) upgrade the plan, (c) relax the policy check to accept `workflow_dispatch` + branch policy as the human gate for a solo-maintained private repo, recorded as a decision. Owner decides.
+- Docs unit deployed to staging locally via `deploy-units.mjs` (Cloudflare OAuth); DNS/cert for the Custom Domain took ~1 minute, during which the smoke fetch fails and the run halts — re-running is idempotent and passed 5/5.

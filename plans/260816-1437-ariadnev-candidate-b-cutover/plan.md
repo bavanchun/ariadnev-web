@@ -48,11 +48,11 @@ The user chose the full path on 2026-08-16.
 
 | # | Phase | Depends on | Status |
 |---|---|---|---|
-| 1 | [Rebrand `apps/site` to ariadnev](phase-01-rebrand-site.md) | — | pending |
-| 2 | [Port the docs platform onto `main`](phase-02-port-docs-platform.md) | — | pending |
-| 3 | [Docs content pipeline + EN/VI content](phase-03-docs-content.md) | 2 | pending |
-| 4 | [Retarget topology and Worker configs to ariadnev hosts](phase-04-topology-and-workers.md) | 1, 2 | pending |
-| 5 | [Provision the deploy control plane and ship staging](phase-05-control-plane-and-staging.md) | 3, 4 | pending |
+| 1 | [Rebrand `apps/site` to ariadnev](phase-01-rebrand-site.md) | — | completed (PR #6, main 75284a9) |
+| 2 | [Port the docs platform onto `main`](phase-02-port-docs-platform.md) | — | completed (PR #6) |
+| 3 | [Docs content pipeline + EN/VI content](phase-03-docs-content.md) | 2 | completed (PR #6) |
+| 4 | [Retarget topology and Worker configs to ariadnev hosts](phase-04-topology-and-workers.md) | 1, 2 | completed (PR #6) |
+| 5 | [Provision the deploy control plane and ship staging](phase-05-control-plane-and-staging.md) | 3, 4 | in-progress — docs unit live on staging.docs.ariadnev.com (2026-08-16); edge unit + workflow run wait on secrets |
 | 6 | [Production cutover, bridge retirement, records](phase-06-production-cutover.md) | 5 | pending |
 
 Phases 1 and 2 are independent and may run in parallel (disjoint files: `apps/site/**` +
@@ -67,6 +67,10 @@ Phases 1 and 2 are independent and may run in parallel (disjoint files: `apps/si
 5. `wrangler deployments list --name vcskill` still shows `b93d9d2`; `vcskill.vchun.dev/install` still 302s.
 6. A `cutover-record-production` artifact exists on the successful `deploy.yml` run; `deployment/inputs/production-*.json` is committed.
 7. `pnpm run test:qualification` green on `main`; `grep -rI vcskill apps/ workers/edge workers/bridge tests/site tests/docs` matches only historical-record allowlisted lines.
+
+## Status log
+
+- 2026-08-16 — Phases 1–4 merged as PR #6 (`75284a9`); code review findings closed in the same PR. Qualification evidence recorded at `deployment/evidence/75284a9….json`; `deployment/inputs/staging-ariadnev-1.0.0.json` composed. Docs unit deployed to `staging.docs.ariadnev.com` through `deploy-units.mjs` (Cloudflare OAuth, not the workflow): 5/5 smoke routes pass. Blocked for the edge unit and the workflow path: Worker `GH_TOKEN`, `CLOUDFLARE_DEPLOY_TOKEN`, `CLOUDFLARE_WAF_TOKEN` (owner-created). GitHub environments `web-staging` / `web-production` created; **required reviewers are unavailable on the current plan for a private repo**, so `verify-production-environment.mjs` will fail as written — decision needed (see phase 5).
 
 ## Risks
 
