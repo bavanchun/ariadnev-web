@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "environment": "staging",
   "topology": "candidate-b",
-  "productSha": "61c0f2c4fa06b851c31f51a34cb1b0729ea79fe7",
-  "qualificationEvidenceSha": "03a9223d045865f5f8441318b0ae3213e26c866c",
+  "productSha": "301f0963ecb2d0af0341ffa8288801e13711d3f7",
+  "qualificationEvidenceSha": "14cee08a3167fc78249edaa98099b4cc93a72345",
   "release": {
     "tag": "ariadnev@1.0.0",
     "version": "1.0.0",
