@@ -15,7 +15,9 @@ import { fileURLToPath } from "node:url";
 import edge, { classifyRoute, isProtected } from "./index.js";
 import { SelectorError, parseReleaseSelector, versionFromTag } from "./release-selector.js";
 import { assertSafeAssetName } from "./github-release.js";
+import { resolveInstallationToken } from "./github-app-auth.js";
 import { CACHE_POLICY, SECURITY_HEADERS, applyStaticResponsePolicy } from "./static-response-policy.js";
+import { TOKEN_URL, appEnv, createTestAppKey } from "../test/app-auth-harness.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const edgeRoot = join(here, "..");
@@ -122,12 +124,25 @@ function createAssetsBinding() {
 
 // ---------------------------------------------------------------- invocation
 
+// Every case below asserts route behavior, not credential acquisition, so the
+// installation token is minted once here and served from cache for the rest of
+// the file. Upstream call lists therefore contain release traffic only, and an
+// unexpected mint would surface as `createMockFetch` throwing.
+// Acquisition itself is covered by `github-app-auth.test.mjs`.
+const { privateKeyPem } = await createTestAppKey();
+const APP_ENV = appEnv(privateKeyPem);
+await resolveInstallationToken(APP_ENV, async (url) => {
+  assert.equal(url, TOKEN_URL);
+  return Response.json({ token: TOKEN, expires_at: new Date(Date.now() + 3_600_000).toISOString() });
+});
+
+/** `token: null` models the Worker deployed without its App secrets. */
 async function call(path, { method = "GET", token = TOKEN, mock = {}, assets = null, fetchImpl } = {}) {
   const upstream = fetchImpl || createMockFetch(mock);
   const originalFetch = globalThis.fetch;
   globalThis.fetch = upstream;
   try {
-    const env = { GH_TOKEN: token };
+    const env = token === null ? {} : { ...APP_ENV };
     if (assets) env.ASSETS = assets;
     const response = await edge.fetch(new Request(`${BASE}${path}`, { method }), env);
     const bodyText = method === "HEAD" || !response.body ? "" : await response.text();

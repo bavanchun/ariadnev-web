@@ -1,0 +1,53 @@
+# Standing liveness probe for the public edge.
+#
+# `deploy.yml` proves the edge worked at deploy time. Nothing proved it still
+# works a month later, and the failure this guards against is exactly the quiet
+# kind: the marketing site keeps answering 200 from static assets while
+# `/install`, `/version`, and `/download/<asset>` fail because the GitHub
+# credential behind the private repository stopped working.
+#
+# A failed run is the alert: GitHub emails the repository owner on workflow
+# failure, which is why this fails loudly instead of only logging.
+#
+# It reads nothing and deploys nothing, so it needs no secrets.
+
+name: edge-health
+
+on:
+  schedule:
+    # Daily, off the hour to avoid GitHub's own scheduling peak.
+    - cron: "37 2 * * *"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to probe
+        required: false
+        default: production
+        type: choice
+        options: [production, staging]
+
+permissions: {}
+
+concurrency:
+  group: edge-health-${{ inputs.environment || 'production' }}
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    name: Probe ${{ inputs.environment || 'production' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+      # The probe is dependency-free on purpose: an install step that breaks
+      # would take the alarm down with it.
+      - name: Probe the public edge
+        env:
+          ENVIRONMENT: ${{ inputs.environment || 'production' }}
+        run: node scripts/deploy/probe-public-edge.mjs --environment "$ENVIRONMENT"

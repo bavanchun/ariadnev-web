@@ -21,11 +21,14 @@ compatibility_date = "2026-07-20"
 workers_dev = false
 preview_urls = false
 
-# Secret (set out of band, never committed):
-#   wrangler secret put GH_TOKEN --config workers/edge/wrangler.combined.toml
+# Secrets (set out of band, never committed) — a GitHub App with Contents: read
+# on bavanchun/ariadnev-kit, so the credential behind the install path has no
+# expiry date. See docs/decisions/private-repo-edge-authentication.md.
+#   wrangler secret put GH_APP_ID --config workers/edge/wrangler.combined.toml
+#   wrangler secret put GH_APP_INSTALLATION_ID --config workers/edge/wrangler.combined.toml
+#   wrangler secret put GH_APP_PRIVATE_KEY --config workers/edge/wrangler.combined.toml
 # This Worker uses its own secret namespace, separate from the retained legacy
-# `vcskill` Worker and from the interim `ariadnev-bridge`, so provisioning or
-# rotating this PAT cannot invalidate either of them.
+# `vcskill` Worker, so provisioning or rotating these cannot invalidate it.
 
 routes = [
   { pattern = "staging.ariadnev.com", custom_domain = true }

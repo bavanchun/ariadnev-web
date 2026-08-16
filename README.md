@@ -134,16 +134,30 @@ config paths, build outputs, and smoke routes.
 
 ## Secrets
 
-The edge Worker needs one secret: a fine-grained GitHub PAT with **Contents:
-read** on the private `bavanchun/ariadnev-kit` repository.
+The kit repository is private, so the edge Worker authenticates every upstream
+read. It does so as a **GitHub App** with **Contents: read** on
+`bavanchun/ariadnev-kit` — a private key with no expiry date, exchanged at run
+time for a one-hour installation token. A personal access token would take the
+public install path down on its expiry date; see
+[`docs/decisions/private-repo-edge-authentication.md`](docs/decisions/private-repo-edge-authentication.md).
 
 ```sh
-wrangler secret put GH_TOKEN --config workers/edge/wrangler.combined.toml
+wrangler secret put GH_APP_ID --config workers/edge/wrangler.combined.toml
+wrangler secret put GH_APP_INSTALLATION_ID --config workers/edge/wrangler.combined.toml
+wrangler secret put GH_APP_PRIVATE_KEY --config workers/edge/wrangler.combined.toml
 ```
+
+`GH_APP_PRIVATE_KEY` must be **PKCS#8** (`BEGIN PRIVATE KEY`). GitHub issues
+PKCS#1; convert it once with
+`openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in <downloaded>.pem`.
 
 Secrets live on the deployed Worker in Cloudflare, never in this repository.
 The combined Worker uses a secret namespace separate from the retained legacy
-Worker and from the interim bridge, so rotating one cannot invalidate another.
+Worker, so rotating one cannot invalidate the other.
+
+`edge-health.yml` probes the live install path daily
+(`pnpm run probe:edge` runs the same check locally), because a credential that
+stops working is otherwise invisible until someone tries to install.
 
 ## Legacy runtime
 

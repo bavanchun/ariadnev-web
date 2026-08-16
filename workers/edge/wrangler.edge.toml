@@ -16,9 +16,10 @@ name = "vcskill-edge-staging"
 main = "src/index.js"
 compatibility_date = "2026-07-20"
 
-# Secret (set out of band, never committed):
-#   wrangler secret put GH_TOKEN --config workers/edge/wrangler.edge.toml
-# A fine-grained PAT scoped to bavanchun/vcskill.
+# Secrets (set out of band, never committed): GH_APP_ID, GH_APP_INSTALLATION_ID,
+# and GH_APP_PRIVATE_KEY, for a GitHub App with Contents: read on the kit
+# repository. This candidate-A profile is retained for reference only; the
+# deployed profiles are the `wrangler.combined*` ones.
 
 routes = [
   { pattern = "staging.vcskill.vchun.dev/install*", zone_name = "vchun.dev" },

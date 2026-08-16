@@ -12,7 +12,7 @@ import { SelectorError, assertSelectorMatch, versionFromTag } from "./release-se
 export const REPO = "bavanchun/ariadnev-kit";
 export const API = "https://api.github.com";
 
-const USER_AGENT = "ariadnev-edge";
+export const USER_AGENT = "ariadnev-edge";
 const MAX_ASSET_NAME_LENGTH = 128;
 // Release asset names are flat basenames: letters, digits, dot, dash, underscore.
 const SAFE_ASSET_NAME = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;

@@ -16,14 +16,20 @@
 //   * The frozen Phase 1 public contract for `/install`, `/install.sh`,
 //     `/install.ps1`, `/version`, and `/download/<asset>` is preserved exactly.
 //
-// Requires one secret: GH_TOKEN — a fine-grained PAT with Contents: read on
-// bavanchun/ariadnev-kit. Under Candidate B this lives in a Worker secret namespace
-// separate from the retained legacy Worker.
+// Requires the three GitHub App secrets described in `github-app-auth.js`:
+// GH_APP_ID, GH_APP_INSTALLATION_ID, and GH_APP_PRIVATE_KEY, for an App with
+// Contents: read installed on bavanchun/ariadnev-kit. Under Candidate B these
+// live in a Worker secret namespace separate from the retained legacy Worker,
+// which still authenticates with its own frozen PAT.
 
 import { SelectorError, parseReleaseSelector } from "./release-selector.js";
 import { assertSafeAssetName, getInstaller, getReleaseAsset, getVersionText } from "./github-release.js";
+import { AuthError, hasAppCredentials, resolveInstallationToken } from "./github-app-auth.js";
 import { applyStaticResponsePolicy } from "./static-response-policy.js";
 
+// Frozen Phase 1 wording. It names the secret the legacy Worker used, and the
+// public contract is the observable 500 plus this exact body — rewording it
+// here would be a contract change, not a comment fix.
 const MISSING_SECRET_BODY = "worker misconfigured: GH_TOKEN unset";
 const FALLTHROUGH_BODY = "ariadnev — install:  curl -fsSL https://ariadnev.com/install | bash\n";
 
@@ -107,17 +113,24 @@ export default {
 
     // Preserve the frozen host-wide missing-secret contract. Under Candidate B
     // this keeps the combined host's observed behavior identical to legacy.
-    const token = env.GH_TOKEN;
-    if (!token) return new Response(MISSING_SECRET_BODY, { status: 500 });
+    // The check is synchronous on purpose: an unprotected asset request must
+    // never reach GitHub, not even to mint a token.
+    if (!hasAppCredentials(env)) return new Response(MISSING_SECRET_BODY, { status: 500 });
 
     if (!isProtected(route)) return handleUnprotected(request, env, url.pathname);
 
     try {
+      const token = await resolveInstallationToken(env, fetch);
       return await handleProtected(route, url, token, fetch);
     } catch (error) {
       // Protected routes fail closed. Never fall through to site assets, and
       // never surface upstream authorization or URL detail.
       if (error instanceof SelectorError) return clientError(error.reason);
+      // A dead credential is otherwise indistinguishable from GitHub being
+      // down. The reason code is safe to log; key material never is.
+      if (error instanceof AuthError) {
+        console.error(`edge auth failed: ${error.reason}${error.status ? ` (upstream ${error.status})` : ""}`);
+      }
       return new Response("edge request failed\n", {
         status: 502,
         headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" },
