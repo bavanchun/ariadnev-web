@@ -25,7 +25,7 @@ const files = DIST.files;
 
 describe("build shape", () => {
   it("emits the required physical artifacts", () => {
-    for (const file of ["/index.html", "/404.html", "/robots.txt", "/sitemap.xml", "/site.webmanifest", "/_headers", "/social-card.png", "/favicon.png", "/ariadnev-logo.png"]) {
+    for (const file of ["/index.html", "/404.html", "/robots.txt", "/sitemap.xml", "/site.webmanifest", "/_headers", "/social-card.png", "/favicon.png", "/ariadnev-logo.webp"]) {
       expect(files, `${file} is missing from dist`).toContain(file);
     }
   });

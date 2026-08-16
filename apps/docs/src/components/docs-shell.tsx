@@ -30,7 +30,7 @@ export function DocsShell({ catalog, page, routeVersion, toc, children }: {
       <a className="skip-link" href="#docs-content">Skip to documentation</a>
       <header className="docs-header">
         <a className="brand" href="/" aria-label="ariadnev docs home">
-          <img className="brand-logo" src="/ariadnev-logo.png" width="192" height="128" alt="" />
+          <img className="brand-logo" src="/ariadnev-logo.webp" width="192" height="128" alt="" />
           <span>ariadnev docs</span>
         </a>
         <SearchDialog locale={page.locale} version={routeVersion} indexUrl={`/search/${page.locale}/${routeVersion}.json`} />
