@@ -1,0 +1,261 @@
+{
+  "environment": {
+    "evidenceKind": "cloudflare-live-observation",
+    "observedAt": "2026-08-09T06:29:28Z",
+    "baseUrl": "https://staging.vcskill.vchun.dev",
+    "profile": "combined"
+  },
+  "attestation": {
+    "permissionModel": "consolidated",
+    "principalRole": "admin",
+    "tokenScope": "single-repository",
+    "repository": "bavanchun/vcskill",
+    "tokenPermissions": {
+      "contents": "read",
+      "actions": "write",
+      "contentsWrite": false,
+      "releasesWrite": false,
+      "administration": false
+    }
+  },
+  "provenance": {
+    "deployments": {
+      "candidate-a-edge-first": {
+        "environment": "staging",
+        "baseUrl": "https://staging.vcskill.vchun.dev",
+        "workerVersionId": "392f6bc4-0326-4543-a237-c4af62b87553",
+        "profile": "edge",
+        "purpose": "candidate-a-gate",
+        "bindingStateRef": "candidate-a-edge-first-bindings",
+        "observedAt": "2026-08-08T22:10:27Z",
+        "retained": false
+      },
+      "candidate-a-failed": {
+        "environment": "staging",
+        "baseUrl": "https://staging.vcskill.vchun.dev",
+        "workerVersionId": "51d7df0d-a0f1-4293-890d-0784bb8f071c",
+        "profile": "edge",
+        "purpose": "candidate-a-route-failure",
+        "bindingStateRef": "candidate-a-unbound-bindings",
+        "observedAt": "2026-08-08T22:14:59Z",
+        "retained": false
+      },
+      "candidate-a-site-first": {
+        "environment": "staging",
+        "baseUrl": "https://staging.vcskill.vchun.dev",
+        "workerVersionId": "f3333a3a-2c4c-4c45-ae9d-60d5931d8a69",
+        "profile": "edge",
+        "purpose": "candidate-a-gate",
+        "bindingStateRef": "candidate-a-site-first-bindings",
+        "observedAt": "2026-08-08T22:16:40Z",
+        "retained": false
+      },
+      "candidate-b-before-rehearsal": {
+        "environment": "staging",
+        "baseUrl": "https://staging.vcskill.vchun.dev",
+        "workerVersionId": "0e6fb032-14fb-4800-921d-510b89c65f50",
+        "profile": "combined",
+        "purpose": "selected-prior",
+        "bindingStateRef": "candidate-b-bindings",
+        "credentialContext": "consolidated-present",
+        "observedAt": "2026-08-09T06:27:00Z",
+        "retained": true
+      },
+      "candidate-b-final": {
+        "environment": "staging",
+        "baseUrl": "https://staging.vcskill.vchun.dev",
+        "workerVersionId": "a9c510fe-98ec-4876-82ce-fd84dba6d510",
+        "profile": "combined",
+        "purpose": "selected-final",
+        "bindingStateRef": "candidate-b-bindings",
+        "credentialContext": "consolidated-present",
+        "observedAt": "2026-08-09T06:29:20Z",
+        "retained": true
+      },
+      "staging-site-binding": {
+        "environment": "staging",
+        "baseUrl": "https://staging.vcskill.vchun.dev",
+        "workerVersionId": "3081658f-1ecc-454c-95f5-84d4453c4f80",
+        "profile": "site",
+        "purpose": "binding-rehearsal",
+        "bindingStateRef": "site-custom-domain-bindings",
+        "credentialContext": "not-applicable",
+        "observedAt": "2026-08-09T06:28:54Z",
+        "retained": true
+      },
+      "missing-binding-control": {
+        "environment": "staging",
+        "baseUrl": "https://staging.vcskill.vchun.dev",
+        "workerVersionId": "26d898e4-f67f-4438-8c16-f869f68eb435",
+        "profile": "combined",
+        "purpose": "controlled-missing-binding",
+        "bindingStateRef": "candidate-b-bindings",
+        "credentialContext": "required-binding-suppressed",
+        "observedAt": "2026-08-09T06:13:40Z",
+        "retained": false
+      },
+      "upstream-failure-control": {
+        "environment": "staging",
+        "baseUrl": "https://staging.vcskill.vchun.dev",
+        "workerVersionId": "d466bbd6-2e39-4a6f-ba89-a23be85bc26f",
+        "profile": "combined",
+        "purpose": "controlled-upstream-failure",
+        "bindingStateRef": "candidate-b-bindings",
+        "credentialContext": "controlled-invalid-upstream",
+        "observedAt": "2026-08-09T06:14:40Z",
+        "retained": false
+      },
+      "legacy-new-credential-probe": {
+        "environment": "staging",
+        "baseUrl": "https://staging.vcskill.vchun.dev",
+        "workerVersionId": "a0258bac-545d-46e4-858d-74c3daafe434",
+        "profile": "legacy",
+        "purpose": "legacy-credential-compatibility",
+        "bindingStateRef": "legacy-shaped-bindings",
+        "credentialContext": "consolidated-present",
+        "observedAt": "2026-08-09T06:15:24Z",
+        "retained": false
+      },
+      "production-legacy": {
+        "environment": "production",
+        "baseUrl": "https://vcskill.vchun.dev",
+        "workerVersionId": "e91ff904-f7b7-4293-a033-dee7e5cc3fe2",
+        "profile": "legacy",
+        "purpose": "retained-first-cutover-rollback",
+        "bindingStateRef": "production-legacy-bindings",
+        "credentialContext": "existing-production-unchanged",
+        "observedAt": "2026-08-09T06:16:20Z",
+        "retained": true
+      }
+    },
+    "routeBindings": [
+      { "host": "staging.vcskill.vchun.dev", "pattern": "/", "deploymentRef": "candidate-b-final", "observed": true },
+      { "host": "staging.vcskill.vchun.dev", "pattern": "/install*", "deploymentRef": "candidate-b-final", "observed": true },
+      { "host": "staging.vcskill.vchun.dev", "pattern": "/install.ps1*", "deploymentRef": "candidate-b-final", "observed": true },
+      { "host": "staging.vcskill.vchun.dev", "pattern": "/version*", "deploymentRef": "candidate-b-final", "observed": true },
+      { "host": "staging.vcskill.vchun.dev", "pattern": "/download/*", "deploymentRef": "candidate-b-final", "observed": true },
+      { "host": "staging.vcskill.vchun.dev", "pattern": "/", "deploymentRef": "staging-site-binding", "observed": true },
+      { "host": "vcskill.vchun.dev", "pattern": "/", "deploymentRef": "production-legacy", "observed": true }
+    ],
+    "transitions": [
+      {
+        "id": "candidate-a-route-reassignment",
+        "fromDeploymentRef": "candidate-a-edge-first",
+        "viaDeploymentRef": "candidate-a-failed",
+        "restoredDeploymentRef": "candidate-a-site-first",
+        "mechanicsResult": "passed",
+        "applicationResult": "failed-site-collision",
+        "observedAt": "2026-08-08T22:16:45Z"
+      },
+      {
+        "id": "legacy-new-credential-rehearsal",
+        "fromDeploymentRef": "upstream-failure-control",
+        "viaDeploymentRef": "legacy-new-credential-probe",
+        "restoredDeploymentRef": "candidate-b-before-rehearsal",
+        "mechanicsResult": "passed",
+        "applicationResult": "failed-credential-compatibility",
+        "observedAt": "2026-08-09T06:16:05Z"
+      },
+      {
+        "id": "candidate-b-custom-domain-reverse",
+        "fromDeploymentRef": "candidate-b-before-rehearsal",
+        "viaDeploymentRef": "staging-site-binding",
+        "restoredDeploymentRef": "candidate-b-final",
+        "mechanicsResult": "passed",
+        "applicationResult": "passed",
+        "observedAt": "2026-08-09T06:29:28Z"
+      }
+    ],
+    "compatibilityProbes": [
+      {
+        "id": "legacy-new-credential-installer",
+        "repetition": 1,
+        "deploymentRef": "legacy-new-credential-probe",
+        "requestPath": "/install",
+        "status": 401,
+        "expectedStatus": 200,
+        "contentClass": "upstream-auth-error",
+        "cacheControl": "no-store",
+        "pass": false,
+        "observedAt": "2026-08-09T06:15:25Z"
+      },
+      {
+        "id": "legacy-new-credential-installer",
+        "repetition": 2,
+        "deploymentRef": "legacy-new-credential-probe",
+        "requestPath": "/install",
+        "status": 401,
+        "expectedStatus": 200,
+        "contentClass": "upstream-auth-error",
+        "cacheControl": "no-store",
+        "pass": false,
+        "observedAt": "2026-08-09T06:15:26Z"
+      }
+    ],
+    "rollbackTarget": {
+      "deploymentRef": "production-legacy",
+      "secretMutationPolicy": "prohibited-until-rollback-window-closes",
+      "liveReadOnlyCompatibility": true,
+      "owner": "vcskill cutover owner",
+      "expiryOwner": "vcskill cleanup owner"
+    }
+  },
+  "cells": [
+    { "id": "candidate-a-protected-query", "repetition": 1, "requestPath": "/version?source=docs", "status": 200, "contentClass": "version-text", "cacheControl": "no-store", "deploymentRef": "candidate-a-edge-first", "observedAt": "2026-08-08T22:11:00Z", "cacheState": "cold", "pass": true },
+    { "id": "candidate-a-protected-query", "repetition": 2, "requestPath": "/version?source=docs", "status": 200, "contentClass": "version-text", "cacheControl": "no-store", "deploymentRef": "candidate-a-edge-first", "observedAt": "2026-08-08T22:11:01Z", "cacheState": "warm", "pass": true },
+    { "id": "candidate-a-lookalike-query", "repetition": 1, "requestPath": "/installer?from=docs", "status": 200, "contentClass": "site-lookalike", "cacheControl": "public, max-age=300", "deploymentRef": "candidate-a-edge-first", "observedAt": "2026-08-08T22:11:02Z", "cacheState": "cold", "pass": true },
+    { "id": "candidate-a-lookalike-query", "repetition": 2, "requestPath": "/installer?from=docs", "status": 200, "contentClass": "site-lookalike", "cacheControl": "public, max-age=300", "deploymentRef": "candidate-a-edge-first", "observedAt": "2026-08-08T22:11:03Z", "cacheState": "warm", "pass": true },
+    { "id": "candidate-a-malformed-download", "repetition": 1, "requestPath": "/download/%25E0%25A4%25A", "status": 400, "contentClass": "bounded-edge-error", "cacheControl": "(absent)", "deploymentRef": "candidate-a-edge-first", "observedAt": "2026-08-08T22:11:04Z", "cacheState": "cold", "pass": true },
+    { "id": "candidate-a-malformed-download", "repetition": 2, "requestPath": "/download/%25E0%25A4%25A", "status": 400, "contentClass": "bounded-edge-error", "cacheControl": "(absent)", "deploymentRef": "candidate-a-edge-first", "observedAt": "2026-08-08T22:11:05Z", "cacheState": "warm", "pass": true },
+    { "id": "candidate-a-route-transfer-rollback", "repetition": 1, "requestPath": "/version", "status": 200, "contentClass": "site-collision", "cacheControl": "public, max-age=300", "deploymentRef": "candidate-a-failed", "observedAt": "2026-08-08T22:15:05Z", "cacheState": "cold", "notes": "Protected route reached the site during route reassignment.", "pass": false },
+    { "id": "candidate-a-route-transfer-rollback", "repetition": 2, "requestPath": "/version", "status": 200, "contentClass": "site-collision", "cacheControl": "public, max-age=300", "deploymentRef": "candidate-a-failed", "observedAt": "2026-08-08T22:15:06Z", "cacheState": "warm", "notes": "Protected route reached the site during route reassignment.", "pass": false },
+    { "id": "candidate-b-collision-version", "repetition": 1, "requestPath": "/version", "status": 200, "contentClass": "version-text", "cacheControl": "no-store", "deploymentRef": "candidate-b-final", "observedAt": "2026-08-09T06:29:21Z", "cacheState": "cold", "pass": true },
+    { "id": "candidate-b-collision-version", "repetition": 2, "requestPath": "/version", "status": 200, "contentClass": "version-text", "cacheControl": "no-store", "deploymentRef": "candidate-b-final", "observedAt": "2026-08-09T06:29:22Z", "cacheState": "warm", "pass": true },
+    { "id": "candidate-b-physical-404", "repetition": 1, "requestPath": "/not-found", "status": 404, "contentClass": "physical-404", "cacheControl": "no-store", "deploymentRef": "candidate-b-final", "observedAt": "2026-08-09T06:29:21Z", "cacheState": "cold", "pass": true },
+    { "id": "candidate-b-physical-404", "repetition": 2, "requestPath": "/not-found", "status": 404, "contentClass": "physical-404", "cacheControl": "no-store", "deploymentRef": "candidate-b-final", "observedAt": "2026-08-09T06:29:22Z", "cacheState": "warm", "pass": true },
+    { "id": "combined-missing-secret", "repetition": 1, "requestPath": "/install", "status": 500, "contentClass": "missing-secret", "cacheControl": "(absent)", "deploymentRef": "missing-binding-control", "observedAt": "2026-08-09T06:13:41Z", "cacheState": "cold", "pass": true },
+    { "id": "combined-missing-secret", "repetition": 2, "requestPath": "/install", "status": 500, "contentClass": "missing-secret", "cacheControl": "(absent)", "deploymentRef": "missing-binding-control", "observedAt": "2026-08-09T06:13:42Z", "cacheState": "warm", "pass": true },
+    { "id": "pinned-version", "repetition": 1, "requestPath": "/version?version=0.11.0", "status": 200, "contentClass": "version-text", "cacheControl": "no-store", "deploymentRef": "candidate-b-final", "observedAt": "2026-08-09T06:29:21Z", "cacheState": "cold", "pass": true },
+    { "id": "pinned-version", "repetition": 2, "requestPath": "/version?version=0.11.0", "status": 200, "contentClass": "version-text", "cacheControl": "no-store", "deploymentRef": "candidate-b-final", "observedAt": "2026-08-09T06:29:22Z", "cacheState": "warm", "pass": true },
+    { "id": "pinned-download", "repetition": 1, "requestPath": "/download/checksums.txt?version=0.11.0", "status": 200, "contentClass": "download-stream", "cacheControl": "no-store", "deploymentRef": "candidate-b-final", "observedAt": "2026-08-09T06:29:21Z", "cacheState": "cold", "pass": true },
+    { "id": "pinned-download", "repetition": 2, "requestPath": "/download/checksums.txt?version=0.11.0", "status": 200, "contentClass": "download-stream", "cacheControl": "no-store", "deploymentRef": "candidate-b-final", "observedAt": "2026-08-09T06:29:22Z", "cacheState": "warm", "pass": true },
+    { "id": "upstream-failure", "repetition": 1, "requestPath": "/version", "status": 502, "contentClass": "empty-error", "cacheControl": "(absent)", "deploymentRef": "upstream-failure-control", "observedAt": "2026-08-09T06:14:41Z", "cacheState": "cold", "pass": true },
+    { "id": "upstream-failure", "repetition": 2, "requestPath": "/version", "status": 502, "contentClass": "empty-error", "cacheControl": "(absent)", "deploymentRef": "upstream-failure-control", "observedAt": "2026-08-09T06:14:42Z", "cacheState": "warm", "pass": true },
+    { "id": "deploy-order-edge-then-site", "repetition": 1, "requestPath": "/version", "status": 200, "contentClass": "version-text", "cacheControl": "no-store", "deploymentRef": "candidate-a-edge-first", "observedAt": "2026-08-08T22:11:06Z", "cacheState": "cold", "pass": true },
+    { "id": "deploy-order-edge-then-site", "repetition": 2, "requestPath": "/version", "status": 200, "contentClass": "version-text", "cacheControl": "no-store", "deploymentRef": "candidate-a-edge-first", "observedAt": "2026-08-08T22:11:07Z", "cacheState": "warm", "pass": true },
+    { "id": "deploy-order-site-then-edge", "repetition": 1, "requestPath": "/download/checksums.txt", "status": 200, "contentClass": "download-stream", "cacheControl": "no-store", "deploymentRef": "candidate-a-site-first", "observedAt": "2026-08-08T22:16:41Z", "cacheState": "cold", "pass": true },
+    { "id": "deploy-order-site-then-edge", "repetition": 2, "requestPath": "/download/checksums.txt", "status": 200, "contentClass": "download-stream", "cacheControl": "no-store", "deploymentRef": "candidate-a-site-first", "observedAt": "2026-08-08T22:16:42Z", "cacheState": "warm", "pass": true },
+    { "id": "rollback-order-edge-then-site", "repetition": 1, "requestPath": "/version?source=final-rehearsal", "status": 200, "contentClass": "version-text", "cacheControl": "no-store", "deploymentRef": "candidate-b-before-rehearsal", "observedAt": "2026-08-09T06:28:55Z", "cacheState": "cold", "pass": true },
+    { "id": "rollback-order-edge-then-site", "repetition": 2, "requestPath": "/version?source=final-rehearsal", "status": 200, "contentClass": "version-text", "cacheControl": "no-store", "deploymentRef": "candidate-b-before-rehearsal", "observedAt": "2026-08-09T06:28:56Z", "cacheState": "warm", "pass": true },
+    { "id": "rollback-order-site-then-edge", "repetition": 1, "requestPath": "/download/checksums.txt?version=0.11.0", "status": 200, "contentClass": "download-stream", "cacheControl": "no-store", "deploymentRef": "candidate-b-before-rehearsal", "observedAt": "2026-08-09T06:28:55Z", "cacheState": "cold", "pass": true },
+    { "id": "rollback-order-site-then-edge", "repetition": 2, "requestPath": "/download/checksums.txt?version=0.11.0", "status": 200, "contentClass": "download-stream", "cacheControl": "no-store", "deploymentRef": "candidate-b-before-rehearsal", "observedAt": "2026-08-09T06:28:56Z", "cacheState": "warm", "pass": true },
+    { "id": "legacy-cutover-restore", "repetition": 1, "requestPath": "/install", "status": 200, "contentClass": "installer-shell", "cacheControl": "no-store", "deploymentRef": "production-legacy", "observedAt": "2026-08-09T06:16:21Z", "cacheState": "cold", "pass": true },
+    { "id": "legacy-cutover-restore", "repetition": 2, "requestPath": "/install", "status": 200, "contentClass": "installer-shell", "cacheControl": "no-store", "deploymentRef": "production-legacy", "observedAt": "2026-08-09T06:16:22Z", "cacheState": "warm", "pass": true }
+  ],
+  "decision": {
+    "selectedCandidate": "B",
+    "rationale": "Candidate A route reassignment exposed a colliding site response. Candidate B protected machine routes and passed reverse binding rehearsal.",
+    "routePatterns": ["/install*", "/install.ps1*", "/version*", "/download/*"],
+    "commands": [
+      "wrangler deploy --dry-run workers/edge/wrangler.edge.toml",
+      "wrangler deploy --dry-run workers/edge/wrangler.combined.toml",
+      "wrangler deployments status vcskill-edge-combined-staging"
+    ]
+  },
+  "stagingState": {
+    "baseUrl": "https://staging.vcskill.vchun.dev",
+    "workerVersionId": "a9c510fe-98ec-4876-82ce-fd84dba6d510",
+    "selectedProfile": "combined",
+    "secretNamePresence": { "GH_TOKEN": true },
+    "rollbackOwner": "vcskill cutover owner",
+    "rollbackResult": "passed-composite",
+    "expiryOwner": "vcskill cleanup owner",
+    "rollbackTarget": {
+      "baseUrl": "https://vcskill.vchun.dev",
+      "workerVersionId": "e91ff904-f7b7-4293-a033-dee7e5cc3fe2",
+      "bindingStateRef": "production-legacy-bindings",
+      "secretNamePresence": { "GH_TOKEN": true },
+      "secretMutationPolicy": "prohibited-until-rollback-window-closes"
+    }
+  }
+}

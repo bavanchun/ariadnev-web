@@ -1,0 +1,21 @@
+{
+  "baseUrl": "https://staging.vcskill.vchun.dev/",
+  "workerVersionId": "a9c510fe-98ec-4876-82ce-fd84dba6d510",
+  "selectedProfile": "combined",
+  "secretNamePresence": {
+    "GH_TOKEN": true
+  },
+  "rollbackOwner": "vcskill cutover owner",
+  "rollbackResult": "passed-composite",
+  "expiryOwner": "vcskill cleanup owner",
+  "rollbackTarget": {
+    "baseUrl": "https://vcskill.vchun.dev/",
+    "workerVersionId": "e91ff904-f7b7-4293-a033-dee7e5cc3fe2",
+    "bindingStateRef": "production-legacy-bindings",
+    "secretNamePresence": {
+      "GH_TOKEN": true
+    },
+    "secretMutationPolicy": "prohibited-until-rollback-window-closes"
+  },
+  "observedAt": "2026-08-09T06:29:28Z"
+}
