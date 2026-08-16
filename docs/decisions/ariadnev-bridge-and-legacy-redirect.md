@@ -67,6 +67,21 @@ frozen Worker is reaching `ariadnev-kit` through the rename redirect right now.
 > Worker is decommissioned. Creating it would break GitHub's rename redirect and
 > take the rollback target down.
 
+**The same trap exists one level up, for this repository.** `bavanchun/vcskill-web`
+and `bavanchun/ariadnev-web` are the *same* repository — verified by id
+`1306476761` — so the old name is itself a rename redirect. Any clone whose
+`origin` still carries the old URL is pushing through that redirect.
+
+> **Never create a repository named `bavanchun/vcskill-web`.** Doing so would
+> silently capture the pushes of every stale clone, so work would appear to
+> succeed while landing in the wrong repository.
+
+Repair a stale clone with:
+
+```sh
+git remote set-url origin git@github.com:bavanchun/ariadnev-web.git
+```
+
 The bridge deliberately does **not** inherit this dependency: it names
 `bavanchun/ariadnev-kit` directly.
 
