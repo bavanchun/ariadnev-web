@@ -86,21 +86,64 @@ test("every authored colour is OKLCH", () => {
 });
 
 test("every alias resolves to an authored literal", () => {
+  // Walk state/content trees down to their leaves (their $value nodes).
+  const collectLeafRoles = (group, path) => {
+    const results = [];
+    const walk = (node, roleParts) => {
+      if (node === null || typeof node !== "object") return;
+      if (Object.hasOwn(node, "$value")) {
+        results.push({ role: roleParts.join("."), node });
+        return;
+      }
+      for (const [key, child] of Object.entries(node)) {
+        if (key.startsWith("$")) continue;
+        walk(child, [...roleParts, key]);
+      }
+    };
+    walk(tokens[group], []);
+    return results;
+  };
+
   for (const group of ["surface", "text", "topology"]) {
     for (const [role, node] of Object.entries(tokens[group])) {
       if (role.startsWith("$")) continue;
       assert.doesNotMatch(resolve(node.$value), /^\{/, `${group}.${role} is unresolved`);
     }
   }
+  for (const group of ["state", "content"]) {
+    for (const { role, node } of collectLeafRoles(group, [group])) {
+      // scrim uses a raw color literal (an alpha over-black); accept it.
+      if (typeof node.$value === "string" && node.$value.startsWith("oklch")) continue;
+      assert.doesNotMatch(resolve(node.$value), /^\{/, `${group}.${role} is unresolved`);
+    }
+  }
 });
 
 test("semantic roles never expose a raw palette step to an app", () => {
-  // Apps consume surface/text/topology. Those roles must alias the palette
-  // rather than restate a literal, so a palette change propagates in one edit.
+  // Apps consume surface/text/topology/state/content. Those roles must alias
+  // the palette rather than restate a literal, so a palette change propagates
+  // in one edit. Exception: content.overlay.scrim is a color-with-alpha and
+  // is authored as an oklch literal because no palette entry carries alpha.
+  const flatten = (node, roleParts) => {
+    const results = [];
+    if (node === null || typeof node !== "object") return results;
+    if (Object.hasOwn(node, "$value")) return [{ role: roleParts.join("."), node }];
+    for (const [key, child] of Object.entries(node)) {
+      if (key.startsWith("$")) continue;
+      results.push(...flatten(child, [...roleParts, key]));
+    }
+    return results;
+  };
   for (const group of ["surface", "text", "topology"]) {
     for (const [role, node] of Object.entries(tokens[group])) {
       if (role.startsWith("$")) continue;
       assert.match(node.$value, /^\{color\./, `${group}.${role} must alias the palette`);
+    }
+  }
+  for (const group of ["state", "content"]) {
+    for (const { role, node } of flatten(tokens[group], [group])) {
+      if (role === "content.overlay.scrim") continue;
+      assert.match(node.$value, /^\{(?:color|surface|text|topology)\./, `${group}.${role} must alias a semantic role or the palette`);
     }
   }
 });
@@ -187,4 +230,99 @@ test("no motion duration reads as latency", () => {
 test("focus is a real ring with an offset, not a colour swap", () => {
   assert.ok(Number.parseFloat(tokens.focus.width.$value) >= 2, "the focus ring must be at least 2px");
   assert.ok(Number.parseFloat(tokens.focus.offset.$value) >= 2, "the focus ring must be offset from its control");
+});
+
+// ---------------------------------------------------- Phase 2: state contracts
+
+test("Inter medium role sits inside the variable-face 400..700 range", () => {
+  const weight = tokens.font.weight.medium.$value;
+  assert.equal(weight, 500, "font.weight.medium must be 500");
+  const regular = tokens.font.weight.regular.$value;
+  const bold = tokens.font.weight.bold.$value;
+  assert.ok(regular <= weight && weight <= bold, "medium must sit between regular and bold");
+});
+
+test("text on selection reads at 4.5:1 or better on the selected layer", () => {
+  const ratio = contrastRatio(literal("state.selected.text"), literal("state.selected.layer"));
+  assert.ok(ratio >= 4.5, `state.selected text on layer is ${ratio.toFixed(2)}, below 4.5`);
+});
+
+test("current-nav indicator is distinguishable from the canvas at 3:1 or better", () => {
+  const ratio = contrastRatio(literal("state.current.indicator"), literal("surface.canvas"));
+  assert.ok(ratio >= 3, `state.current.indicator contrast ${ratio.toFixed(2)} is below 3`);
+});
+
+test("destructive-boundary indicator is a hazard signal, not a whisper", () => {
+  const ratio = contrastRatio(literal("state.destructive.indicator"), literal("surface.canvas"));
+  assert.ok(ratio >= 3, `state.destructive.indicator contrast ${ratio.toFixed(2)} is below 3`);
+});
+
+test("code text reads at 7:1 or better on the code surface", () => {
+  const ratio = contrastRatio(literal("content.code.text"), literal("content.code.background"));
+  assert.ok(ratio >= 7, `content.code text contrast ${ratio.toFixed(2)} is below 7`);
+});
+
+test("every callout body text reads at 4.5:1 or better on its layer", () => {
+  for (const kind of ["note", "gate", "boundary", "destructive", "evidence"]) {
+    const ratio = contrastRatio(literal(`content.callout.${kind}.text`), literal(`content.callout.${kind}.layer`));
+    assert.ok(ratio >= 4.5, `content.callout.${kind} text ${ratio.toFixed(2)} is below 4.5`);
+  }
+});
+
+test("table header text reads at 4.5:1 or better on the header surface", () => {
+  const ratio = contrastRatio(literal("content.table.headerText"), literal("content.table.header"));
+  assert.ok(ratio >= 4.5, `content.table headerText contrast ${ratio.toFixed(2)} is below 4.5`);
+});
+
+// ------------------------------------------------ Phase 2: shell dimensions
+
+test("shell dimensions in rem sit on a strict 4px grid", () => {
+  // Walk layout.*; skip calc() and non-rem values, both of which are legitimate
+  // (railViewportHeight uses vh; column widths are rem multiples of 0.25).
+  const walk = (node, path) => {
+    if (node === null || typeof node !== "object") return;
+    if (Object.hasOwn(node, "$value")) {
+      const value = node.$value;
+      if (typeof value !== "string") return;
+      if (!/rem$/.test(value)) return; // vh / calc(...) permitted
+      const rem = Number.parseFloat(value);
+      assert.equal((rem * 16) % 4, 0, `${path.join(".")} (${value}) is off the 4px grid`);
+      return;
+    }
+    for (const [key, child] of Object.entries(node)) if (!key.startsWith("$")) walk(child, [...path, key]);
+  };
+  walk(tokens.layout, ["layout"]);
+});
+
+test("docs header meets the touch-target floor", () => {
+  const headerPx = Number.parseFloat(tokens.layout.docs.headerHeight.$value) * 16;
+  const targetPx = Number.parseFloat(tokens.size.touchTarget.$value) * 16;
+  assert.ok(headerPx >= targetPx, `docs header ${headerPx}px is below the ${targetPx}px touch-target floor`);
+});
+
+test("interactive densities meet the touch-target floor", () => {
+  const targetPx = Number.parseFloat(tokens.size.touchTarget.$value) * 16;
+  for (const density of ["proseRow", "referenceRow"]) {
+    const px = Number.parseFloat(tokens.layout.density[density].$value) * 16;
+    assert.ok(px >= targetPx, `layout.density.${density} ${px}px is below the ${targetPx}px touch-target floor`);
+  }
+  // compactRow is deliberately smaller than touchTarget; documented for
+  // display-only rows (a status ledger, not a menu). Do NOT assert ≥ target.
+});
+
+test("reference measure sits between prose and content measures", () => {
+  const prose = Number.parseFloat(tokens.size.proseMax.$value);
+  const reference = Number.parseFloat(tokens.size.referenceMax.$value);
+  const content = Number.parseFloat(tokens.size.contentMax.$value);
+  assert.ok(prose < reference && reference < content, `${prose}rem < ${reference}rem < ${content}rem must hold`);
+});
+
+test("sidebar and TOC widths leave room for the reading measure at desktop", () => {
+  const sidebar = Number.parseFloat(tokens.layout.docs.sidebarWidth.$value);
+  const toc = Number.parseFloat(tokens.layout.docs.tocWidth.$value);
+  const prose = Number.parseFloat(tokens.size.proseMax.$value);
+  // 1200px common desktop viewport ≈ 75rem; sidebar + toc + prose + gutter
+  // must still fit on that width, or the shell wraps at every stress frame.
+  const gutter = 4; // 4rem breathing room
+  assert.ok(sidebar + toc + prose + gutter <= 75, `sidebar(${sidebar}) + toc(${toc}) + prose(${prose}) + gutter(${gutter}) exceeds 75rem`);
 });

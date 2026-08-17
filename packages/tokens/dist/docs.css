@@ -68,9 +68,9 @@
   --vcs-state-hover-border: var(--vcs-color-graphite-500);
   --vcs-state-pressed-layer: var(--vcs-color-ink-800);
   --vcs-state-pressed-border: var(--vcs-color-graphite-500);
-  --vcs-state-selected-layer: var(--vcs-color-spectral-600);
+  --vcs-state-selected-layer: var(--vcs-color-spectral-400);
   --vcs-state-selected-border: var(--vcs-color-spectral-500);
-  --vcs-state-selected-text: var(--vcs-color-ink-900);
+  --vcs-state-selected-text: var(--vcs-text-on-accent);
   --vcs-state-current-indicator: var(--vcs-color-spectral-400);
   --vcs-state-current-text: var(--vcs-color-cool-100);
   --vcs-state-disabled-layer: var(--vcs-color-ink-800);
