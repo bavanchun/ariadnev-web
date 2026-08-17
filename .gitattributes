@@ -1,0 +1,2 @@
+# Playwright visual harness baselines — binary, no diff churn
+tests/visual/__baselines__/**/*.png binary
