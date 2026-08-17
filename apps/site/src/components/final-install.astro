@@ -15,18 +15,28 @@ import InstallCommand from "./install-command.astro";
     <p class="lede">{INSTALL.note}</p>
   </div>
 
-  <div class="command-list">
-    <InstallCommand id="final-install-unix" label={INSTALL.unixLabel} command={INSTALL.unixCommand} />
-    <InstallCommand id="final-install-windows" label={INSTALL.windowsLabel} command={INSTALL.windowsCommand} />
+  <div class="final__block">
+    <p class="eyebrow final__eyebrow">Platform commands</p>
+    <div class="command-list">
+      <InstallCommand id="final-install-unix" label={INSTALL.unixLabel} command={INSTALL.unixCommand} />
+      <InstallCommand id="final-install-windows" label={INSTALL.windowsLabel} command={INSTALL.windowsCommand} />
+    </div>
   </div>
 
-  <div class="action-row">
-    <a class="action action--primary" href={DOCS.installation}>First-run guide</a>
-    <a class="action" href={DOCS.releaseNotes}>Release notes</a>
+  <div class="final__block">
+    <p class="eyebrow final__eyebrow">After installing</p>
+    <div class="action-row">
+      <a class="action action--primary" href={DOCS.installation}>First-run guide</a>
+      <a class="action" href={DOCS.releaseNotes}>Release notes</a>
+    </div>
   </div>
 
-  <p class="note">
-    Prefer to read the script before running it? Open{" "}
-    <a href="/install">{SITE.origin}/install</a> — it is the same anonymous path the command above fetches.
-  </p>
+  <div class="final__block">
+    <p class="eyebrow final__eyebrow">Read the script first</p>
+    <p class="note">
+      Prefer to inspect the script before piping it into a shell? Open{" "}
+      <a href="/install">{SITE.origin}/install</a> — it is the same anonymous path the command above fetches, and no
+      authentication is involved.
+    </p>
+  </div>
 </section>

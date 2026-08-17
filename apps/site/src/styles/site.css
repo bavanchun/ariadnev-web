@@ -833,6 +833,15 @@ pre {
   gap: var(--vcs-space-5);
 }
 
+.final__block {
+  display: grid;
+  gap: var(--vcs-space-3);
+}
+
+.final__eyebrow {
+  margin: 0;
+}
+
 .copy-status {
   font-size: var(--vcs-font-size-sm);
   color: var(--vcs-text-muted);
