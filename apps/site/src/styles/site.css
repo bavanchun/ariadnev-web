@@ -457,6 +457,50 @@ pre {
   overflow-x: auto;
 }
 
+/* On desktop the compact topology follows the reader down the chapter list so
+   the state currently being narrated stays visible. Mobile keeps the natural
+   flow; a sticky element would eat scarce viewport height. */
+@media (min-width: 960px) {
+  .map__figure {
+    position: sticky;
+    top: var(--vcs-space-4);
+  }
+}
+
+.map__step-facets {
+  display: grid;
+  gap: var(--vcs-space-2);
+  margin: var(--vcs-space-3) 0 0;
+}
+
+.map__step-facet {
+  display: grid;
+  grid-template-columns: 6rem 1fr;
+  gap: var(--vcs-space-3);
+  align-items: baseline;
+}
+
+.map__step-facet dt {
+  margin: 0;
+  font-family: var(--vcs-font-family-mono);
+  font-size: var(--vcs-font-size-xs);
+  color: var(--vcs-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.map__step-facet dd {
+  margin: 0;
+  color: var(--vcs-text-secondary);
+}
+
+@media (max-width: 640px) {
+  .map__step-facet {
+    grid-template-columns: 1fr;
+    gap: var(--vcs-space-1);
+  }
+}
+
 .map__svg {
   display: block;
   width: 100%;

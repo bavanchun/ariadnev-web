@@ -104,8 +104,20 @@ const nodes = EXECUTION_MAP.map((state, index) => ({
         <li class="map__step" id={`map-step-${node.id}`} data-map-step={node.id} tabindex="-1">
           <p class="map__step-index">{node.id}</p>
           <h3>{node.label}</h3>
-          <p class="lede">{node.summary}</p>
-          <p class="map__step-produces">produces → {node.produces}</p>
+          <dl class="map__step-facets">
+            <div class="map__step-facet">
+              <dt>Meaning</dt>
+              <dd>{node.summary}</dd>
+            </div>
+            <div class="map__step-facet">
+              <dt>Evidence</dt>
+              <dd>{node.produces}</dd>
+            </div>
+            <div class="map__step-facet">
+              <dt>Boundary</dt>
+              <dd>{node.boundary}</dd>
+            </div>
+          </dl>
         </li>
       ))
     }

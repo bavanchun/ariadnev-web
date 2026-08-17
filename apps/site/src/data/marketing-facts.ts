@@ -114,6 +114,9 @@ export const INSTALL = {
 export interface MapState {
   readonly id: string;
   readonly label: string;
+  /** The condition the state fails closed on, sourced from the graph-execution
+   *  lifecycle table. Names the claim boundary for that state. */
+  readonly boundary: string;
   /** One sentence. This is the initial DOM content, not an enhancement. */
   readonly summary: string;
   /** The observable artifact this state produces. */
@@ -132,6 +135,7 @@ export const EXECUTION_MAP: readonly MapState[] = [
     summary:
       "A canonical, provider-neutral graph is compiled and linted from the kit. Provider settings never enter the intermediate representation.",
     produces: "A compiled graph digest",
+    boundary: "Schema drift or an unknown node kind stops the run before policy.",
   },
   {
     id: "policy",
@@ -139,6 +143,7 @@ export const EXECUTION_MAP: readonly MapState[] = [
     summary:
       "Authority is resolved before any provider is contacted: which capabilities a node may use, whether it causes an effect, and whether a human must approve it.",
     produces: "An allow or a denial, decided locally",
+    boundary: "An effect requested with no matching executor is refused, not silently skipped.",
   },
   {
     id: "execute",
@@ -146,6 +151,7 @@ export const EXECUTION_MAP: readonly MapState[] = [
     summary:
       "The runner drives the graph through the executor registry. Codex and Claude Code implement the same executor contract behind one interface.",
     produces: "An append-only event log",
+    boundary: "Executor errors and runtime timeouts fail the run instead of degrading its output.",
   },
   {
     id: "checkpoint",
@@ -153,6 +159,7 @@ export const EXECUTION_MAP: readonly MapState[] = [
     summary:
       "Durable state is written outside the inspected workspace, so a run survives interruption and can be resumed, inspected, or cancelled.",
     produces: "A resumable run under ~/.ariadnev/runs/",
+    boundary: "Envelope corruption or a seal mismatch refuses resume rather than reconciling silently.",
   },
   {
     id: "proof",
@@ -160,6 +167,7 @@ export const EXECUTION_MAP: readonly MapState[] = [
     summary:
       "Resuming re-checks the instruction digest, workspace identity, graph digest, runner contract, runtime, runtime version, and model. A mismatch is reported rather than silently reconciled.",
     produces: "A stable JSON envelope you can diff",
+    boundary: "Identity drift or a digest mismatch is reported instead of accepted.",
   },
 ] as const;
 
