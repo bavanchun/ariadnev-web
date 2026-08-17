@@ -4,7 +4,8 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import test from "node:test";
 import { buildContentRoot, loadAuthoredPages, parseArguments, parseFrontmatter } from "../../scripts/docs-content/build-content-root.mjs";
-import { code, escapeMarkdownProse, escapeMdx, renderReleaseNotes, renderSkillCatalog, renderSkillCategoryPage } from "../../scripts/docs-content/render-reference-pages.mjs";
+import { cliCommandSlug, code, escapeMarkdownProse, escapeMdx, renderReleaseNotes, renderRetiredCliRoute, renderSkillCatalog, renderSkillCategoryPage } from "../../scripts/docs-content/render-reference-pages.mjs";
+import { DEFAULT_RETIRED_ROUTES } from "../../packages/contracts/dist/index.js";
 import {
   parseDocsContentCatalog,
   resolveNavigationVisibility,
@@ -116,6 +117,52 @@ test("bundle text is escaped so it cannot become MDX syntax", () => {
   // Bundle text is escaped so it renders literally inside the MDX table cell.
   assert.match(detail, /Has \\<jsx\/\\> and \\\{curly\\\}/);
   assert.doesNotThrow(() => publicMarkdown(detail));
+});
+
+test("retired CLI routes render safe replacement and tombstone pages", () => {
+  // Replacement variant: the reader is offered the live command URL and a reason.
+  const replaced = renderRetiredCliRoute("en", "old-slug", {
+    kind: "replaced",
+    commandId: "ariadnev.doctor",
+    replacementSlug: "doctor",
+    reason: "renamed to `doctor` in 1.1.0",
+  });
+  assert.match(replaced, /^---\ntitle: "Retired: old-slug"/);
+  assert.match(replaced, /\[Go to the current command \(`doctor`\)\]\(%ROOT%reference\/cli\/doctor\/\)/);
+  // escapeMdx renders backticks in the raw reason as literal `\`` so they
+  // never turn into MDX code spans inside untrusted registry text.
+  assert.match(replaced, /Reason: renamed to \\`doctor\\` in 1\.1\.0/);
+  assert.doesNotThrow(() => publicMarkdown(replaced));
+
+  // Tombstone variant: no forwarding link, just the reason and an index link.
+  const tombstoned = renderRetiredCliRoute("en", "dead-slug", { kind: "tombstone", reason: "feature removed in 1.1.0" });
+  assert.match(tombstoned, /^---\ntitle: "Retired: dead-slug"/);
+  assert.doesNotMatch(tombstoned, /Go to the current command/);
+  assert.match(tombstoned, /Reason: feature removed in 1\.1\.0/);
+  assert.match(tombstoned, /\[Browse the current CLI reference\]\(%ROOT%reference\/cli\/\)/);
+  assert.doesNotThrow(() => publicMarkdown(tombstoned));
+});
+
+test("retired CLI slugs never collide with live command slugs or aliases", async () => {
+  // Contract invariant: an old URL that resolves to a retired-route page must
+  // not also be a live canonical command slug (that would erase the current
+  // command). Aliases must never leak into canonical URLs either.
+  const bundle = JSON.parse(await readFile(resolve(repositoryRoot, "apps/docs/content/generated/bundle/reference/cli/commands.json"), "utf8"));
+  const canonicalSlugs = new Set(bundle.commands.map((command) => cliCommandSlug(command.path)));
+  for (const [oldSlug] of DEFAULT_RETIRED_ROUTES) {
+    assert.ok(!canonicalSlugs.has(oldSlug), `retired slug ${oldSlug} collides with a live command slug`);
+  }
+  // Aliases must never be canonical URLs. Every alias should share the same
+  // canonical page as its owning command (i.e. differ from that command's slug
+  // only if listed in aliases). Since the current release ships no aliases,
+  // the loop asserts the empty-alias state is intentional — a future release
+  // that adds one triggers the collision check the next line asserts.
+  for (const command of bundle.commands) {
+    for (const alias of command.aliases ?? []) {
+      assert.notEqual(cliCommandSlug(alias), cliCommandSlug(command.path), `alias ${alias} shares a slug with its own command path`);
+      assert.ok(!canonicalSlugs.has(cliCommandSlug(alias)) || cliCommandSlug(alias) === cliCommandSlug(command.path), `alias ${alias} would become a canonical route`);
+    }
+  }
 });
 
 // -------------------------------------------------- catalog metadata (P1)

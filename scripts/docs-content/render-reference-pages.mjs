@@ -26,6 +26,15 @@ const STRINGS = {
       detailIntroPrefix: "This is the reference for the",
       detailIntroSuffix: "command, projected from the release.",
       backToIndex: "Back to CLI index",
+      retiredReplacedTitlePrefix: "Retired:",
+      retiredReplacedDescription: "This CLI URL has moved. The command still exists under a new slug.",
+      retiredReplacedIntro: "The URL you followed is retired. This command is still available in the current release under a new slug:",
+      retiredReplacedGoTo: "Go to the current command",
+      retiredTombstoneTitlePrefix: "Retired:",
+      retiredTombstoneDescription: "This CLI URL has been retired.",
+      retiredTombstoneIntro: "The URL you followed points at a command that no longer ships in the current release.",
+      retiredReasonLabel: "Reason",
+      retiredIndexLink: "Browse the current CLI reference",
     },
     providers: {
       title: "Provider reference",
@@ -100,6 +109,15 @@ const STRINGS = {
       detailIntroPrefix: "Đây là tham chiếu cho lệnh",
       detailIntroSuffix: ", chiếu ra từ bản phát hành.",
       backToIndex: "Về danh mục CLI",
+      retiredReplacedTitlePrefix: "Đã ngừng:",
+      retiredReplacedDescription: "URL CLI này đã đổi. Lệnh vẫn còn trong bản phát hành hiện tại với slug mới.",
+      retiredReplacedIntro: "URL bạn theo đã ngừng. Lệnh này vẫn có trong bản phát hành hiện tại với slug mới:",
+      retiredReplacedGoTo: "Mở lệnh hiện tại",
+      retiredTombstoneTitlePrefix: "Đã ngừng:",
+      retiredTombstoneDescription: "URL CLI này đã ngừng phục vụ.",
+      retiredTombstoneIntro: "URL bạn theo trỏ tới một lệnh không còn xuất hiện trong bản phát hành hiện tại.",
+      retiredReasonLabel: "Lý do",
+      retiredIndexLink: "Xem danh mục CLI hiện tại",
     },
     providers: {
       title: "Tham chiếu provider",
@@ -346,6 +364,43 @@ export function renderCliCommandDetail(locale, command) {
     lines.push("");
   }
   lines.push(`[${t.backToIndex}](%ROOT%reference/cli/)`, "");
+  return `${lines.join("\n").trimEnd()}\n`;
+}
+
+/**
+ * Retired CLI slug page: a stable 200 landing that either points at the
+ * live replacement command or explains that the URL has been tombstoned.
+ * `oldSlug` is the URL the reader followed (before the leading segment);
+ * `retired` is the `RetiredRoute` entry the contract registry supplies.
+ */
+export function renderRetiredCliRoute(locale, oldSlug, retired) {
+  const t = STRINGS[locale].cli;
+  const label = oldSlug;
+  if (retired.kind === "replaced") {
+    const title = `${t.retiredReplacedTitlePrefix} ${label}`;
+    const lines = [
+      frontmatter(title, t.retiredReplacedDescription).trimEnd(),
+      "",
+      t.retiredReplacedIntro,
+      "",
+      `- [${t.retiredReplacedGoTo} (${code(retired.replacementSlug)})](%ROOT%reference/cli/${retired.replacementSlug}/)`,
+      "",
+      `${t.retiredReasonLabel}: ${escapeMdx(retired.reason)}`,
+      "",
+      `[${t.retiredIndexLink}](%ROOT%reference/cli/)`,
+    ];
+    return `${lines.join("\n").trimEnd()}\n`;
+  }
+  const title = `${t.retiredTombstoneTitlePrefix} ${label}`;
+  const lines = [
+    frontmatter(title, t.retiredTombstoneDescription).trimEnd(),
+    "",
+    t.retiredTombstoneIntro,
+    "",
+    `${t.retiredReasonLabel}: ${escapeMdx(retired.reason)}`,
+    "",
+    `[${t.retiredIndexLink}](%ROOT%reference/cli/)`,
+  ];
   return `${lines.join("\n").trimEnd()}\n`;
 }
 

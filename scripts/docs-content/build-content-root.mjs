@@ -25,7 +25,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync, renameSync, mkdtempSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
-import { extractDocsBundle, TRUSTED_SCHEMA_DIGEST } from "../../packages/contracts/dist/index.js";
+import { DEFAULT_RETIRED_ROUTES, extractDocsBundle, TRUSTED_SCHEMA_DIGEST } from "../../packages/contracts/dist/index.js";
 import {
   GENERATED_PAGE_IDS,
   cliCommandSlug,
@@ -36,6 +36,7 @@ import {
   renderPreviousRoot,
   renderProviderReference,
   renderReleaseNotes,
+  renderRetiredCliRoute,
   renderSkillCatalog,
   renderSkillCategoryPage,
   renderWorkflowReference,
@@ -264,6 +265,23 @@ export function buildContentRoot(options) {
     // global sidebar, so an authored top-level shelf is never crowded by 50+
     // command entries; catalog consumers still find them by pageKind/screenKind.
     const commandDetailMeta = { pageKind: "command", screenKind: "D13-cli-command-detail", section: "reference", navigationVisibility: "reference-only" };
+    // Retired CLI slugs get their own 200 landing so an old URL never
+    // 404s: a `replaced` entry points at the current command; a
+    // `tombstone` entry explains why it's gone. Same reference-only
+    // visibility as command detail pages — retired URLs are contract
+    // debt, not sidebar navigation. `DEFAULT_RETIRED_ROUTES` is
+    // currently empty (see packages/contracts/src/cli-command-registry.ts)
+    // so this emits zero routes today; the pipeline is ready for the
+    // first rename or removal without a separate wiring change.
+    const commandRetiredMeta = { pageKind: "command", screenKind: "D13-cli-command-retired", section: "reference", navigationVisibility: "reference-only" };
+    const emitRetiredCliRoutes = (locale, version) => {
+      for (const [oldSlug, retired] of DEFAULT_RETIRED_ROUTES) {
+        const pageId = `reference/cli/${oldSlug}`;
+        const body = renderRetiredCliRoute(locale, oldSlug, retired);
+        const parsed = meta(body);
+        add(locale, version, pageId, pageId, parsed.title, parsed.description, body, commandRetiredMeta);
+      }
+    };
     // D15 per-category skills page metadata — reference-only so the global
     // sidebar stays anchored to the authored top-level shelf; the main
     // /reference/skills/ index is the single sidebar entry that links out to
@@ -313,6 +331,7 @@ export function buildContentRoot(options) {
     }
     for (const locale of LOCALES) {
       emitCliPages(locale, currentStable, commands);
+      emitRetiredCliRoutes(locale, currentStable);
       emitSkillPages(locale, currentStable, skills);
       const generated = [
         [GENERATED_PAGE_IDS.providers, renderProviderReference(locale, providers)],
