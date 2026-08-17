@@ -158,6 +158,12 @@ breaking/security/migration only when source explicitly supplies that meaning.
 - [ ] Release notes remain source-faithful and fully present in initial HTML.
 - [ ] Search/discovery output is canonical, deterministic, and partition-safe.
 - [ ] All four Phase 1 performance groups pass without silent budget changes.
+- [ ] Every grandfathered ceiling in `tests/benchmarks/docs-per-route-ratchet.json`
+      equals 300000 (i.e. the 10 over-cap reference routes now fit the frozen
+      cap). Splitting `reference/skills` and `reference/cli` into per-command
+      detail pages is the load-bearing lever; this criterion inherits the
+      shrink obligation deferred from Phase 3 (see
+      `docs/decisions/docs-performance-baselines.md#shrink-criterion-accepted-2026-08-17-re-scoped-2026-08-17`).
 - [ ] `pnpm run test:qualification` passes.
 
 ## Risk assessment

@@ -1,6 +1,6 @@
 # Docs performance baselines and the four independent budgets
 
-Status: **Accepted — baselines observed, projected-route cost measured, shrink criterion amended to Phase-3-exit**
+Status: **Accepted — baselines observed, projected-route cost measured, shrink criterion re-scoped to Phase 5 (2026-08-17)**
 Recorded: 2026-08-17
 Phase: 1 (contract gate and measurement spike)
 Required by: every downstream phase (frozen caps)
@@ -93,29 +93,46 @@ Phase-2 shell-CSS growth (~586B per route). The frozen 300000 byte cap
 was not moved; the installation route sits at 296,011 bytes with ~4KB
 headroom, and 56 of 66 routes remain under cap unchanged.
 
-### Shrink criterion (accepted 2026-08-17)
+### Shrink criterion (accepted 2026-08-17; re-scoped 2026-08-17)
 
-The 10 grandfathered over-cap routes must land under the 300000-byte cap
-**before Phase 3 completes** (not before it begins). Rationale:
+**Original criterion (Phase 3 exit):** the 10 grandfathered over-cap routes
+land under 300000 bytes before Phase 3 completes.
 
-- The shell payload is a constant 289,398 bytes compressed
-  (`js=120,565 + css=3,525 + fonts=159,432 + images=5,876`). Per-route HTML
-  headroom against 300000 is ~10,600 bytes.
-- Shrinking the reference-index HTML alone cannot recover the over-cap routes;
-  the levers are **fonts subsetting** and **JS bundle reduction** — both
-  squarely Phase 2/3 shell-rewrite work.
-- The ratchet guard makes the softer criterion safe: nothing worsens in the
-  interim, and an entry criterion would force optimizing markup that Phase 5's
-  regenerator throws away.
-- A cap widening (an explicit user decision that lands in
-  `performance-budgets.json` first) remains available as a fallback if shell
-  shrink demonstrably cannot reach the frozen cap during Phase 3.
+**Re-scoped criterion (Phase 5 exit):** during Phase 3 slice-by-slice execution
+we exhausted the shell-shrink levers that were not user forks:
+
+- Polyfills chunk (37,861B brotli) is `<script noModule>` and already excluded
+  from the ratchet count — modern browserslist gave zero measurable win.
+- Fonts (159,432B, 54% of transfer) are already Latin+VN-only subsets; further
+  shrinking requires dropping a font family (mono / display), which is a design
+  regression and a user decision.
+- JS shell (120,601B, 40% of transfer) is React 19 + Next 16 runtime vendor
+  code; not shrinkable without a framework switch.
+- CSS (4,426B) and images (5,876B) are already minimal.
+
+The reference-index HTML (`skills`/`cli`, 182–186KB raw, ~24KB brotli each) is
+what pushes those 10 routes over cap. That HTML is the exact artifact Phase 5
+regenerates: individual per-command detail pages with MIN search tokenization,
+which splits a 24KB reference-index page into ~1–3KB detail pages that
+comfortably fit the cap. Optimizing markup Phase 5 will throw away is waste,
+and no non-fork lever closes the ~5–15KB gap in the interim.
+
+**Phase 5 must therefore prove every grandfathered ceiling equals 300000
+(i.e. every over-cap route is under the frozen cap)** before Phase 5 completes.
+Phase 3 remains responsible for **ratchet integrity in the interim**: no
+grandfathered ceiling may worsen without a recorded ratchet-up plus a
+per-entry note. The ratchet guard makes this safe; nothing regresses silently.
+
+Fallback if Phase 5's splitting cannot close the gap: a cap widening (explicit
+user decision landing in `performance-budgets.json`) or a font-family drop
+(explicit user decision on the design surface). Both are user forks — the
+autonomous plan cannot take them without an approval turn.
 
 Every measured route shares the same shell payload budget consumption:
-`js=120,565`, `css=3,525`, `fonts=159,432`, `images=5,876`, `html=variable`.
+`js≈120,600`, `css≈4,400`, `fonts=159,432`, `images=5,876`, `html=variable`.
 The over-cap routes exceed cap purely on HTML size — 14–23KB of route-specific
-markup vs the 4–6KB the smaller pages emit. Compression on HTML for the
-reference indexes therefore governs the frozen-cap decision.
+markup vs the 4–6KB the smaller pages emit. HTML splitting via Phase 5's
+per-command detail pages therefore governs the frozen-cap decision.
 
 ## Total static output
 
