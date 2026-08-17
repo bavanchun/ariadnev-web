@@ -76,6 +76,15 @@ const STRINGS = {
       to: "To",
       type: "Type",
       handler: "Handler",
+      legendHeading: "Legend",
+      nodeKindsLabel: "Node kinds",
+      edgeKindsLabel: "Edge kinds",
+      topologyHeading: "Topology",
+      entryHeading: "Entry points",
+      terminalHeading: "Terminal states",
+      adjacencyHeading: "Flow (from → to)",
+      noOutbound: "no outbound edges",
+      entryFromNoIncoming: "reachable without an inbound edge",
     },
     releaseNotes: {
       title: "Release notes",
@@ -169,6 +178,15 @@ const STRINGS = {
       to: "Đến",
       type: "Kiểu",
       handler: "Bộ xử lý",
+      legendHeading: "Chú giải",
+      nodeKindsLabel: "Loại node",
+      edgeKindsLabel: "Loại edge",
+      topologyHeading: "Topology",
+      entryHeading: "Điểm vào",
+      terminalHeading: "Điểm kết",
+      adjacencyHeading: "Luồng (từ → đến)",
+      noOutbound: "không có edge đi ra",
+      entryFromNoIncoming: "vào được mà không có edge tới",
     },
     releaseNotes: {
       title: "Ghi chú phát hành",
@@ -624,22 +642,95 @@ export function renderSkillCategoryPage(locale, category, skills, options = {}) 
   return `${lines.join("\n").trimEnd()}\n`;
 }
 
+/**
+ * D16 workflow reference. Each workflow renders:
+ *
+ *   * Legend — the distinct node kinds and edge kinds observed in this
+ *     workflow, so a reader sees the vocabulary before the topology.
+ *   * Topology — entry points (nodes with no inbound edge), terminal
+ *     states (nodes with no outbound edge or `type: "terminal"`), and an
+ *     adjacency list ("from → to" grouped by source node) that traverses
+ *     every edge in the graph.
+ *   * Nodes / Edges tables — exact lookup as before.
+ *
+ * Every topology fact is present in text; nothing depends on color,
+ * geometry, or a client-side tab (per phase-05 D16 requirement). An SVG
+ * topology diagram is deferred: the current Markdown pipeline forbids
+ * inline HTML/images (see apps/docs/src/lib/public-markdown.ts), and a
+ * client-side mermaid renderer would breach the frozen JS cap. That work
+ * is tracked as a re-scoped D16 item requiring either a safe MDX
+ * component registry or a build-time SVG asset pipeline.
+ */
 export function renderWorkflowReference(locale, workflows) {
   const t = STRINGS[locale].workflows;
   const lines = [frontmatter(t.title, t.description).trimEnd(), "", t.intro, ""];
   for (const workflow of sortBy(workflows, (workflow) => workflow.id)) {
+    const nodes = sortBy(workflow.nodes ?? [], (node) => node.id);
+    const edges = sortBy(workflow.edges ?? [], (edge) => `${edge.from} ${edge.to} ${edge.id ?? ""}`);
+    const outbound = new Map();
+    const inbound = new Map();
+    for (const edge of edges) {
+      if (!outbound.has(edge.from)) outbound.set(edge.from, []);
+      outbound.get(edge.from).push(edge);
+      if (!inbound.has(edge.to)) inbound.set(edge.to, []);
+      inbound.get(edge.to).push(edge);
+    }
+    const nodeKinds = [...new Set(nodes.map((node) => node.type).filter(Boolean))].sort((left, right) => left.localeCompare(right, "en"));
+    const edgeKinds = [...new Set(edges.map((edge) => edge.type).filter(Boolean))].sort((left, right) => left.localeCompare(right, "en"));
     lines.push(`## ${code(workflow.id)}`, "", `**${escapeMdx(workflow.title)}** — ${escapeMdx(workflow.description)}`, "");
-    if (workflow.nodes?.length) {
+
+    // Legend
+    lines.push(`### ${t.legendHeading}`, "");
+    if (nodeKinds.length) lines.push(`- **${t.nodeKindsLabel}**: ${nodeKinds.map(code).join(", ")}`);
+    if (edgeKinds.length) lines.push(`- **${t.edgeKindsLabel}**: ${edgeKinds.map(code).join(", ")}`);
+    lines.push("");
+
+    // Topology
+    lines.push(`### ${t.topologyHeading}`, "");
+    const entryNodes = nodes.filter((node) => !inbound.has(node.id));
+    const terminalNodes = nodes.filter((node) => node.type === "terminal" || !outbound.has(node.id));
+    if (entryNodes.length) {
+      lines.push(`**${t.entryHeading}** — ${t.entryFromNoIncoming}:`, "");
+      for (const node of entryNodes) lines.push(`- ${code(node.id)}${node.type ? ` (${escapeMdx(node.type)})` : ""}`);
+      lines.push("");
+    }
+    if (terminalNodes.length) {
+      lines.push(`**${t.terminalHeading}**:`, "");
+      for (const node of terminalNodes) lines.push(`- ${code(node.id)}${node.type ? ` (${escapeMdx(node.type)})` : ""}`);
+      lines.push("");
+    }
+    // Adjacency: for each source node, list every outbound edge. Every graph
+    // edge appears here exactly once, so a screen-reader or print reader
+    // walks the full topology without depending on a diagram.
+    lines.push(`**${t.adjacencyHeading}**:`, "");
+    for (const node of nodes) {
+      const outs = outbound.get(node.id) ?? [];
+      if (outs.length === 0) {
+        lines.push(`- ${code(node.id)} — *${t.noOutbound}*`);
+        continue;
+      }
+      lines.push(`- ${code(node.id)}:`);
+      for (const edge of outs) {
+        const label = edge.type ? ` — ${escapeMdx(edge.type)}` : "";
+        lines.push(`  - → ${code(edge.to)}${label}`);
+      }
+    }
+    lines.push("");
+
+    // Nodes table
+    if (nodes.length) {
       lines.push(`### ${t.nodes}`, "", tableRow([t.node, t.kind, t.handler]), tableRow(["---", "---", "---"]));
-      for (const node of sortBy(workflow.nodes, (node) => node.id)) {
+      for (const node of nodes) {
         const handler = node.handler ? `${escapeMdx(node.handler.kind)}: ${code(node.handler.ref)}` : "";
         lines.push(tableRow([code(node.id), escapeMdx(node.type ?? ""), handler]));
       }
       lines.push("");
     }
-    if (workflow.edges?.length) {
+
+    // Edges table
+    if (edges.length) {
       lines.push(`### ${t.edges}`, "", tableRow([t.from, t.to, t.type]), tableRow(["---", "---", "---"]));
-      for (const edge of sortBy(workflow.edges, (edge) => `${edge.from} ${edge.to} ${edge.id ?? ""}`)) {
+      for (const edge of edges) {
         lines.push(tableRow([code(edge.from), code(edge.to), escapeMdx(edge.type ?? "")]));
       }
       lines.push("");
