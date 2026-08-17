@@ -12,10 +12,10 @@
     "check:deploy": "wrangler deploy --dry-run --config wrangler.staging.toml"
   },
   "dependencies": {
-    "@mdx-js/mdx": "3.1.1",
-    "@orama/orama": "3.1.18",
     "@ariadnev-web/contracts": "workspace:*",
     "@ariadnev-web/tokens": "workspace:*",
+    "@mdx-js/mdx": "3.1.1",
+    "@orama/orama": "3.1.18",
     "fumadocs-core": "16.14.3",
     "fumadocs-mdx": "15.2.3",
     "fumadocs-ui": "16.14.3",
@@ -31,6 +31,7 @@
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.4",
     "postcss": "8.5.26",
+    "rehype-autolink-headings": "7.1.0",
     "wrangler": "4.120.0"
   }
 }

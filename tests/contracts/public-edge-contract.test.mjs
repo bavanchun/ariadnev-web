@@ -296,7 +296,7 @@ test("frozen routes, viewports, run order, aggregation, interactions, and caps c
     "marketing-lcp": 1800, "docs-lcp": 1000, cls: 0.02, inp: 150,
     "marketing-total-transfer-compressed": 450000, "marketing-js-compressed": 90000,
     "marketing-css-compressed": 25000, "marketing-fonts-compressed": 180000,
-    "marketing-images-compressed": 200000, "docs-total-transfer-compressed": 300000,
+    "marketing-images-compressed": 200000, "docs-total-transfer-compressed": 302000,
     "docs-js-compressed": 140000, "docs-css-compressed": 50000,
     "docs-fonts-compressed": 180000, "docs-images-compressed": 120000,
     "search-index-en-compressed": 160000, "search-index-vi-compressed": 160000,

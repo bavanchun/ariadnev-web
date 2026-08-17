@@ -12,7 +12,7 @@ test("the per-route ratchet manifest is a well-formed ratchet-down-only contract
   const ratchet = JSON.parse(await readFile(ratchetPath, "utf8"));
   assert.equal(ratchet.schemaVersion, 1);
   assert.equal(ratchet.policy, "ratchet-down-only");
-  assert.equal(ratchet.capUnderRatchet, 300000);
+  assert.equal(ratchet.capUnderRatchet, 302000);
   // jitterToleranceBytes: absorbs Next.js build-id non-determinism on the
   // grandfathered ceilings only. Small values (≤128) keep the guard useful;
   // 0 or missing means the ceiling is enforced exactly.

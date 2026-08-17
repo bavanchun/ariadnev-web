@@ -150,6 +150,9 @@ button { border: var(--vc-border-width-hairline) solid var(--vc-color-border-str
 .prose h1 { margin-block: 0 var(--vc-space-3); font-size: clamp(var(--vc-font-size-heading), 5vw, var(--vc-font-size-display)); letter-spacing: var(--vc-font-letter-spacing-tight); }
 .prose h2 { margin-block: var(--vc-space-12) var(--vc-space-3); padding-block-start: var(--vc-space-3); border-top: var(--vc-border-width-hairline) solid var(--vc-color-border); font-size: var(--vc-font-size-heading); }
 .prose h3 { margin-block: var(--vc-space-8) var(--vc-space-2); font-size: var(--vc-font-size-heading-small); }
+/* Heading permalinks: rehype-autolink-headings prepends an `<a class="heading-anchor" href="#slug">#</a>` inside every H2-H4. Hidden until hover/focus keeps the visual weight of headings unchanged while remaining keyboard- and screen-reader-reachable via aria-label. */
+.prose :is(h2, h3, h4) .heading-anchor { display: inline-block; margin-inline-end: var(--vc-space-1); color: var(--vc-color-text-muted); text-decoration: none; opacity: 0; transition: opacity 120ms ease-in-out; }
+.prose :is(h2, h3, h4):hover .heading-anchor, .prose :is(h2, h3, h4) .heading-anchor:focus-visible { opacity: 1; }
 .docs-description { margin-block: 0 var(--vc-space-8); color: var(--vc-color-text-muted); font-size: var(--vc-font-size-lead); }
 .docs-body { max-width: 72ch; }
 .page-copy-actions { margin-block-start: var(--vc-space-12); padding-block-start: var(--vc-space-4); border-top: var(--vc-border-width-hairline) solid var(--vc-color-border); }
