@@ -6,6 +6,8 @@ screenKind: "D06-graph-execution"
 
 `av run` is ariadnev's local execution control plane. It compiles a canonical, provider-neutral workflow from the kit, enforces policy before any provider executes, and records enough private durable state to resume after interruption. Codex and Claude Code implement the same executor contract; provider settings never enter the graph.
 
+> **Public active execution is read-only.** Every workflow validates and dry-runs, but active execution runs only nodes whose executor is read-only against your workspace today. `safe-change-delivery` stays policy-denied for dry-run and execution until a real side-effect executor and approval surface exist — ariadnev does not simulate a mutation to look complete.
+
 The public pipeline is narrow:
 
 ```text

@@ -6,6 +6,8 @@ screenKind: "D06-graph-execution"
 
 `av run` là mặt phẳng điều khiển thực thi cục bộ của ariadnev. Nó biên dịch một workflow chuẩn, trung lập với provider từ kit, áp chính sách trước khi bất kỳ provider nào thực thi, và ghi đủ trạng thái bền vững riêng tư để resume sau gián đoạn. Codex và Claude Code triển khai cùng một hợp đồng executor; cấu hình provider không bao giờ đi vào đồ thị.
 
+> **Thực thi active công khai là read-only.** Mọi workflow đều validate và dry-run được, nhưng active execution hôm nay chỉ chạy các node có executor read-only đối với workspace của bạn. `safe-change-delivery` vẫn bị chính sách chặn cả dry-run lẫn execution cho đến khi có một side-effect executor thật và mặt phẳng approval — ariadnev không giả lập một thay đổi thành công để trông có vẻ hoàn tất.
+
 Pipeline công khai rất hẹp:
 
 ```text
