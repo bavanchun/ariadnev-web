@@ -39,6 +39,8 @@ The binary is not yet notarized, so the first run may be blocked. Allow it with:
 xattr -d com.apple.quarantine "$(command -v ariadnev)"
 ```
 
+> **Removes a macOS safety check.** The quarantine attribute is how macOS warns about unsigned downloads. Only run this after the installer above has verified the sha256, or after you have downloaded the binary yourself and matched it against `https://ariadnev.com/download/checksums.txt` for the same version.
+
 ## Optional: Claude Code hooks
 
 The CLI itself is self-contained. The optional Claude Code hooks the kit ships are separate `.cjs` processes and need `node` on your PATH when you enable them.

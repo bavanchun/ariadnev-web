@@ -39,6 +39,8 @@ Binary chưa được notarize, nên lần chạy đầu có thể bị chặn. 
 xattr -d com.apple.quarantine "$(command -v ariadnev)"
 ```
 
+> **Bỏ một lớp an toàn của macOS.** Thuộc tính quarantine là cách macOS cảnh báo về file tải xuống chưa ký. Chỉ chạy lệnh này sau khi installer ở trên đã xác minh sha256, hoặc sau khi bạn tự tải binary về và đối chiếu với `https://ariadnev.com/download/checksums.txt` cho cùng phiên bản.
+
 ## Tùy chọn: hook cho Claude Code
 
 Bản thân CLI tự chứa. Các hook Claude Code tùy chọn mà kit đóng gói là các tiến trình `.cjs` riêng và cần `node` trong PATH khi bạn bật chúng.
