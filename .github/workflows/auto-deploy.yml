@@ -132,12 +132,12 @@ jobs:
           EOF
       - name: Compose the staging input
         run: >
-          pnpm run compose:input -- --environment staging
+          node scripts/deploy/compose-deployment-input.mjs --environment staging
           --product-sha "${{ github.sha }}" --evidence-sha "$EVIDENCE_SHA"
           --out "$RUNNER_TEMP/deployment-inputs/staging-input.json"
       - name: Compose the production input
         run: >
-          pnpm run compose:input -- --environment production
+          node scripts/deploy/compose-deployment-input.mjs --environment production
           --product-sha "${{ github.sha }}" --evidence-sha "$EVIDENCE_SHA"
           --out "$RUNNER_TEMP/deployment-inputs/production-input.json"
       - name: Validate both composed inputs
@@ -186,7 +186,7 @@ jobs:
           INPUT_PATH=".deployment-input/staging-input.json"
           test "$(node -p "require('./$INPUT_PATH').productSha")" = "$(git rev-parse HEAD)"
           echo "INPUT_PATH=$INPUT_PATH" >> "$GITHUB_ENV"
-      - run: pnpm run sync:release -- "$INPUT_PATH"
+      - run: node scripts/deploy/validate-deployment-input.mjs "$INPUT_PATH"
       - name: Reconcile the source-owned ingress rule
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WAF_TOKEN }}
@@ -197,13 +197,13 @@ jobs:
         run: |
           set -o pipefail
           date -u +%Y-%m-%dT%H:%M:%SZ > deploy-started-at.txt
-          pnpm run deploy:units -- "$INPUT_PATH" | tee deploy-result.json
+          node scripts/deploy/deploy-units.mjs "$INPUT_PATH" | tee deploy-result.json
       - name: Verify convergence against the declared release
         run: |
           set -o pipefail
-          pnpm run verify:convergence -- "$INPUT_PATH" | tee convergence.json
+          node scripts/deploy/verify-convergence.mjs "$INPUT_PATH" | tee convergence.json
       - name: Probe the public edge
-        run: pnpm run probe:edge -- --environment staging
+        run: node scripts/deploy/probe-public-edge.mjs --environment staging
       - name: Write the sanitized cutover record
         run: |
           node scripts/deploy/compose-cutover-record.mjs "$INPUT_PATH" \
@@ -251,7 +251,7 @@ jobs:
           INPUT_PATH=".deployment-input/production-input.json"
           test "$(node -p "require('./$INPUT_PATH').productSha")" = "$(git rev-parse HEAD)"
           echo "INPUT_PATH=$INPUT_PATH" >> "$GITHUB_ENV"
-      - run: pnpm run sync:release -- "$INPUT_PATH"
+      - run: node scripts/deploy/validate-deployment-input.mjs "$INPUT_PATH"
       - name: Reconcile the source-owned ingress rule
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WAF_TOKEN }}
@@ -262,13 +262,13 @@ jobs:
         run: |
           set -o pipefail
           date -u +%Y-%m-%dT%H:%M:%SZ > deploy-started-at.txt
-          pnpm run deploy:units -- "$INPUT_PATH" | tee deploy-result.json
+          node scripts/deploy/deploy-units.mjs "$INPUT_PATH" | tee deploy-result.json
       - name: Verify convergence against the declared release
         run: |
           set -o pipefail
-          pnpm run verify:convergence -- "$INPUT_PATH" | tee convergence.json
+          node scripts/deploy/verify-convergence.mjs "$INPUT_PATH" | tee convergence.json
       - name: Probe the public edge
-        run: pnpm run probe:edge -- --environment production
+        run: node scripts/deploy/probe-public-edge.mjs --environment production
       - name: Write the sanitized cutover record
         run: |
           node scripts/deploy/compose-cutover-record.mjs "$INPUT_PATH" \
