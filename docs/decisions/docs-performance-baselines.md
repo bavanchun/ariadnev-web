@@ -220,6 +220,34 @@ be measured meaningfully during the spike (task #7 loops `build-content-root.mjs
 with the projected +318 pages injected); today's steady-state build number
 would not reflect the pressure the plan is testing for.
 
+## Slice-1 attempt lesson (2026-08-17)
+
+Phase 3 slice 1 attempted a chrome-strings authority migration and busted
+the frozen 300000 byte cap on 2 non-grandfathered routes
+(`/vi/{stable,1.1.0}/concepts/graph-execution/` at 300,083–300,086 bytes).
+Root cause: three Client Components (`search-dialog`, `copy-actions`,
+`document-copy-enhancer`) imported `chromeStrings(locale)` because Next.js
+cannot serialise function-valued props across the RSC → Client boundary.
+The import pulled BOTH `en` and `vi` records into every client bundle,
+adding ~1500 bytes per route in the shell CSS + JS chunks after brotli-9.
+
+Rejected the slice; reverted to zero-cost state. Recorded here so the
+retry uses the correct pattern:
+
+- Server Components resolve `chromeStrings(locale)` and render HTML with
+  strings inlined — zero net cost since HTML already carries the labels.
+- Client Components receive **plain string props** (static labels
+  pre-materialised on the server) plus **template strings** with
+  `{count}` / `{name}` placeholders for dynamic values, formatted on the
+  client with `String.prototype.replace`. No client-side import of
+  `chrome-strings.ts` at all.
+- The chrome-strings module itself must not be imported from any file
+  marked `"use client"`.
+
+This pattern was not implemented in the aborted slice because Server → Client
+props were passed as the raw ChromeStrings record (which includes functions).
+Retry Phase 3 slice with the plain-string-props pattern above.
+
 ## Stop conditions
 
 - **Route transfer**: any viable shell variant exceeds 300KB per route after
