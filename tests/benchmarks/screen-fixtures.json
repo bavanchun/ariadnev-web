@@ -14,7 +14,7 @@
     { "id": "D00", "surface": "docs", "route": "/", "locale": null, "description": "Language chooser (app root)" },
     { "id": "D01", "surface": "docs", "route": "/en/stable/", "locale": "en", "description": "Current docs home (EN stable)" },
     { "id": "D01-vi", "surface": "docs", "route": "/vi/stable/", "locale": "vi", "description": "Current docs home (VI stable)" },
-    { "id": "D02", "surface": "docs", "route": "/en/previous/", "locale": "en", "description": "Previous edition home (EN)" },
+    { "id": "D02", "surface": "docs", "route": "/en/1.0.0/", "locale": "en", "description": "Previous edition home (EN 1.0.0)" },
     { "id": "D03", "surface": "docs", "route": "/en/stable/get-started/installation/", "locale": "en", "description": "Installation" },
     { "id": "D06", "surface": "docs", "route": "/en/stable/concepts/graph-execution/", "locale": "en", "description": "Graph execution flagship topology" },
     { "id": "D11", "surface": "docs", "route": "/en/stable/guides/migration-from-vcskill/", "locale": "en", "description": "Migration — irreversible stages" },
@@ -22,7 +22,7 @@
     { "id": "D14", "surface": "docs", "route": "/en/stable/reference/providers/", "locale": "en", "description": "Provider comparison + records" },
     { "id": "D15", "surface": "docs", "route": "/en/stable/reference/skills/", "locale": "en", "description": "Skill catalog + per-category split" },
     { "id": "D16", "surface": "docs", "route": "/en/stable/reference/workflows/", "locale": "en", "description": "Workflow topology text-first" },
-    { "id": "D17", "surface": "docs", "route": "/en/stable/reference/release-notes/", "locale": "en", "description": "Release notes + edition metadata" },
+    { "id": "D17", "surface": "docs", "route": "/en/stable/release-notes/", "locale": "en", "description": "Release notes + edition metadata" },
     { "id": "D18", "surface": "docs", "route": "/en/stable/does-not-exist/", "locale": "en", "description": "Docs not-found", "expectStatus": 404 }
   ],
   "stressFrames": [
