@@ -90,6 +90,11 @@ function walk(dir, base = dir, out = []) {
   return out;
 }
 
+// Optional Living Execution Atlas frontmatter keys authored pages may set.
+// These are the same names the catalog schema accepts; unknown keys still
+// throw so a typo like `screemKind:` never silently disables screen dispatch.
+const AUTHORED_META_KEYS = new Set(["title", "description", "pageKind", "screenKind", "section", "navigationVisibility"]);
+
 export function parseFrontmatter(source, label) {
   const match = /^---\r?\n([\s\S]*?)\r?\n---\r?\n/.exec(source);
   if (!match) throw new Error(`${label}: missing frontmatter`);
@@ -99,13 +104,20 @@ export function parseFrontmatter(source, label) {
     if (!pair) throw new Error(`${label}: unreadable frontmatter line "${line}"`);
     let value = pair[2].trim();
     if (value.startsWith('"')) value = JSON.parse(value);
+    if (!AUTHORED_META_KEYS.has(pair[1])) throw new Error(`${label}: unknown frontmatter key "${pair[1]}"`);
     fields[pair[1]] = value;
   }
   for (const key of ["title", "description"]) {
     if (typeof fields[key] !== "string" || fields[key].length === 0) throw new Error(`${label}: frontmatter needs ${key}`);
   }
   if (/^#\s/m.test(source.slice(match[0].length))) throw new Error(`${label}: body must not contain an H1; the title is the H1`);
-  return { title: fields.title, description: fields.description, body: source };
+  const metadata = {};
+  for (const key of ["pageKind", "screenKind", "section", "navigationVisibility"]) {
+    if (typeof fields[key] === "string" && fields[key].length > 0) metadata[key] = fields[key];
+  }
+  const result = { title: fields.title, description: fields.description, body: source };
+  if (Object.keys(metadata).length > 0) result.metadata = metadata;
+  return result;
 }
 
 /** Authored pages keyed by relative path, checked for EN/VI parity. */
@@ -125,7 +137,8 @@ export function loadAuthoredPages(authoredRoot) {
       const parsed = parseFrontmatter(source, label);
       const pageId = path.replace(/\.mdx$/, "");
       if (!/^[a-z0-9][a-z0-9/-]*$/.test(pageId) || pageId.includes("//")) throw new Error(`${label}: page path must be lowercase kebab segments`);
-      pages.push({ locale, pageId, canonicalId: `core/${pageId}`, ...parsed });
+      const { metadata, ...rest } = parsed;
+      pages.push({ locale, pageId, canonicalId: `core/${pageId}`, ...rest, ...(metadata ? { metadata } : {}) });
     }
   }
   return pages;
@@ -327,7 +340,7 @@ export function buildContentRoot(options) {
     };
 
     for (const page of loadAuthoredPages(authoredRoot)) {
-      add(page.locale, currentStable, page.pageId, page.canonicalId, page.title, page.description, page.body);
+      add(page.locale, currentStable, page.pageId, page.canonicalId, page.title, page.description, page.body, page.metadata);
     }
     for (const locale of LOCALES) {
       emitCliPages(locale, currentStable, commands);
