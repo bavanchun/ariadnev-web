@@ -8,6 +8,8 @@ Phiên bản 1.0.0 đổi tên toàn bộ sản phẩm: binary và package, ti�
 
 CLI mới không biết gì về những gì tên cũ để lại trên đĩa — **không có mã di trú**, đó là chủ ý. Một cuộc di trú âm thầm di chuyển file là một thay đổi bạn không thể review, và các file liên quan chỉ là một cache, một thư mục trạng thái và các artifact đã cài mà bạn có thể cài lại bằng một lệnh. Vậy nên đây là một lần dọn dẹp ngắn bạn tự làm.
 
+> **Có tính phá hủy — đọc kỹ trước khi chạy.** Bước 2 và 3 xóa file bằng `rm -rf`. Không có undo, và `ariadnev backups` không đọc thư mục cũ `~/.vcskill/backups`. Nếu bạn muốn giữ gì trong hai thư mục đó, hãy sao chép ra trước.
+
 ## 1. Gỡ artifact cũ đã cài
 
 Nếu vẫn còn binary cũ, gỡ bằng nó — nó đọc receipt của chính nó và gỡ đúng những gì đã ghi:

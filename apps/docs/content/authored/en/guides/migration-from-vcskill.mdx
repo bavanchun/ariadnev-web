@@ -8,6 +8,8 @@ Version 1.0.0 renamed the whole product: the binary and package, the `ARIADNEV_*
 
 The new CLI knows nothing about what the old name left on disk — **there is no migration code**, deliberately. A migration that silently moves files is a change you cannot review, and the only files involved are a cache, a state directory, and installed artifacts you can reinstall in one command. So this is a short cleanup you do yourself, once.
 
+> **Destructive — read before running.** Steps 2 and 3 delete files with `rm -rf`. There is no undo, and `ariadnev backups` does not read the old `~/.vcskill/backups` directory. If you want anything from either directory, copy it out first.
+
 ## 1. Remove the old installed artifacts
 
 If you still have the old binary, uninstall with it — it reads its own receipt and removes exactly what it wrote:
