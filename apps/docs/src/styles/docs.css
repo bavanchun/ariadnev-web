@@ -186,6 +186,20 @@ button { border: var(--vc-border-width-hairline) solid var(--vc-color-border-str
 .docs-pager-next { text-align: end; }
 .docs-pager-empty { display: block; }
 
+/* D12 CLI index progressive filter. No-JS readers never see this element
+   mount (it is a client component); every row and group heading stays
+   visible until JavaScript actually hides one, so the filter can only add
+   capability, never remove content that would otherwise be reachable. */
+.reference-index-filter { display: grid; gap: var(--vc-space-1); margin-block-end: var(--vc-space-4); max-width: 28rem; }
+.reference-index-filter label { color: var(--vc-color-text-muted); font-size: var(--vc-font-size-caption); }
+.reference-index-filter input { width: 100%; min-height: var(--vc-size-control-minimum); border: var(--vc-border-width-strong) solid var(--vc-color-border); border-radius: var(--vc-border-radius-control); background: var(--vc-color-canvas-raised); padding: var(--vc-space-2); }
+
+/* D13 CLI command detail: related-commands nav in the same source-derived
+   namespace, server-rendered from the catalog. */
+.cli-command-related { margin-block-start: var(--vc-space-8); padding-block-start: var(--vc-space-4); border-top: var(--vc-border-width-hairline) solid var(--vc-color-border); }
+.cli-command-related ul { margin: var(--vc-space-2) 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: var(--vc-space-2); }
+.cli-command-related a { display: inline-flex; align-items: center; min-height: var(--vc-size-control-minimum); padding: var(--vc-space-1) var(--vc-space-3); border: var(--vc-border-width-hairline) solid var(--vc-color-border); border-radius: var(--vc-border-radius-control); text-decoration: none; }
+
 @media (max-width: 64rem) {
   .docs-frame { grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr); }
   .docs-toc { grid-column: 2; border-inline-start: 0; border-top: var(--vc-border-width-hairline) solid var(--vc-color-border); }

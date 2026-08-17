@@ -322,11 +322,17 @@ export function buildContentRoot(options) {
         }
       }
     };
+    // D12 CLI index metadata — stays in the global sidebar (it is the one
+    // reference/cli/ entry a reader browses to); the screenKind lets
+    // `cli-command-index.tsx` recognise the page and layer its progressive
+    // filter, and lets other pages (e.g. the docs-home atlas strip) query
+    // command counts by identity instead of guessing from route shape.
+    const cliIndexMeta = { pageKind: "reference-index", screenKind: "D12-cli-command-index", section: "reference" };
     const emitCliPages = (locale, version, commandList) => {
       // Index page: light summary + links to every detail page.
       const indexBody = renderCliCommandIndex(locale, commandList);
       const indexMeta = meta(indexBody);
-      add(locale, version, GENERATED_PAGE_IDS.cli, GENERATED_PAGE_IDS.cli, indexMeta.title, indexMeta.description, indexBody);
+      add(locale, version, GENERATED_PAGE_IDS.cli, GENERATED_PAGE_IDS.cli, indexMeta.title, indexMeta.description, indexBody, cliIndexMeta);
       // Per-command detail pages. Canonical id embeds the slug so siblings
       // across locales/editions resolve pairwise even when a command exists in
       // one edition but not another.

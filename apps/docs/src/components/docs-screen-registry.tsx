@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import type { DocsCatalogPage, DocsContentCatalog } from "@/lib/content-catalog.ts";
 import { REGISTERED_SCREEN_KINDS, hasRegisteredScreen, isGeneratedPassthroughScreen } from "./docs-screen-registry.ts";
 import { DocsHomeExperience } from "./screen-experiences/docs-home.tsx";
+import { CliCommandIndexExperience } from "./reference/cli-command-index.tsx";
+import { CliCommandDetailExperience } from "./reference/cli-command-detail.tsx";
 
 // JSX dispatcher for the screen registry. Each entry wraps the authored
 // MDX article body with a screen-specific composition. The registry is
@@ -43,6 +45,8 @@ const RENDERERS: Readonly<Record<string, ScreenExperience>> = Object.freeze({
   "D09-configuration": PassThroughExperience,
   "D10-doctor-audit-backups-uninstall": PassThroughExperience,
   "D11-migration": PassThroughExperience,
+  "D12-cli-command-index": CliCommandIndexExperience,
+  "D13-cli-command-detail": CliCommandDetailExperience,
 });
 
 // Cross-check the two halves at module load. Every declared kind in the

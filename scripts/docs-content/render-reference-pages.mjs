@@ -334,10 +334,36 @@ export function cliCommandPageId(commandPath) {
 }
 
 /**
+ * Source-derived namespace for one command: the first token after `ariadnev`,
+ * or `ariadnev` itself for the root invocation. Every subcommand of a group
+ * (e.g. `ariadnev mcp add`, `ariadnev mcp list`) shares the same namespace so
+ * the index can group them under one heading; a command with no siblings
+ * (e.g. `ariadnev install`) simply forms a group of one. Used by both the
+ * index renderer (grouping) and `cli-command-index.tsx` (related-commands
+ * lookup at request time, derived identically from the route slug).
+ */
+export function commandNamespace(commandPath) {
+  const path = String(commandPath ?? "").trim();
+  if (path === "ariadnev") return "ariadnev";
+  const rest = path.startsWith("ariadnev ") ? path.slice("ariadnev ".length) : path;
+  const [first] = rest.trim().split(/\s+/);
+  return first || "ariadnev";
+}
+
+/**
  * Compact index page: one row per command with description and link to its
  * detail page. No arguments or options tables here — those live on the detail
  * page. This is the load-bearing shrink that lets the previously ~24KB
  * `reference/cli/` monolith fit inside the frozen per-route byte cap.
+ *
+ * The Markdown stays flat and byte-minimal on purpose: this content is
+ * indexed verbatim into the search partition, which has effectively zero
+ * headroom left under its frozen compressed cap
+ * (`tests/benchmarks/performance-budgets.json#search-index-en-compressed`).
+ * Source-derived namespace grouping (D12 requirement) is layered at request
+ * time by `cli-command-index.tsx` from the catalog's own command-detail
+ * entries — same source of truth, zero cost to the indexed Markdown, and
+ * still fully server-rendered HTML with no JavaScript dependency.
  */
 export function renderCliCommandIndex(locale, commands) {
   const t = STRINGS[locale].cli;

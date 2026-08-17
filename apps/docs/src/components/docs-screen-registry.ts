@@ -33,6 +33,10 @@ export const REGISTERED_SCREEN_KINDS: readonly string[] = Object.freeze([
   "D09-configuration",
   "D10-doctor-audit-backups-uninstall",
   "D11-migration",
+  // D12/D13 generated reference screens with a dedicated composition — see
+  // `components/reference/cli-command-index.tsx` and `cli-command-detail.tsx`.
+  "D12-cli-command-index",
+  "D13-cli-command-detail",
 ]);
 
 /**
@@ -45,7 +49,6 @@ export const REGISTERED_SCREEN_KINDS: readonly string[] = Object.freeze([
  * complete Markdown.
  */
 export const GENERATED_PASSTHROUGH_SCREEN_KINDS: readonly string[] = Object.freeze([
-  "D13-cli-command-detail",
   "D13-cli-command-retired",
   "D15-skill-category",
 ]);
