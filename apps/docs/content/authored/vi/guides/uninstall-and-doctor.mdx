@@ -32,6 +32,8 @@ ariadnev backups restore <timestamp> [--file <rel>] [--global] [--dry-run]
 
 Cài và gỡ đều tạo backup có timestamp. `restore` sao lưu an toàn trạng thái hiện tại trước khi ghi.
 
+> **Có sửa đổi — chạy `--dry-run` trước.** `restore` ghi đè các file hiện tại bằng phiên bản lưu trữ. Backup an toàn trước-khi-ghi có để cứu vãn sai sót, nhưng bước xem trước thông thường là `--dry-run`, liệt kê mọi file sẽ thay đổi mà không ghi gì cả.
+
 ## uninstall
 
 ```bash
@@ -39,6 +41,8 @@ ariadnev uninstall [--provider a,b] [--global] [--dry-run]
 ```
 
 Gỡ đúng những gì receipt liệt kê cho provider đã chọn và **giữ lại mọi file bạn đã sửa** kể từ khi cài. Nó phục hồi một bản cài bị gián đoạn trước khi ghi receipt, và thất bại thay vì báo thành công khi không có bản ghi cài nào.
+
+> **Có sửa đổi — chỉ phạm vi receipt.** `uninstall` chỉ xóa các file có đường dẫn và hash trong receipt; file bạn đã sửa hoặc tạo sau khi cài được giữ nguyên. `--dry-run` liệt kê mọi đường dẫn sẽ bị xóa trước.
 
 ## Mã thoát
 

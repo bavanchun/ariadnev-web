@@ -32,6 +32,8 @@ ariadnev backups restore <timestamp> [--file <rel>] [--global] [--dry-run]
 
 Installs and uninstalls take timestamped backups. `restore` safety-backs-up the current state before writing.
 
+> **Mutating — pass `--dry-run` first.** `restore` overwrites current files with the archived versions. The pre-write safety backup exists to recover from a mistake, but the ordinary review is `--dry-run`, which lists every file that would change without writing anything.
+
 ## uninstall
 
 ```bash
@@ -39,6 +41,8 @@ ariadnev uninstall [--provider a,b] [--global] [--dry-run]
 ```
 
 Removes exactly what the receipt lists for the chosen providers and **preserves any file you edited** since install. It recovers an install that was interrupted before its receipt was written, and it fails rather than reporting success when there is no install record at all.
+
+> **Mutating — receipt-scoped only.** `uninstall` deletes only files whose paths and hashes are in the receipt; a file you edited or created after install is left in place. `--dry-run` lists every path it would remove first.
 
 ## Exit codes
 
