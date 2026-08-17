@@ -124,8 +124,8 @@
       "id": "docs-total-transfer-compressed",
       "metric": "transfer",
       "unit": "bytes",
-      "cap": 302000,
-      "rationale": "Docs routes must remain lighter than marketing to preserve search and findability speed. Cap widened from 300000 to 302000 (2026-08-17, user decision) after evidence showed the tightest non-grandfathered route (vi/1.1.0/concepts/graph-execution) sits at 300000 exactly with 0B headroom, dominated by shared shell (fonts 159KB + JS vendor 121KB + CSS 4KB + images 6KB). A +2KB widen unblocks Phase 3 shell interactions (mobile drawer, chrome-strings full-authority, search grouping/loading, heading permalinks) that were byte-blocked at 300000. See docs/decisions/docs-performance-baselines.md for the widen rationale and the plan to keep it fixed after the Phase 5 skill-catalog rebuild lands.",
+      "cap": 304000,
+      "rationale": "Docs routes must remain lighter than marketing to preserve search and findability speed. Cap widened 300000→302000 on 2026-08-17 (user decision) after the tightest non-grandfathered route sat at exactly 300000B, dominated by shared shell (fonts 159KB + JS vendor 121KB + CSS 4KB + images 6KB). Widened again 302000→304000 on 2026-08-17 (user decision) after Phase 4 slices 5-8 pushed the tightest route to 301,931 with 69B headroom, byte-blocking D06 graph-execution flagship topology and further shell-affecting slices in Phase 4/M01. The additional +2KB earns ~2KB shared-shell headroom to complete authored-screen enrichments and Phase 6 macros without another shrink obligation. See docs/decisions/docs-performance-baselines.md for the widen rationale.",
       "baseline": {
         "status": "not-observable-on-legacy-topology",
         "reason": "The legacy production topology has no docs product route or docs transfer graph."

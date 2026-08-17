@@ -84,8 +84,8 @@ test("full docs build enforces the frozen static transfer budgets", async () => 
   assert.match(verifier, /docs-per-route-ratchet\.json/);
   assert.match(verifier, /ratchet-down-only/);
   // jitter tolerance must apply ONLY to grandfathered ceilings; the hard
-  // 302000 byte cap on non-grandfathered routes stays strict (widened from
-  // 300000 on 2026-08-17 per docs/decisions/docs-performance-baselines.md).
+  // 304000 byte cap on non-grandfathered routes stays strict (widened from
+  // 300000 → 302000 → 304000 on 2026-08-17 per docs/decisions/docs-performance-baselines.md).
   assert.match(verifier, /jitterToleranceBytes/);
   assert.match(verifier, /isGrandfathered\s*\?\s*ceiling\s*\+\s*jitterTolerance\s*:\s*ceiling/);
 });
