@@ -43,6 +43,10 @@ const STRINGS = {
       artifact: "Artifact",
       path: "Path",
       skip: "skip",
+      comparisonHeading: "Comparison matrix",
+      comparisonIntro: "Rows are artifact kinds; columns are providers. Each cell shows the path the install engine writes, or `skip` when the provider does not verify that target.",
+      providerRecordsHeading: "Providers",
+      providerRecordsIntro: "Per-provider view — on narrow screens each provider reads as a record instead of a matrix column.",
     },
     skills: {
       title: "Skill catalog",
@@ -129,6 +133,10 @@ const STRINGS = {
       title: "Tham chiếu provider",
       description: "Mỗi loại artifact được ghi vào đâu với từng provider được hỗ trợ, và mục tiêu nào bị bỏ qua.",
       intro: "Bộ cài chỉ ghi artifact khi đường dẫn và định dạng đích đã được xác minh. Ô ghi *skip* là mục tiêu chưa xác minh: ariadnev không đoán, nó bỏ qua và ghi vào bản tóm tắt cài đặt.",
+      comparisonHeading: "Ma trận so sánh",
+      comparisonIntro: "Hàng là loại artifact; cột là provider. Mỗi ô hiện đường dẫn mà bộ cài sẽ ghi, hoặc `skip` khi provider không xác minh mục tiêu đó.",
+      providerRecordsHeading: "Provider",
+      providerRecordsIntro: "Xem theo từng provider — trên màn hình hẹp mỗi provider đọc như một bản ghi thay vì một cột trong ma trận.",
       artifact: "Artifact",
       path: "Đường dẫn",
       skip: "skip",
@@ -416,11 +424,51 @@ export function renderRetiredCliRoute(locale, oldSlug, retired) {
   return `${lines.join("\n").trimEnd()}\n`;
 }
 
+/**
+ * D14 provider reference:
+ *
+ *   1. Comparison matrix — rows are artifact kinds, columns are providers.
+ *      Enumerated up-front so a reader can compare providers at a glance.
+ *      The matrix scrolls horizontally inside a local scroller when the
+ *      viewport cannot fit every column; the wide-table containment lives
+ *      in `apps/docs/src/styles/docs.css` and reveals the scroller with
+ *      a visible edge affordance.
+ *   2. Per-provider records — one H2 + dense table per provider so the
+ *      same data reads as a record on narrow screens without depending
+ *      on the scroller.
+ *
+ * Unsupported cells are `*skip*` — the release explicitly declared no
+ * verified target for that artifact/provider pair. The renderer never
+ * infers `skip`; the provider bundle carries `verified: false` or omits
+ * the path.
+ */
 export function renderProviderReference(locale, providers) {
   const t = STRINGS[locale].providers;
-  const lines = [frontmatter(t.title, t.description).trimEnd(), "", t.intro, ""];
-  for (const provider of sortBy(providers, (provider) => provider.id)) {
-    lines.push(`## ${code(provider.id)}`, "");
+  const orderedProviders = sortBy(providers, (provider) => provider.id);
+  const artifactKinds = [...new Set(orderedProviders.flatMap((provider) => (provider.artifacts ?? []).map((artifact) => artifact.artifact)))].sort((left, right) => left.localeCompare(right, "en"));
+  const cellFor = (provider, kind) => {
+    const artifact = (provider.artifacts ?? []).find((entry) => entry.artifact === kind);
+    if (!artifact || artifact.verified === false || !artifact.path) return `*${t.skip}*`;
+    return code(artifact.path);
+  };
+  const lines = [
+    frontmatter(t.title, t.description).trimEnd(),
+    "",
+    t.intro,
+    "",
+    `## ${t.comparisonHeading}`,
+    "",
+    t.comparisonIntro,
+    "",
+    tableRow([t.artifact, ...orderedProviders.map((provider) => code(provider.id))]),
+    tableRow(["---", ...orderedProviders.map(() => "---")]),
+  ];
+  for (const kind of artifactKinds) {
+    lines.push(tableRow([code(kind), ...orderedProviders.map((provider) => cellFor(provider, kind))]));
+  }
+  lines.push("", `## ${t.providerRecordsHeading}`, "", t.providerRecordsIntro, "");
+  for (const provider of orderedProviders) {
+    lines.push(`### ${code(provider.id)}`, "");
     lines.push(tableRow([t.artifact, t.path]), tableRow(["---", "---"]));
     for (const artifact of sortBy(provider.artifacts ?? [], (artifact) => artifact.artifact)) {
       lines.push(tableRow([code(artifact.artifact), artifact.verified === false || !artifact.path ? `*${t.skip}*` : code(artifact.path)]));
