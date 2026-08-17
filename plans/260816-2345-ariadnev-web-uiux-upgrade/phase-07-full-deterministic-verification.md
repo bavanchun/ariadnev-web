@@ -1,11 +1,30 @@
 ---
 phase: 7
 title: "Full deterministic verification"
-status: pending
+status: in-progress
 priority: P1
 effort: "5-7d"
 dependencies: [1, 2, 3, 4, 5, 6]
 ---
+
+<!-- 2026-08-17 status: bootstrap slices shipped —
+- slice1: typed screen fixture manifest (tests/benchmarks/screen-
+  fixtures.json) + validating gates (tests/docs/screen-fixture-
+  manifest.test.mjs). Closes step 3.
+- slice2: route-wide structural probes reading built HTML for every
+  docs manifest fixture (lang/title/main/h1). Closes step 6 for the
+  manifest-declared docs surface (full-catalog probes still route to
+  the future Playwright harness).
+Remaining: Playwright production config + deterministic server
+lifecycle (steps 1-2), screenshot baselines (steps 4-5), cross-browser
+critical journeys (step 8), no-JS + ≤2-interaction command journey
+(step 9), fixed VI fixtures (step 10), axe + reflow + text-spacing +
+forced-colors (step 11), task-outcome comparisons (step 12), Lighthouse
++ four-group performance gates (step 13), baseline/browser pinning
+(step 14), test:qualification sharding (step 15), two-run flake
+detection (step 16), runbook (step 17). Adding @axe-core/playwright
+as a direct dev dep waits until the harness is in place. -->
+
 
 # Phase 7: Full deterministic verification
 
