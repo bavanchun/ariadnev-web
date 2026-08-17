@@ -142,29 +142,29 @@ breaking/security/migration only when source explicitly supplies that meaning.
 
 ## Success criteria
 
-- [ ] Current details project to +212 HTML routes and current+historical output
+- [x] Current details project to +212 HTML routes and current+historical output
       matches the measured Phase 1 contract, currently projected +318.
-- [ ] Every available historical command ships; no historical scope is deferred.
-- [ ] Every legacy anchor and retired URL follows the approved contract.
-- [ ] CLI index contains no duplicated full option tables.
-- [ ] A named command is reachable in at most two purposeful interactions and
+- [x] Every available historical command ships; no historical scope is deferred.
+- [x] Every legacy anchor and retired URL follows the approved contract.
+- [x] CLI index contains no duplicated full option tables.
+- [x] A named command is reachable in at most two purposeful interactions and
       without JavaScript.
-- [ ] Provider data is complete, reachable, and not page-clipped at 320px.
-- [ ] All 105 skills and category counts derive from source; filter/no-JS tests
+- [x] Provider data is complete, reachable, and not page-clipped at 320px.
+- [x] All 105 skills and category counts derive from source; filter/no-JS tests
       pass.
-- [ ] All three workflow graphs have exact topology and text equivalents.
-- [ ] Workflow topology remains complete in print and with CSS/JavaScript
+- [x] All three workflow graphs have exact topology and text equivalents.
+- [x] Workflow topology remains complete in print and with CSS/JavaScript
       disabled.
-- [ ] Release notes remain source-faithful and fully present in initial HTML.
-- [ ] Search/discovery output is canonical, deterministic, and partition-safe.
-- [ ] All four Phase 1 performance groups pass without silent budget changes.
-- [ ] Every grandfathered ceiling in `tests/benchmarks/docs-per-route-ratchet.json`
+- [x] Release notes remain source-faithful and fully present in initial HTML.
+- [x] Search/discovery output is canonical, deterministic, and partition-safe.
+- [x] All four Phase 1 performance groups pass without silent budget changes.
+- [x] Every grandfathered ceiling in `tests/benchmarks/docs-per-route-ratchet.json`
       equals 300000 (i.e. the 10 over-cap reference routes now fit the frozen
       cap). Splitting `reference/skills` and `reference/cli` into per-command
       detail pages is the load-bearing lever; this criterion inherits the
       shrink obligation deferred from Phase 3 (see
       `docs/decisions/docs-performance-baselines.md#shrink-criterion-accepted-2026-08-17-re-scoped-2026-08-17`).
-- [ ] `pnpm run test:qualification` passes.
+- [x] `pnpm run test:qualification` passes.
 
 ## Risk assessment
 

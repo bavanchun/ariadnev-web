@@ -1,7 +1,7 @@
 ---
 title: "ariadnev web UI/UX upgrade — Living Execution Atlas"
 description: "Upgrade every marketing and documentation screen into one premium, static, bilingual Living Execution Atlas without weakening URLs, generated-source authority, accessibility, or performance."
-status: in-progress
+status: completed
 priority: P1
 effort: "7-9w critical path with parallel site/docs ownership; 40-53 engineer-days"
 branch: main

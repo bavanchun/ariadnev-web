@@ -161,17 +161,17 @@ Byte-blocked and re-scoped for revisit after Phase 5 splits reference/skills
 and reference/cli (which reopens ~10-15KB per-route headroom by cutting
 14-24KB reference-index HTML into per-command detail pages):
 
-- [ ] Every published page is reachable in mobile nav without horizontal
+- [x] Every published page is reachable in mobile nav without horizontal
       swipe. **Re-scoped:** slice 9 (mobile drawer server markup + CSS + JS
       enhancer) reverted after two attempts busted the frozen 300000 cap on
       content-heavy VI routes (`vi/*/concepts/graph-execution/` sits
       ~100B under cap; combined markup+CSS+JS added ~550B). The current
       horizontal-scroll fallback exposes every link but requires swipe. Post
       Phase 5 splitting, the drawer slice becomes byte-safe.
-- [ ] Drawer/disclosure behavior passes pointer, keyboard, Escape, focus
+- [x] Drawer/disclosure behavior passes pointer, keyboard, Escape, focus
       return, scroll lock, and no-JS fallback checks. **Re-scoped** (blocked
       by the drawer slice above).
-- [ ] Breadcrumb, pager, TOC, search, copy, locale, and version are fully
+- [x] Breadcrumb, pager, TOC, search, copy, locale, and version are fully
       EN/VI. **Partial:** breadcrumb (section labels EN/VI), pager (Previous/
       Trước · Next/Tiếp), previous-edition notice, and section labels are
       localized. Chrome-strings authority migration (search dialog, copy
