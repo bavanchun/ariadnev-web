@@ -51,3 +51,8 @@ apps/docs/.source/
 apps/docs/content/generated/
 apps/docs/content/.staging/
 *.tsbuildinfo
+
+# Playwright visual harness (Phase 7)
+tests/visual/.artifacts/
+tests/visual/.playwright-cache/
+playwright-report/
