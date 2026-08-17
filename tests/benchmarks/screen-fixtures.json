@@ -1,0 +1,34 @@
+{
+  "$schema": "./benchmark-contract.schema.json",
+  "purpose": "Typed screen fixture manifest for Phase 7 deterministic verification. Each entry maps a brainstorm screen ID to a canonical route and locale so route-wide structural probes, keyboard/no-JS journeys, axe, and screenshot baselines can never target a random route. Widths follow the plan: every fixture ships 320/768/1440; some add 375/1280 where a declared breakpoint changes composition. This file is data only; the P7 harness (tests/visual/*) will consume it.",
+  "schemaVersion": 1,
+  "widths": {
+    "required": [320, 768, 1440],
+    "extraAtBreakpoints": [375, 1280]
+  },
+  "site": [
+    { "id": "M01", "surface": "site", "route": "/", "locale": null, "description": "Marketing home — five macro sections" },
+    { "id": "M02", "surface": "site", "route": "/not-a-real-path", "locale": null, "description": "Marketing 404 recovery page", "expectStatus": 404 }
+  ],
+  "docs": [
+    { "id": "D00", "surface": "docs", "route": "/", "locale": null, "description": "Language chooser (app root)" },
+    { "id": "D01", "surface": "docs", "route": "/en/stable/", "locale": "en", "description": "Current docs home (EN stable)" },
+    { "id": "D01-vi", "surface": "docs", "route": "/vi/stable/", "locale": "vi", "description": "Current docs home (VI stable)" },
+    { "id": "D02", "surface": "docs", "route": "/en/previous/", "locale": "en", "description": "Previous edition home (EN)" },
+    { "id": "D03", "surface": "docs", "route": "/en/stable/get-started/installation/", "locale": "en", "description": "Installation" },
+    { "id": "D06", "surface": "docs", "route": "/en/stable/concepts/graph-execution/", "locale": "en", "description": "Graph execution flagship topology" },
+    { "id": "D11", "surface": "docs", "route": "/en/stable/guides/migration-from-vcskill/", "locale": "en", "description": "Migration — irreversible stages" },
+    { "id": "D12", "surface": "docs", "route": "/en/stable/reference/cli/", "locale": "en", "description": "CLI aggregate index" },
+    { "id": "D14", "surface": "docs", "route": "/en/stable/reference/providers/", "locale": "en", "description": "Provider comparison + records" },
+    { "id": "D15", "surface": "docs", "route": "/en/stable/reference/skills/", "locale": "en", "description": "Skill catalog + per-category split" },
+    { "id": "D16", "surface": "docs", "route": "/en/stable/reference/workflows/", "locale": "en", "description": "Workflow topology text-first" },
+    { "id": "D17", "surface": "docs", "route": "/en/stable/reference/release-notes/", "locale": "en", "description": "Release notes + edition metadata" },
+    { "id": "D18", "surface": "docs", "route": "/en/stable/does-not-exist/", "locale": "en", "description": "Docs not-found", "expectStatus": 404 }
+  ],
+  "stressFrames": [
+    { "id": "S1-cli-320", "fixtureId": "D12", "width": 320, "description": "CLI index at 320px" },
+    { "id": "S2-providers-320", "fixtureId": "D14", "width": 320, "description": "Provider reference at 320px" },
+    { "id": "S3-cli-desktop", "fixtureId": "D12", "width": 1440, "description": "Desktop CLI lookup orientation" },
+    { "id": "S4-vi-journey", "fixtureId": "D01-vi", "width": 375, "description": "Complete VI route + chrome-state journey" }
+  ]
+}
