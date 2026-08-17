@@ -17,6 +17,17 @@ test("chooser, navigation, search, and copy controls expose static and accessibl
   for (const key of ["breadcrumbLabel", "sidebarLabel", "tocLabel"]) assert.match(shell, new RegExp(`strings\\.${key}`));
   assert.match(shell, /skip-link/);
   assert.match(shell, /lang=\{page\.locale\}/);
+  // Mobile drawer: server-rendered <details> is the no-JS fallback; the enhancer
+  // upgrades it into a modal at mobile viewports with focus containment, Escape
+  // close, focus return, and scroll-locked background.
+  assert.match(shell, /docs-sidebar-drawer/);
+  assert.match(shell, /<details className="docs-sidebar-drawer" open>/);
+  const drawerEnhancer = await readFile(new URL("src/components/mobile-drawer-enhancer.tsx", app), "utf8");
+  assert.match(drawerEnhancer, /matchMedia/);
+  assert.match(drawerEnhancer, /"Escape"/);
+  assert.match(drawerEnhancer, /inert/);
+  assert.match(drawerEnhancer, /trapFocus/);
+  assert.match(drawerEnhancer, /lockScroll/);
 
   const chromeStrings = await readFile(new URL("src/lib/chrome-strings.ts", app), "utf8");
   for (const literal of ["Breadcrumb", "Documentation pages", "On this page"]) assert.match(chromeStrings, new RegExp(literal));

@@ -116,6 +116,13 @@ button { border: var(--vc-border-width-hairline) solid var(--vc-color-border-str
 .switcher-group [aria-disabled="true"] { color: var(--vc-color-text-muted); }
 .docs-sidebar, .docs-toc { min-width: 0; padding: var(--vc-space-4); }
 .docs-sidebar { border-inline-end: var(--vc-border-width-hairline) solid var(--vc-color-border); }
+/* Mobile drawer: <details> is the no-JS disclosure and the JS enhancer modal
+   base. Desktop keeps the summary hidden so the tree always shows; mobile
+   shows the summary as a hamburger toggle and, when open in modal mode,
+   fills the viewport with a scrollable navigation. */
+.docs-sidebar-drawer > summary { display: none; }
+.docs-sidebar-drawer[data-drawer-mode="modal"] { position: fixed; inset: 0; z-index: 40; background: var(--vc-color-canvas); overflow: auto; padding: var(--vc-space-4); }
+.docs-sidebar-drawer[data-drawer-mode="modal"] > summary { display: inline-flex; }
 .docs-sidebar nav { display: grid; gap: var(--vc-space-4); }
 .docs-sidebar-section { display: grid; gap: var(--vc-space-1); }
 .docs-sidebar-section-title { margin: 0; font-family: var(--vc-font-family-body); font-size: var(--vc-font-size-caption); font-weight: var(--vc-font-weight-semibold); color: var(--vc-color-text-muted); text-transform: uppercase; letter-spacing: 0.06em; }

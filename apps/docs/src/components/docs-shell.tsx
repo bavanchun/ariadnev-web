@@ -88,18 +88,25 @@ export function DocsShell({ catalog, page, routeVersion, toc, children }: {
         <LocaleVersionSwitcher catalog={catalog} page={page} routeVersion={routeVersion} />
       </header>
       <aside className="docs-sidebar" aria-label={strings.sidebarLabel}>
-        <nav>
-          {SIDEBAR_SECTION_ORDER.map((section) => {
-            const inSection = bySection.get(section);
-            if (!inSection || inSection.length === 0) return null;
-            return (
-              <section key={section} className="docs-sidebar-section" aria-current={section === activeSection ? "true" : undefined}>
-                <h2 className="docs-sidebar-section-title">{labels[section]}</h2>
-                <ul>{inSection.map((candidate) => <li key={candidate.id}><a aria-current={candidate.id === page.id ? "page" : undefined} href={href(candidate, routeVersion)}>{candidate.title}</a></li>)}</ul>
-              </section>
-            );
-          })}
-        </nav>
+        {/* Native <details> is the no-JS mobile disclosure. Desktop CSS hides the
+            summary so the tree always shows. The mobile-drawer-enhancer promotes
+            this into a modal drawer at mobile viewports with focus containment,
+            Escape/backdrop close, focus return, and scroll-locked background. */}
+        <details className="docs-sidebar-drawer" open>
+          <summary className="docs-sidebar-drawer-toggle" aria-controls="docs-sidebar-tree">{strings.sidebarLabel}</summary>
+          <nav id="docs-sidebar-tree">
+            {SIDEBAR_SECTION_ORDER.map((section) => {
+              const inSection = bySection.get(section);
+              if (!inSection || inSection.length === 0) return null;
+              return (
+                <section key={section} className="docs-sidebar-section" aria-current={section === activeSection ? "true" : undefined}>
+                  <h2 className="docs-sidebar-section-title">{labels[section]}</h2>
+                  <ul>{inSection.map((candidate) => <li key={candidate.id}><a aria-current={candidate.id === page.id ? "page" : undefined} href={href(candidate, routeVersion)}>{candidate.title}</a></li>)}</ul>
+                </section>
+              );
+            })}
+          </nav>
+        </details>
       </aside>
       <main id="docs-content" tabIndex={-1}>
         <nav aria-label={strings.breadcrumbLabel} className="breadcrumb"><ol>

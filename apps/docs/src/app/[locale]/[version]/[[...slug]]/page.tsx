@@ -4,6 +4,7 @@ import { DocsMobileToc, DocsShell } from "@/components/docs-shell.tsx";
 import { DocsPager } from "@/components/docs-pager.tsx";
 import { PageCopyActions } from "@/components/copy-actions.tsx";
 import { DocumentCopyEnhancer } from "@/components/document-copy-enhancer.tsx";
+import { MobileDrawerEnhancer } from "@/components/mobile-drawer-enhancer.tsx";
 import { TocActiveObserver } from "@/components/toc-active-observer.tsx";
 import { enumerateDocsRoutes } from "@/lib/content-catalog.ts";
 import { chromeStrings } from "@/lib/chrome-strings.ts";
@@ -47,6 +48,7 @@ export default async function DocumentationPage({ params }: { params: Promise<Ro
         <PageCopyActions markdownUrl={markdownUrl} headingUrl={new URL(`${route}#page-title`, "https://docs.ariadnev.com").href} ariaLabel={chromeStrings(catalogPage.locale).copyOptionsLabel} />
         <DocumentCopyEnhancer rootId="rendered-markdown" />
         <TocActiveObserver rootId="rendered-markdown" />
+        <MobileDrawerEnhancer />
         <DocsPager catalog={catalog} page={catalogPage} routeVersion={version} />
       </article>
     </DocsShell>
