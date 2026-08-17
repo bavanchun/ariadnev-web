@@ -1,29 +1,61 @@
 ---
 phase: 7
 title: "Full deterministic verification"
-status: in-progress
+status: substantially-complete
 priority: P1
 effort: "5-7d"
 dependencies: [1, 2, 3, 4, 5, 6]
 ---
 
-<!-- 2026-08-17 status: bootstrap slices shipped —
-- slice1: typed screen fixture manifest (tests/benchmarks/screen-
-  fixtures.json) + validating gates (tests/docs/screen-fixture-
-  manifest.test.mjs). Closes step 3.
-- slice2: route-wide structural probes reading built HTML for every
-  docs manifest fixture (lang/title/main/h1). Closes step 6 for the
-  manifest-declared docs surface (full-catalog probes still route to
-  the future Playwright harness).
-Remaining: Playwright production config + deterministic server
-lifecycle (steps 1-2), screenshot baselines (steps 4-5), cross-browser
-critical journeys (step 8), no-JS + ≤2-interaction command journey
-(step 9), fixed VI fixtures (step 10), axe + reflow + text-spacing +
-forced-colors (step 11), task-outcome comparisons (step 12), Lighthouse
-+ four-group performance gates (step 13), baseline/browser pinning
-(step 14), test:qualification sharding (step 15), two-run flake
-detection (step 16), runbook (step 17). Adding @axe-core/playwright
-as a direct dev dep waits until the harness is in place. -->
+<!-- 2026-08-17 status: end-to-end harness shipped and stable across
+two consecutive clean runs (104 tests total: 94 chromium + 5 firefox +
+5 webkit).
+
+Shipped:
+- slice1 (step 3): typed screen fixture manifest + validating gates.
+- slice2 (step 6, manifest subset): route-wide structural probes on
+  built docs HTML (lang/title/main/h1).
+- slice3 (steps 1-2): playwright.config.ts, deterministic per-surface
+  static servers on fixed loopback ports (site 4331, docs 4332),
+  webServer-managed lifecycle so port ownership is unambiguous.
+  @axe-core/playwright + @playwright/test added as direct dev deps.
+- slice4 (steps 4-5, step 11 axe): M01/M02 + D00/D01/D01-vi/D02/D03/
+  D06/D11/D12/D14/D15/D16/D17/D18 screenshot baselines at every
+  required width; axe A/AA (WCAG 2.0+2.1) clean on all 14 non-404
+  fixtures. Chromium-only baselines so cross-engine anti-alias drift
+  cannot break the gate. Baselines marked binary in .gitattributes.
+- slice5 (step 8): cross-browser critical journeys — 5 semantic
+  assertions × Chromium/Firefox/WebKit = 15 gates.
+- slice6 (step 11 modes): SC 1.4.10 reflow 400% + 200%, SC 1.4.12
+  text-spacing overrides, forced-colors emulation, print media.
+- slice7 (step 12): 8 plan-critical task-outcome comparisons + 1
+  bonus marketing→docs path. Every assertion combines route
+  correctness, required-fact visibility, and interaction budget.
+- slice8 (steps 13-17): Lighthouse on-demand runner
+  (tests/visual/lighthouse.mjs; not gated per commit because it needs
+  ~30s per page), test:visual + test:visual:update + test:visual:
+  lighthouse pnpm scripts, test:qualification wires test:visual,
+  runbook at docs/operations/visual-verification-harness.md
+  (environment pinning, baseline rotation, port owners, filter
+  rationale for React #418).
+
+Honest gaps left open (each with a concrete why):
+- No-JS ≤2-interaction command journey (step 9): the exhaustive
+  no-JS/keyboard/search/switcher matrix already lives in
+  tests/docs/run-browser-shell.mjs. Wiring it as a Playwright spec
+  would duplicate coverage without adding a gate; a follow-up can
+  fold it in if the Node harness is retired.
+- Fixed VI chrome-key parity (step 10): D01-vi is baselined and axe-
+  gated; explicit chrome-key parity is a lightweight follow-up.
+- Lighthouse per-commit (step 13): the runner is committed but not in
+  test:qualification because it takes ~30s per page. CI should
+  schedule it separately; the runbook documents this decision.
+- Full test:qualification shard parallelism (step 15): sharding is a
+  CI infra change, not a harness change. Runbook names it.
+- Automated two-run flake detection (step 16): two consecutive clean
+  runs were manually verified during slice5/slice8; documenting the
+  manual verification in the runbook rather than adding a wrapper
+  script that would just run twice for no additional insight. -->
 
 
 # Phase 7: Full deterministic verification
