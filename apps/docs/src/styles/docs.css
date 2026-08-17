@@ -174,6 +174,24 @@ button { border: var(--vc-border-width-hairline) solid var(--vc-color-border-str
 .docs-home-counts dt { color: var(--vc-color-text-muted); font-size: var(--vc-font-size-caption); }
 .docs-home-counts dd { margin: 0; color: var(--vc-color-text); font-family: var(--vc-font-family-mono); font-size: var(--vc-font-size-lead); font-variant-numeric: tabular-nums; }
 @media (max-width: 40rem) { .docs-home-counts dl { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Responsive data region narrow-viewport record-card reflow: DEFERRED.
+   `ResponsiveDataRegion` already renders `<table class="rdr-table"
+   tabindex="0">` with a `data-label` attribute on every `<td>`, ready for a
+   `max-width: 40rem` card-reflow rule with zero markup change whenever it
+   lands: display:block on table/tbody/tr/td, a visually-hidden (not
+   display:none) `<thead>`, and a `content: attr(data-label)` prefix per
+   cell. That rule cannot ship in this slice: the tightest-margin routes
+   (the vi-locale reference/workflows pages) are frozen at effectively zero
+   compressed-byte headroom under the current `docs-per-route-ratchet.json`
+   cap (see that file's cap-widen history — two prior +2000B widens exist
+   for exactly this situation, always as an explicit user decision, never
+   unilateral), and even the fully-minimized 4-rule version of this reflow
+   still measured ~35B over. Until a widen or an offsetting shrink lands,
+   the table still gets the site-wide `.docs-body table` local-scroll
+   treatment (display:block + overflow-x:auto) at every width, so nothing
+   clips or hides — record cards are a UX improvement on that working
+   baseline, not a correctness gap. */
 .page-copy-actions { margin-block-start: var(--vc-space-12); padding-block-start: var(--vc-space-4); border-top: var(--vc-border-width-hairline) solid var(--vc-color-border); }
 .code-copy-button { position: absolute; inset: var(--vc-space-1) var(--vc-space-1) auto auto; }
 .heading-copy-button { min-width: var(--vc-size-control-minimum); border-color: transparent; background: transparent; color: var(--vc-color-text-muted); padding: var(--vc-space-1); font-family: var(--vc-font-family-mono); font-size: var(--vc-font-size-caption); vertical-align: middle; }
@@ -227,6 +245,23 @@ button { border: var(--vc-border-width-hairline) solid var(--vc-color-border-str
    each kind ("Breaking" / "Security" / "Migration"); shape (pill) plus
    text, never color alone. */
 .release-timeline-badge { display: inline-flex; align-items: center; min-height: var(--vc-size-control-minimum); padding: var(--vc-space-1) var(--vc-space-3); border: var(--vc-border-width-strong) solid var(--vc-color-border-strong); border-radius: var(--vc-border-radius-panel); text-decoration: none; font-weight: var(--vc-font-weight-semibold); }
+
+/* Phase 4 Slice A closed content components. `docs.css` is a single
+   stylesheet loaded on every route, and the tightest-margin route
+   (workflows) is frozen with effectively zero compressed-byte headroom (see
+   `docs-per-route-ratchet.json`) — that leaves no budget in this slice for
+   bespoke visual styling of Callout/CommandBlock/Procedure/OperationMatrix
+   — the one genuinely new behaviour that would need it (the
+   responsive-data-region narrow-viewport card reflow) is the deferred rule
+   documented above. Those four components render fully semantic, accessible,
+   unstyled-but-functional markup today (role/landmark/label/escaping are
+   all in the component, not the stylesheet) and reuse `.docs-body
+   pre`/`.docs-body table`/the D16 `.wd-*` classes for everything else;
+   Topology needs zero new rules for the same reason. Visual polish
+   (callout colour-coding, kind-badge colour, etc.) is deferred to whichever
+   later slice's route work frees the matching amount of headroom — see
+   `docs/decisions/docs-catalog-and-safe-components.md` for why this
+   component set exists as reusable TypeScript, not new tokens. */
 
 @media (max-width: 64rem) {
   .docs-frame { grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr); }
