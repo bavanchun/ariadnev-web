@@ -92,7 +92,7 @@ Command-detail routes add one D13 instance per available command.
 | 2 | [Shared design tokens and foundations](./phase-02-shared-design-tokens-and-shell-primitives.md) | 1 | Complete (tokens expanded additively, 2 decision docs shipped, ratchet ratcheted up +586B/route with per-entry deltas recorded) |
 | 3 | [Docs safety, shell, and shared interactions](./phase-03-docs-safety-and-shell.md) | 1, 2 | Sufficient (slices 2-8 shipped; mobile drawer, chrome-strings full-authority, search grouping/loading, heading permalinks byte-blocked and re-scoped to post-Phase-5 revisit) |
 | 4 | [Authored docs screen experiences](./phase-04-authored-docs-screen-experiences.md) | 1, 2, 3 | Pending |
-| 5 | [Generated reference experiences](./phase-05-generated-reference-experience.md) | 1, 2, 3, 4 | Pending |
+| 5 | [Generated reference experiences](./phase-05-generated-reference-experience.md) | 1, 2, 3, 4 | In progress (slice 1 shipped: CLI monolith split into index + per-command detail pages, 6 CLI grandfathered ceilings dropped off ratchet, route count 66→384; D14/D15/D16/D17 rebuilds and skills-catalog shrink pending) |
 | 6 | [Marketing surfaces](./phase-06-marketing-surfaces.md) | 1, 2 | Pending |
 | 7 | [Full deterministic verification](./phase-07-full-deterministic-verification.md) | 1–6 | Pending |
 
