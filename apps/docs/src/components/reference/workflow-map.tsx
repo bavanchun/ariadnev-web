@@ -115,9 +115,9 @@ interface LaidOutNode extends WorkflowNode {
   readonly isTerminal: boolean;
 }
 
-const NODE_HEIGHT = 28;
-const LAYER_GAP = 48;
-const NODE_GAP = 14;
+const NODE_HEIGHT = 22;
+const LAYER_GAP = 34;
+const NODE_GAP = 8;
 const CHAR_WIDTH = 7;
 const NODE_PADDING = 18;
 const MARGIN = 12;

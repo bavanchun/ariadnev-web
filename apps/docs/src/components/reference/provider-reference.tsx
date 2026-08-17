@@ -71,7 +71,7 @@ export function ProviderReferenceExperience({ catalog, catalogPage, children }: 
     <div className="provider-reference">
       {providers.length > 0 && (
         <nav className="provider-reference-jump" aria-label={strings.jumpAria}>
-          <span className="provider-reference-jump-label">{strings.jumpLabel}</span>
+          <span className="reference-badges-label">{strings.jumpLabel}</span>
           <ul>
             {providers.map((provider) => (
               <li key={provider.id}>

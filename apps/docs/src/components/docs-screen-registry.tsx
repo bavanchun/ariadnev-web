@@ -7,6 +7,7 @@ import { CliCommandDetailExperience } from "./reference/cli-command-detail.tsx";
 import { ProviderReferenceExperience } from "./reference/provider-reference.tsx";
 import { SkillCatalogExperience, SkillCategoryExperience } from "./reference/skill-catalog.tsx";
 import { WorkflowMapExperience } from "./reference/workflow-map.tsx";
+import { ReleaseTimelineExperience } from "./reference/release-timeline.tsx";
 
 // JSX dispatcher for the screen registry. Each entry wraps the authored
 // MDX article body with a screen-specific composition. The registry is
@@ -54,6 +55,7 @@ const RENDERERS: Readonly<Record<string, ScreenExperience>> = Object.freeze({
   "D15-skill-catalog": SkillCatalogExperience,
   "D15-skill-category": SkillCategoryExperience,
   "D16-workflow-reference": WorkflowMapExperience,
+  "D17-release-notes": ReleaseTimelineExperience,
 });
 
 // Cross-check the two halves at module load. Every declared kind in the

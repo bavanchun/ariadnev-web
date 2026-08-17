@@ -47,6 +47,8 @@ export const REGISTERED_SCREEN_KINDS: readonly string[] = Object.freeze([
   "D15-skill-category",
   // D16 workflow topology diagrams — see `components/reference/workflow-map.tsx`.
   "D16-workflow-reference",
+  // D17 release notes highlights — see `components/reference/release-timeline.tsx`.
+  "D17-release-notes",
 ]);
 
 /**

@@ -344,6 +344,10 @@ export function buildContentRoot(options) {
     // SVG topology diagram per workflow ahead of the generated legend/
     // topology/nodes/edges text, which stays the authoritative source.
     const workflowReferenceMeta = { pageKind: "reference-index", screenKind: "D16-workflow-reference", section: "reference" };
+    // D17 release notes metadata — `release-timeline.tsx` surfaces which
+    // breaking/security/migration headings this edition's source actually
+    // wrote, without inventing a classification the source omits.
+    const releaseNotesScreenMeta = { pageKind: "release-notes", screenKind: "D17-release-notes", section: "release-notes" };
     const emitCliPages = (locale, version, commandList) => {
       // Index page: light summary + links to every detail page.
       const indexBody = renderCliCommandIndex(locale, commandList);
@@ -376,7 +380,7 @@ export function buildContentRoot(options) {
       const generated = [
         [GENERATED_PAGE_IDS.providers, renderProviderReference(locale, providers), providerReferenceMeta],
         [GENERATED_PAGE_IDS.workflows, renderWorkflowReference(locale, workflows), workflowReferenceMeta],
-        [GENERATED_PAGE_IDS.releaseNotes, renderReleaseNotes(locale, releaseNotes, releaseEdition), undefined],
+        [GENERATED_PAGE_IDS.releaseNotes, renderReleaseNotes(locale, releaseNotes, releaseEdition), releaseNotesScreenMeta],
       ];
       for (const [pageId, body, pageMeta] of generated) {
         const { title, description } = meta(body);
