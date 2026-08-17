@@ -41,6 +41,8 @@ const STRINGS = {
       intro: "Every skill below is installed as `av:<name>`. The counts and descriptions come from the release itself, so this page cannot drift from what `ariadnev list` reports.",
       total: "skills in this release",
       argumentHint: "Arguments",
+      skill: "Skill",
+      details: "Details",
     },
     workflows: {
       title: "Workflow reference",
@@ -106,6 +108,8 @@ const STRINGS = {
       intro: "Mọi skill dưới đây được cài với tên `av:<name>`. Số lượng và mô tả lấy trực tiếp từ bản phát hành, nên trang này không thể lệch với những gì `ariadnev list` báo cáo.",
       total: "skill trong bản phát hành này",
       argumentHint: "Tham số",
+      skill: "Skill",
+      details: "Chi tiết",
     },
     workflows: {
       title: "Tham chiếu workflow",
@@ -345,6 +349,16 @@ export function renderProviderReference(locale, providers) {
   return `${lines.join("\n").trimEnd()}\n`;
 }
 
+/**
+ * The catalog renders one dense two-column table per category (skill name +
+ * merged description/arguments). Previously each skill was an H3 heading with
+ * a prose paragraph and a separate argument line; that pattern paid heading
+ * markup + rehype-autolink-headings anchors 105 times and pushed all four
+ * skill routes past the frozen per-route transfer cap. Compact table rows
+ * carry the same data, keep every description present in initial HTML for
+ * no-JS scan / in-page search, and are the load-bearing shrink Phase 5 owes
+ * (see docs/decisions/docs-performance-baselines.md#shrink-criterion).
+ */
 export function renderSkillCatalog(locale, skills) {
   const t = STRINGS[locale].skills;
   const lines = [frontmatter(t.title, t.description).trimEnd(), "", t.intro, "", `**${skills.length}** ${t.total}.`, ""];
@@ -357,10 +371,14 @@ export function renderSkillCatalog(locale, skills) {
   for (const category of [...groups.keys()].sort((left, right) => left.localeCompare(right, "en"))) {
     const members = sortBy(groups.get(category), (skill) => skill.name);
     lines.push(`## ${escapeMdx(category)} (${members.length})`, "");
+    lines.push(tableRow([t.skill, t.details]), tableRow(["---", "---"]));
     for (const skill of members) {
-      lines.push(`### ${code(skill.name.startsWith("av:") ? skill.name : `av:${skill.name}`)}`, "", escapeMdx(skill.description), "");
-      if (skill.argumentHint) lines.push(`${t.argumentHint}: ${code(skill.argumentHint)}`, "");
+      const name = skill.name.startsWith("av:") ? skill.name : `av:${skill.name}`;
+      const desc = escapeMdx(skill.description);
+      const args = skill.argumentHint ? ` — ${t.argumentHint}: ${code(skill.argumentHint)}` : "";
+      lines.push(tableRow([code(name), `${desc}${args}`]));
     }
+    lines.push("");
   }
   return `${lines.join("\n").trimEnd()}\n`;
 }

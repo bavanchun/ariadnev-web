@@ -97,8 +97,13 @@ test("bundle text is escaped so it cannot become MDX syntax", () => {
     { name: "av:one", category: "cat", description: "Has <jsx/> and {curly}", argumentHint: "[x]" },
     { name: "two", category: "cat", description: "plain" },
   ]);
-  assert.match(page, /### `av:one`/);
-  assert.match(page, /### `av:two`/);
+  // The compact table rows keep every skill in initial HTML while dropping the
+  // per-skill H3 markup that previously blew the per-route transfer cap.
+  assert.match(page, /## cat \(2\)/);
+  assert.match(page, /\| `av:one` \|/);
+  assert.match(page, /\| `av:two` \|/);
+  // Description text is escaped inside the table cell (no MDX interpretation).
+  assert.match(page, /Has \\<jsx\/\\> and \\\{curly\\\}/);
   assert.doesNotThrow(() => publicMarkdown(page));
 });
 
