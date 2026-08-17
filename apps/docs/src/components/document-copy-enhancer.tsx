@@ -37,6 +37,13 @@ export function DocumentCopyEnhancer({ rootId }: { rootId: string }) {
       button.addEventListener("click", () => void copy(code, "Code copied"));
       block.prepend(button);
       controls.push(button);
+      // Make horizontal-scroll regions keyboard reachable. Adding tabindex
+      // only when the region actually overflows means readers whose viewport
+      // has no overflow do not get an unnecessary tab stop.
+      if (block.scrollWidth > block.clientWidth) block.setAttribute("tabindex", "0");
+    }
+    for (const table of root.querySelectorAll("table")) {
+      if (table.scrollWidth > table.clientWidth) table.setAttribute("tabindex", "0");
     }
 
     for (const heading of root.querySelectorAll<HTMLHeadingElement>("h2[id], h3[id], h4[id], h5[id], h6[id]")) {

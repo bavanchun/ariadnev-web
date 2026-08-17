@@ -49,6 +49,11 @@ test("chooser, navigation, search, and copy controls expose static and accessibl
   assert.match(documentCopy, /h2\[id\].*h6\[id\]/);
   assert.match(documentCopy, /Copy code block/);
   assert.match(documentCopy, /aria-live="polite"/);
+  // Keyboard reachability for horizontal-scroll regions: pre + table each
+  // get tabindex=0 when they actually overflow (not unconditionally).
+  assert.match(documentCopy, /querySelectorAll\("table"\)/);
+  assert.match(documentCopy, /scrollWidth\s*>\s*\.?\w*\.?clientWidth/);
+  assert.match(documentCopy, /setAttribute\("tabindex",\s*"0"\)/);
 });
 
 test("styles enforce touch targets, focus, reduced motion, and responsive overflow containment", async () => {
@@ -57,7 +62,12 @@ test("styles enforce touch targets, focus, reduced motion, and responsive overfl
   assert.match(css, /:focus-visible/);
   assert.match(css, /--vc-color-focus-contrast/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
-  assert.match(css, /overflow-x:\s*hidden/);
+  // No body overflow-x mask — wide content contains locally.
+  assert.doesNotMatch(css, /^body\s*\{[^}]*overflow-x:\s*hidden/m);
+  // Local scroll containment for pre + table.
+  assert.match(css, /\.docs-body pre\s*\{[^}]*overflow-x:\s*auto/);
+  assert.match(css, /\.docs-body table\s*\{[^}]*overflow-x:\s*auto/);
+  assert.match(css, /overflow-wrap:\s*break-word/);
   assert.match(css, /@media \(max-width:\s*48rem\)/);
   assert.match(css, /\.docs-toc\s*\{\s*border-inline-start:/);
   assert.match(css, /\.docs-mobile-toc\s*\{\s*display:\s*none/);

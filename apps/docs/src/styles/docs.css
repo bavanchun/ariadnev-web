@@ -57,7 +57,11 @@
 
 * { box-sizing: border-box; }
 html { background: var(--vc-color-canvas); color: var(--vc-color-text); scroll-behavior: smooth; }
-body { margin: 0; min-width: 0; overflow-x: hidden; font-family: var(--vc-font-family-body); line-height: var(--vc-font-line-height-body); }
+/* No body overflow-x mask. Wide content is contained locally by
+ * `.docs-body :where(pre, table)` below; a page-level mask would hide
+ * horizontal-only overflow of an unbounded child, so the reader never sees
+ * the problem and never has a scroll affordance to reach it. */
+body { margin: 0; min-width: 0; font-family: var(--vc-font-family-body); line-height: var(--vc-font-line-height-body); overflow-wrap: break-word; }
 a { color: var(--vc-color-link); text-underline-offset: 0.2em; }
 a:hover { color: var(--vc-color-link-hover); }
 button, input, textarea { color: inherit; font: inherit; }
@@ -114,6 +118,15 @@ button { border: var(--vc-border-width-hairline) solid var(--vc-color-border-str
 .copy-action textarea[hidden], .document-copy-fallback textarea[hidden] { display: none; }
 .document-copy-fallback textarea { display: block; width: 100%; max-height: 5rem; resize: vertical; border: var(--vc-border-width-hairline) solid var(--vc-color-border); background: var(--vc-color-canvas-raised); font-family: var(--vc-font-family-mono); }
 .docs-body pre { position: relative; max-width: 100%; overflow-x: auto; padding-block-start: calc(var(--vc-size-control-minimum) + var(--vc-space-2)); }
+/* Data tables: local horizontal scroll instead of pushing the page. The
+ * `display: block` trade-off costs implicit table role in some legacy
+ * screen readers; keep <table>/<thead>/<tbody> structure so semantic
+ * announcement stays possible on modern engines. Keyboard focus is set on
+ * the wrapping <div> at hydration via DocumentCopyEnhancer so
+ * keyboard-only readers reach the scrollable region. */
+.docs-body table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; }
+.docs-body table th, .docs-body table td { padding: var(--vc-space-2) var(--vc-space-3); border-bottom: var(--vc-border-width-hairline) solid var(--vc-color-border); text-align: start; vertical-align: top; }
+.docs-body pre[tabindex], .docs-body table[tabindex] { outline-offset: calc(var(--vc-focus-ring-offset) * -1); }
 .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 { font-family: var(--vc-font-family-display); line-height: var(--vc-font-line-height-heading); text-wrap: balance; }
 .prose h1 { margin-block: 0 var(--vc-space-3); font-size: clamp(var(--vc-font-size-heading), 5vw, var(--vc-font-size-display)); letter-spacing: var(--vc-font-letter-spacing-tight); }
 .prose h2 { margin-block: var(--vc-space-12) var(--vc-space-3); padding-block-start: var(--vc-space-3); border-top: var(--vc-border-width-hairline) solid var(--vc-color-border); font-size: var(--vc-font-size-heading); }
