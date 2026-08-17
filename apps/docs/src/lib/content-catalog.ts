@@ -296,6 +296,29 @@ export function resolveNavigationVisibility(page: DocsCatalogPage): DocsNavigati
 }
 
 /**
+ * Sidebar section a page belongs to. Uses the authored `page.section` when
+ * present; otherwise infers it from the page's first slug segment so the
+ * sidebar can group even before Phase 4 populates the metadata field. Unknown
+ * slug prefixes fall into `meta` so nothing disappears from the sidebar.
+ */
+export function resolveSection(page: DocsCatalogPage): DocsSection {
+  if (page.section !== undefined) return page.section;
+  const first = page.slug[0];
+  if (first === "get-started" || first === "concepts" || first === "guides" || first === "reference" || first === "release-notes") return first;
+  return "meta";
+}
+
+/** Canonical top-to-bottom order of sidebar sections. */
+export const SIDEBAR_SECTION_ORDER: readonly DocsSection[] = Object.freeze([
+  "get-started",
+  "concepts",
+  "guides",
+  "reference",
+  "release-notes",
+  "meta",
+]);
+
+/**
  * Pages a global sidebar should enumerate for the given locale/version. Command
  * detail pages (`reference-only`) and hidden routes drop out; everything else
  * is preserved in catalog order so the sidebar keeps its authored sequence.

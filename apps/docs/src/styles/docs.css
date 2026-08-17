@@ -101,6 +101,10 @@ button { border: var(--vc-border-width-hairline) solid var(--vc-color-border-str
 .switcher-group [aria-disabled="true"] { color: var(--vc-color-text-muted); }
 .docs-sidebar, .docs-toc { min-width: 0; padding: var(--vc-space-4); }
 .docs-sidebar { border-inline-end: var(--vc-border-width-hairline) solid var(--vc-color-border); }
+.docs-sidebar nav { display: grid; gap: var(--vc-space-4); }
+.docs-sidebar-section { display: grid; gap: var(--vc-space-1); }
+.docs-sidebar-section-title { margin: 0; font-family: var(--vc-font-family-body); font-size: var(--vc-font-size-caption); font-weight: var(--vc-font-weight-semibold); color: var(--vc-color-text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.docs-sidebar-section[aria-current="true"] > .docs-sidebar-section-title { color: var(--vc-color-text); }
 .docs-sidebar ul, .docs-toc ol { margin: 0; padding: 0; list-style: none; }
 .docs-sidebar a, .docs-toc a { display: flex; align-items: center; overflow-wrap: anywhere; }
 .docs-sidebar [aria-current="page"] { color: var(--vc-color-text); font-weight: var(--vc-font-weight-semibold); }

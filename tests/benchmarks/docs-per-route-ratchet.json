@@ -7,19 +7,20 @@
   "measuredAtHistory": [
     { "at": "2026-08-17", "note": "Phase 1 initial grandfather values, before token expansion." },
     { "at": "2026-08-17", "note": "Phase 2 ratchet-up: token expansion added ~586B compressed shell CSS. Every ceiling grew by the same ~586B; the per-route HTML fraction did not change. Recorded here rather than silently absorbed because Phase 3 owns the shrink." },
-    { "at": "2026-08-17", "note": "Phase 3 slice 2 ratchet-up: overflow-x mask removed from body; per-element scroll containment added for pre + table with keyboard-reachable tabindex hydration when the region actually overflows. Every ceiling grew by ~118B (CSS + JS). Installation route at 296,131B with ~3.9KB headroom; 56 non-grandfathered routes remain under the 300000 hard cap." }
+    { "at": "2026-08-17", "note": "Phase 3 slice 2 ratchet-up: overflow-x mask removed from body; per-element scroll containment added for pre + table with keyboard-reachable tabindex hydration when the region actually overflows. Every ceiling grew by ~118B (CSS + JS). Installation route at 296,131B with ~3.9KB headroom; 56 non-grandfathered routes remain under the 300000 hard cap." },
+    { "at": "2026-08-17", "note": "Phase 3 slice 3 ratchet-up: grouped sidebar server-rendered from catalog section metadata (with slug-derived default so grouping works before Phase 4 populates page.section explicitly). Every ceiling grew by ~161-283B (varies with catalog page count in each partition). Installation route at 296,381B with ~3.6KB headroom; 56 non-grandfathered routes remain under 300000." }
   ],
   "rationale": "Extends apps/docs/scripts/verify-static-budget.mjs from the single installation route to every enumerable docs route. Ten routes currently exceed the frozen 300000 byte cap for docs-total-transfer-compressed because the enforcement point was previously the installation route alone. Each over-cap route is grandfathered at its measured value; every future build must be strictly non-worsening against its ceiling, and every non-grandfathered route must respect the 300000 byte cap. jitterToleranceBytes (64) is applied ONLY to grandfathered ceilings to absorb Next.js build-id/chunk-hash non-determinism (observed drift up to ±2 bytes across clean rebuilds of an identical source tree); the frozen 300000 byte cap has ~4-6KB headroom on non-grandfathered routes so it is enforced strictly with zero tolerance. Phase 2 (2026-08-17) token expansion legitimately grew every ceiling by ~586B compressed as the new state/content/layout tokens landed on the shared shell CSS — this is a recorded ratchet-up as the shell grew, not a silent regression. Phase 3 exit criterion, per docs/decisions/docs-performance-baselines.md: every grandfathered ceiling equals capUnderRatchet (i.e. every over-cap route has been shrunk to 300000 or below) before Phase 3 marks complete. Phase 3 must recover both the pre-Phase-2 gap (4-13KB) and the Phase-2 shell-CSS growth (~586B). Cap widening is a separate explicit user decision that must land in performance-budgets.json first.",
   "grandfathered": [
-    { "route": "/en/stable/reference/cli/",     "ceiling": 304896, "note": "P3.slice2 ratchet: was 304775 (P2); +121B from overflow containment." },
-    { "route": "/en/1.1.0/reference/cli/",     "ceiling": 304909, "note": "P3.slice2 ratchet: was 304792 (P2); +117B from overflow containment." },
-    { "route": "/en/1.0.0/reference/cli/",     "ceiling": 304496, "note": "P3.slice2 ratchet: was 304377 (P2); +119B from overflow containment." },
-    { "route": "/vi/stable/reference/cli/",     "ceiling": 305115, "note": "P3.slice2 ratchet: was 304999 (P2); +116B from overflow containment." },
-    { "route": "/vi/1.1.0/reference/cli/",     "ceiling": 305122, "note": "P3.slice2 ratchet: was 305007 (P2); +115B from overflow containment." },
-    { "route": "/vi/1.0.0/reference/cli/",     "ceiling": 304763, "note": "P3.slice2 ratchet: was 304645 (P2); +118B from overflow containment." },
-    { "route": "/en/stable/reference/skills/", "ceiling": 313757, "note": "P3.slice2 ratchet: was 313639 (P2); +118B from overflow containment. Skills catalog is the largest reference page." },
-    { "route": "/en/1.1.0/reference/skills/", "ceiling": 313759, "note": "P3.slice2 ratchet: was 313641 (P2); +118B from overflow containment." },
-    { "route": "/vi/stable/reference/skills/", "ceiling": 313929, "note": "P3.slice2 ratchet: was 313809 (P2); +120B from overflow containment." },
-    { "route": "/vi/1.1.0/reference/skills/", "ceiling": 313938, "note": "P3.slice2 ratchet: was 313821 (P2); +117B from overflow containment. Current global maximum." }
+    { "route": "/en/stable/reference/cli/",     "ceiling": 305148, "note": "P3.slice3 ratchet: was 304896 (P3.s2); +252B from grouped sidebar." },
+    { "route": "/en/1.1.0/reference/cli/",     "ceiling": 305157, "note": "P3.slice3 ratchet: was 304909 (P3.s2); +248B from grouped sidebar." },
+    { "route": "/en/1.0.0/reference/cli/",     "ceiling": 304657, "note": "P3.slice3 ratchet: was 304496 (P3.s2); +161B (fewer catalog pages in historical partition)." },
+    { "route": "/vi/stable/reference/cli/",     "ceiling": 305399, "note": "P3.slice3 ratchet: was 305115 (P3.s2); +284B." },
+    { "route": "/vi/1.1.0/reference/cli/",     "ceiling": 305413, "note": "P3.slice3 ratchet: was 305122 (P3.s2); +291B." },
+    { "route": "/vi/1.0.0/reference/cli/",     "ceiling": 304932, "note": "P3.slice3 ratchet: was 304763 (P3.s2); +169B." },
+    { "route": "/en/stable/reference/skills/", "ceiling": 314040, "note": "P3.slice3 ratchet: was 313757 (P3.s2); +283B. Skills catalog is the largest reference page." },
+    { "route": "/en/1.1.0/reference/skills/", "ceiling": 314047, "note": "P3.slice3 ratchet: was 313759 (P3.s2); +288B." },
+    { "route": "/vi/stable/reference/skills/", "ceiling": 314212, "note": "P3.slice3 ratchet: was 313929 (P3.s2); +283B." },
+    { "route": "/vi/1.1.0/reference/skills/", "ceiling": 314212, "note": "P3.slice3 ratchet: was 313938 (P3.s2); +274B. Current global maximum." }
   ]
 }
