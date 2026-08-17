@@ -8,6 +8,10 @@ import { FirstInstallExperience } from "./screen-experiences/first-install.tsx";
 import { KitAdaptExperience } from "./screen-experiences/kit-adapt.tsx";
 import { GraphExecutionExperience } from "./screen-experiences/graph-execution.tsx";
 import { EvaluationExperience } from "./screen-experiences/evaluation.tsx";
+import { UpgradingExperience } from "./screen-experiences/upgrading.tsx";
+import { ConfigurationExperience } from "./screen-experiences/configuration.tsx";
+import { UninstallAndDoctorExperience } from "./screen-experiences/uninstall-and-doctor.tsx";
+import { MigrationFromVcskillExperience } from "./screen-experiences/migration-from-vcskill.tsx";
 import { CliCommandIndexExperience } from "./reference/cli-command-index.tsx";
 import { CliCommandDetailExperience } from "./reference/cli-command-detail.tsx";
 import { ProviderReferenceExperience } from "./reference/provider-reference.tsx";
@@ -33,28 +37,23 @@ export interface DocsScreenContext {
 
 type ScreenExperience = (context: DocsScreenContext) => ReactNode;
 
-// Pass-through renderer for screens whose composition is fully carried
-// by the authored MDX body and the shell chrome. Registered so the
-// coverage test can rely on every declared authored screenKind having a
-// named owner, and so a future slice can swap in an enriched renderer
-// without touching any consumer of the registry.
-const PassThroughExperience: ScreenExperience = ({ children }) => children;
-
 const RENDERERS: Readonly<Record<string, ScreenExperience>> = Object.freeze({
   "D01-current-docs-home": DocsHomeExperience,
   "D02-previous-home": PreviousHomeExperience,
-  // D08-D11 authored screens: registered as pass-through today so the
-  // authored MDX composition ships unchanged. Future slices swap in
-  // dedicated experiences without touching consumers of the registry.
   "D03-installation": InstallationExperience,
   "D04-first-install": FirstInstallExperience,
   "D05-kit-adapt": KitAdaptExperience,
   "D06-graph-execution": GraphExecutionExperience,
   "D07-evaluation": EvaluationExperience,
-  "D08-upgrading": PassThroughExperience,
-  "D09-configuration": PassThroughExperience,
-  "D10-doctor-audit-backups-uninstall": PassThroughExperience,
-  "D11-migration": PassThroughExperience,
+  // D08-D11 authored screens — see `components/screen-experiences/
+  // upgrading.tsx`, `configuration.tsx`, `uninstall-and-doctor.tsx`, and
+  // `migration-from-vcskill.tsx` for the upgrade-recipe/config-resolution
+  // topology diagrams and the doctor/audit/backups/uninstall intent matrix
+  // layered above the authored MDX body.
+  "D08-upgrading": UpgradingExperience,
+  "D09-configuration": ConfigurationExperience,
+  "D10-doctor-audit-backups-uninstall": UninstallAndDoctorExperience,
+  "D11-migration": MigrationFromVcskillExperience,
   "D12-cli-command-index": CliCommandIndexExperience,
   "D13-cli-command-detail": CliCommandDetailExperience,
   "D14-provider-reference": ProviderReferenceExperience,

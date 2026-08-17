@@ -29,11 +29,11 @@ export const REGISTERED_SCREEN_KINDS: readonly string[] = Object.freeze([
   "D05-kit-adapt",
   "D06-graph-execution",
   "D07-evaluation",
-  // D08-D11 authored screens. Each is currently registered as a
-  // pass-through — the authored MDX carries the composition today —
-  // and the identifier lets future slices swap in an enriched
-  // renderer without touching the catalog or the authored source.
-  // Coverage is enforced by the docs-screen-registry test.
+  // D08-D11 authored screens — see `components/screen-experiences/
+  // upgrading.tsx`, `configuration.tsx`, `uninstall-and-doctor.tsx`, and
+  // `migration-from-vcskill.tsx` for the topology diagrams and intent
+  // matrix layered above the authored MDX body. Coverage is enforced by
+  // the docs-screen-registry test.
   "D08-upgrading",
   "D09-configuration",
   "D10-doctor-audit-backups-uninstall",
