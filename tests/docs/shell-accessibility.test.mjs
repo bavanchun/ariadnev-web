@@ -51,7 +51,9 @@ test("chooser, navigation, search, and copy controls expose static and accessibl
   assert.match(search, /partitionPromise/);
   assert.match(search, /ArrowDown/);
   assert.match(search, /window\.location\.assign/);
-  assert.match(search, /static sidebar/i);
+  // Search failure fallback text lives in chrome-strings now; assert both places
+  assert.match(chromeStrings, /static sidebar/i);
+  assert.match(chromeStrings, /điều hướng tĩnh/i);
 
   const copy = await readFile(new URL("src/components/copy-actions.tsx", app), "utf8");
   assert.match(copy, /<textarea/);

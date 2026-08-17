@@ -108,6 +108,10 @@ export function SearchDialog({ locale, version, indexUrl }: { locale: string; ve
       setMessage("");
       return;
     }
+    // Loading state is announced through the polite live region so screen
+    // readers know a query is in flight; the partition itself may still be
+    // fetching on first search of a session.
+    setMessage(strings.searchLoading);
     try {
       const loaded = await getPartition();
       const found = await loaded.search(loaded.database, { term: value, limit: 8, properties: ["title", "description", "content"] });
@@ -118,7 +122,7 @@ export function SearchDialog({ locale, version, indexUrl }: { locale: string; ve
       const pendingAction = pendingResultAction.current?.query === value ? pendingResultAction.current.action : null;
       setResults(exact);
       setActiveResult(exact.length > 0 && pendingAction ? 0 : -1);
-      setMessage(`${exact.length} search results`);
+      setMessage(exact.length === 0 ? strings.searchNoResults : `${exact.length} search results`);
       if (exact.length > 0 && pendingAction === "navigate") {
         pendingResultAction.current = null;
         window.location.assign(exact[0]!.url);
@@ -134,8 +138,27 @@ export function SearchDialog({ locale, version, indexUrl }: { locale: string; ve
       pendingResultAction.current = null;
       setResults([]);
       setActiveResult(-1);
-      setMessage("Search is temporarily unavailable. Use the static sidebar to browse documentation.");
+      setMessage(strings.searchError);
     }
+  }
+
+  // Group results by the third URL segment (locale/version/SECTION/...) so
+  // matches surface under sensible headings; "" (root) becomes "meta". Order
+  // preserves the search relevance rank while grouping visually.
+  function sectionOf(hit: SearchHit): string {
+    const parts = hit.url.split("/").filter(Boolean);
+    return parts[2] ?? "meta";
+  }
+  function groupResults(hits: readonly SearchHit[]): { section: string; items: { hit: SearchHit; index: number }[] }[] {
+    const order: string[] = [];
+    const buckets = new Map<string, { hit: SearchHit; index: number }[]>();
+    hits.forEach((hit, index) => {
+      const section = sectionOf(hit);
+      let bucket = buckets.get(section);
+      if (!bucket) { bucket = []; buckets.set(section, bucket); order.push(section); }
+      bucket.push({ hit, index });
+    });
+    return order.map((section) => ({ section, items: buckets.get(section)! }));
   }
 
   function handleInputKeyDown(event: ReactKeyboardEvent<HTMLInputElement>) {
@@ -184,7 +207,14 @@ export function SearchDialog({ locale, version, indexUrl }: { locale: string; ve
         <label htmlFor={`${titleId}-query`}>{strings.searchInputLabel} · {locale.toUpperCase()} {version}</label>
         <input id={`${titleId}-query`} ref={input} value={query} onChange={(event) => void runSearch(event.target.value)} onKeyDown={handleInputKeyDown} type="search" autoComplete="off" />
         <p role="status" aria-live="polite">{message}</p>
-        <ul ref={resultList}>{results.map((result, index) => <li key={result.id}><a href={result.url} aria-current={activeResult === index ? "true" : undefined} onFocus={() => setActiveResult(index)} onKeyDown={(event) => handleResultKeyDown(event, index)}><strong>{result.title}</strong><span>{result.description}</span></a></li>)}</ul>
+        <ul ref={resultList} className="search-results">{groupResults(results).map(({ section, items }) => (
+          <li key={section} className="search-results-group">
+            <h3 className="search-results-group-title">{section}</h3>
+            <ul>{items.map(({ hit, index }) => (
+              <li key={hit.id}><a href={hit.url} aria-current={activeResult === index ? "true" : undefined} onFocus={() => setActiveResult(index)} onKeyDown={(event) => handleResultKeyDown(event, index)}><strong>{hit.title}</strong><span>{hit.description}</span></a></li>
+            ))}</ul>
+          </li>
+        ))}</ul>
       </dialog>
     </div>
   );

@@ -48,7 +48,7 @@ const en: ChromeStrings = {
   searchPlaceholder: "Search",
   searchNoResults: "No results",
   searchLoading: "Loading",
-  searchError: "Search failed",
+  searchError: "Search is temporarily unavailable. Use the static sidebar to browse documentation.",
   copyOptionsLabel: "Copy options",
 };
 
@@ -69,7 +69,7 @@ const vi: ChromeStrings = {
   searchPlaceholder: "Tìm",
   searchNoResults: "Không có kết quả",
   searchLoading: "Đang tải",
-  searchError: "Tìm kiếm thất bại",
+  searchError: "Tìm kiếm tạm thời không khả dụng. Dùng thanh điều hướng tĩnh để duyệt tài liệu.",
   copyOptionsLabel: "Tùy chọn sao chép",
 };
 
