@@ -45,6 +45,8 @@ export const REGISTERED_SCREEN_KINDS: readonly string[] = Object.freeze([
   // name/description filter, so it graduated out of the pass-through list.
   "D15-skill-catalog",
   "D15-skill-category",
+  // D16 workflow topology diagrams — see `components/reference/workflow-map.tsx`.
+  "D16-workflow-reference",
 ]);
 
 /**

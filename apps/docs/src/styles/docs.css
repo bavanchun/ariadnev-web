@@ -208,6 +208,21 @@ button { border: var(--vc-border-width-hairline) solid var(--vc-color-border-str
 .provider-reference-jump ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: var(--vc-space-2); }
 .provider-reference-jump a { display: inline-flex; align-items: center; min-height: var(--vc-size-control-minimum); padding: var(--vc-space-1) var(--vc-space-3); border: var(--vc-border-width-hairline) solid var(--vc-color-border); border-radius: var(--vc-border-radius-control); text-decoration: none; }
 
+/* D16 workflow reference: static SVG topology diagram, one per workflow.
+   The Nodes/Edges/legend text below stays authoritative — this is a visual
+   simplification only, never a second copy of graph data. Local scroll for
+   diagrams too wide for the viewport, matching every other wide element in
+   `.docs-body`. */
+.workflow-diagram { margin-block-end: var(--vc-space-6); }
+.wd-svg { display: block; width: 100%; max-width: 40rem; height: auto; overflow: visible; }
+.wd-edge { fill: none; stroke: var(--vc-color-border-strong); }
+.wd-node { fill: var(--vc-color-canvas-raised); stroke: var(--vc-color-border-strong); stroke-width: var(--vc-border-width-strong); }
+.wd-node-gate { stroke-width: var(--vc-border-width-gate); }
+.wd-node-terminal { stroke-dasharray: 3 2; }
+.wd-node-label { font-family: var(--vc-font-family-mono); font-size: 11px; fill: var(--vc-color-text); }
+.wd-node-badge { font-family: var(--vc-font-family-body); font-size: 10px; fill: var(--vc-color-text-muted); }
+.wd-edge-label { font-family: var(--vc-font-family-mono); font-size: 9px; fill: var(--vc-color-text-muted); }
+
 @media (max-width: 64rem) {
   .docs-frame { grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr); }
   .docs-toc { grid-column: 2; border-inline-start: 0; border-top: var(--vc-border-width-hairline) solid var(--vc-color-border); }

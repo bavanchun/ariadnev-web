@@ -340,6 +340,10 @@ export function buildContentRoot(options) {
     // projection page; `provider-reference.tsx` picks its data source by
     // comparing the page's own `version` against the catalog's `currentStable`.
     const providerReferenceMeta = { pageKind: "reference-index", screenKind: "D14-provider-reference", section: "reference" };
+    // D16 workflow reference metadata — `workflow-map.tsx` renders a static
+    // SVG topology diagram per workflow ahead of the generated legend/
+    // topology/nodes/edges text, which stays the authoritative source.
+    const workflowReferenceMeta = { pageKind: "reference-index", screenKind: "D16-workflow-reference", section: "reference" };
     const emitCliPages = (locale, version, commandList) => {
       // Index page: light summary + links to every detail page.
       const indexBody = renderCliCommandIndex(locale, commandList);
@@ -371,7 +375,7 @@ export function buildContentRoot(options) {
       };
       const generated = [
         [GENERATED_PAGE_IDS.providers, renderProviderReference(locale, providers), providerReferenceMeta],
-        [GENERATED_PAGE_IDS.workflows, renderWorkflowReference(locale, workflows), undefined],
+        [GENERATED_PAGE_IDS.workflows, renderWorkflowReference(locale, workflows), workflowReferenceMeta],
         [GENERATED_PAGE_IDS.releaseNotes, renderReleaseNotes(locale, releaseNotes, releaseEdition), undefined],
       ];
       for (const [pageId, body, pageMeta] of generated) {
