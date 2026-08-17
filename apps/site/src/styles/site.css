@@ -240,6 +240,12 @@ pre {
 
 /* -------------------------------------------------------------- controls */
 
+/*
+ * Interactive controls: hover, pressed, and current states come from the
+ * Phase 2 semantic state token family (`--vcs-state-*`), not raw palette
+ * colors. This keeps the marketing chrome one token-rename away from the
+ * docs shell — a design change lands in packages/tokens, not here.
+ */
 .action {
   display: inline-flex;
   align-items: center;
@@ -256,25 +262,44 @@ pre {
   text-decoration: none;
   cursor: pointer;
   transition: border-color var(--vcs-motion-duration-fast) var(--vcs-motion-easing-standard),
+    background-color var(--vcs-motion-duration-fast) var(--vcs-motion-easing-standard),
     color var(--vcs-motion-duration-fast) var(--vcs-motion-easing-standard);
 }
 
 .action:hover {
-  border-color: var(--vcs-color-spectral-400);
+  border-color: var(--vcs-state-hover-border);
+  background: var(--vcs-state-hover-layer);
   color: var(--vcs-text-accent);
 }
 
+.action:active {
+  border-color: var(--vcs-state-pressed-border);
+  background: var(--vcs-state-pressed-layer);
+  color: var(--vcs-text-accent);
+}
+
+.action[aria-current="page"] {
+  border-color: var(--vcs-state-current-indicator);
+  color: var(--vcs-state-current-text);
+}
+
 .action--primary {
-  background: var(--vcs-color-spectral-400);
-  border-color: var(--vcs-color-spectral-400);
-  color: var(--vcs-text-on-accent);
+  background: var(--vcs-state-selected-layer);
+  border-color: var(--vcs-state-selected-border);
+  color: var(--vcs-state-selected-text);
   font-weight: var(--vcs-font-weight-bold);
 }
 
 .action--primary:hover {
   background: var(--vcs-color-spectral-500);
   border-color: var(--vcs-color-spectral-500);
-  color: var(--vcs-text-on-accent);
+  color: var(--vcs-state-selected-text);
+}
+
+.action--primary:active {
+  background: var(--vcs-color-spectral-600);
+  border-color: var(--vcs-color-spectral-600);
+  color: var(--vcs-state-selected-text);
 }
 
 .action-row {
