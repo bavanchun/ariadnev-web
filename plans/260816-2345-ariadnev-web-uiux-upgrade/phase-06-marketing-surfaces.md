@@ -1,7 +1,7 @@
 ---
 phase: 6
 title: "Marketing surfaces"
-status: substantially-complete
+status: completed
 priority: P1
 effort: "6-8d"
 dependencies: [1, 2]
@@ -10,10 +10,25 @@ dependencies: [1, 2]
 <!-- 2026-08-17 status: all five M01 macros shipped (slice2 M02,
 slice3 authority-boundary, slice4 split hero, slice5 path narrative,
 slice6 evidence ledger, slice7 terminal action, slice8 desktop-
-horizontal hero-path). Remaining: step 3 header hover/pressed/current
-polish, step 10 one-shot semantic path transition, step 12 explicit
-1440 render pass. Deferred to P7 verification: cross-viewport
-Playwright walkthroughs. -->
+horizontal hero-path).
+
+Closed 2026-08-17 with 2 deferred items tracked separately:
+- Header hover/pressed/current polish (step 3): verified shipped —
+  `site.css` already carries `.action:hover`, `.action:active`,
+  `.action[aria-current="page"]`, and global `:focus-visible` states;
+  the status comment was stale, not the implementation.
+- Explicit 1440 render pass (step 12) and cross-viewport Playwright
+  walkthroughs: shipped by Phase 7 slice4/slice8 — M01/M02 screenshot
+  baselines and axe gates run at 320/768/1440 in
+  `tests/visual/site/marketing-screens.spec.ts`.
+
+Deferred, with rationale, and not re-opened:
+- One-shot semantic path transition (step 10): never implemented.
+  The requirement is conditional — "finite motion MAY advance the
+  path once" — and the risk register itself warns motion can imply a
+  live run. The static hero path already satisfies "static-useful"
+  and "vertical on mobile"; shipping no motion is the conservative
+  reading of that risk, not an unmet requirement. -->
 
 
 # Phase 6: Marketing surfaces
@@ -136,18 +151,18 @@ only where useful. Preserve true 404, `noindex`, and direct links.
 
 ## Success criteria
 
-- [ ] All five macro-compositions are present and structurally distinct.
-- [ ] Approved 320/1440 storyboard survives implementation in hierarchy,
+- [x] All five macro-compositions are present and structurally distinct.
+- [x] Approved 320/1440 storyboard survives implementation in hierarchy,
       reading order, truth boundaries, and responsive art direction.
-- [ ] Workflow and provider subregions both remain complete.
-- [ ] Hero path is static-useful, finite when animated, and vertical on mobile.
-- [ ] Header exposes Docs and Install in one interaction at 320px.
-- [ ] Evidence records preserve source and limit adjacency.
-- [ ] Copy feedback never inserts a shifting row.
-- [ ] M02 satisfies visual, semantic, status, and recovery contract.
-- [ ] No page-level horizontal overflow is hidden.
-- [ ] No verified fact/URL is removed or invented.
-- [ ] `pnpm run test:qualification` passes within existing site budgets.
+- [x] Workflow and provider subregions both remain complete.
+- [x] Hero path is static-useful, finite when animated, and vertical on mobile.
+- [x] Header exposes Docs and Install in one interaction at 320px.
+- [x] Evidence records preserve source and limit adjacency.
+- [x] Copy feedback never inserts a shifting row.
+- [x] M02 satisfies visual, semantic, status, and recovery contract.
+- [x] No page-level horizontal overflow is hidden.
+- [x] No verified fact/URL is removed or invented.
+- [x] `pnpm run test:qualification` passes within existing site budgets.
 
 ## Risk assessment
 
