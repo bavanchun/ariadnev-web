@@ -388,6 +388,26 @@ pre {
   counter-reset: hero-path;
 }
 
+/* At 1280+ CSS pixels the path becomes a single horizontal track that mirrors
+   the execution-map SVG below. Each step still keeps its number/label/produces
+   so the DOM reading order is preserved. */
+@media (min-width: 1280px) {
+  .hero-path {
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--vcs-space-2);
+  }
+  .hero-path__step {
+    grid-template-columns: 1fr;
+    row-gap: var(--vcs-space-1);
+    border-left: 0;
+    border-top: var(--vcs-border-width-hairline) solid var(--vcs-surface-border);
+    padding-inline: var(--vcs-space-2);
+  }
+  .hero-path__num {
+    grid-row: auto;
+  }
+}
+
 .hero-path__step {
   display: grid;
   grid-template-columns: auto 1fr;
