@@ -333,10 +333,15 @@ export function buildContentRoot(options) {
       emitCliPages(locale, currentStable, commands);
       emitRetiredCliRoutes(locale, currentStable);
       emitSkillPages(locale, currentStable, skills);
+      const releaseEdition = {
+        version: extracted.manifest.version,
+        releaseTag: extracted.manifest.releaseTag,
+        sourceSha: extracted.manifest.sourceSha,
+      };
       const generated = [
         [GENERATED_PAGE_IDS.providers, renderProviderReference(locale, providers)],
         [GENERATED_PAGE_IDS.workflows, renderWorkflowReference(locale, workflows)],
-        [GENERATED_PAGE_IDS.releaseNotes, renderReleaseNotes(locale, releaseNotes)],
+        [GENERATED_PAGE_IDS.releaseNotes, renderReleaseNotes(locale, releaseNotes, releaseEdition)],
       ];
       for (const [pageId, body] of generated) {
         const { title, description } = meta(body);

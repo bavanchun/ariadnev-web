@@ -77,6 +77,12 @@ const STRINGS = {
       title: "Release notes",
       description: "What changed in this release, exactly as the release ships it.",
       intro: "Release notes are published in English with every release.",
+      editionHeading: "This edition",
+      versionLabel: "Version",
+      releaseTagLabel: "Release tag",
+      sourceShaLabel: "Source commit",
+      docsHomeLabel: "Documentation home",
+      upgradingLabel: "Upgrade guide",
     },
     previousRoot: {
       title: "Documentation for the previous stable release",
@@ -160,6 +166,12 @@ const STRINGS = {
       title: "Ghi chú phát hành",
       description: "Những gì thay đổi trong bản phát hành này, đúng như bản phát hành đóng gói.",
       intro: "Ghi chú phát hành được công bố bằng tiếng Anh cùng mỗi bản phát hành.",
+      editionHeading: "Ấn bản này",
+      versionLabel: "Phiên bản",
+      releaseTagLabel: "Tag phát hành",
+      sourceShaLabel: "Commit gốc",
+      docsHomeLabel: "Trang tài liệu",
+      upgradingLabel: "Hướng dẫn nâng cấp",
     },
     previousRoot: {
       title: "Tài liệu cho bản ổn định trước",
@@ -588,11 +600,26 @@ export function renderWorkflowReference(locale, workflows) {
   return `${lines.join("\n").trimEnd()}\n`;
 }
 
-/** Release notes ship as Markdown with H2 headings per version; H1s, if any, are demoted. */
-export function renderReleaseNotes(locale, notesMarkdown) {
+/**
+ * Release notes ship as Markdown with H2 headings per version; H1s, if any,
+ * are demoted. The renderer prepends an edition metadata block plus links
+ * to the upgrade guide and the versioned docs home. Change groups
+ * (`### Minor Changes` / `### Major Changes` / `### Patch Changes` /
+ * `### Security` / `### Migration`) are preserved verbatim: this renderer
+ * never invents a classification the source does not state.
+ */
+export function renderReleaseNotes(locale, notesMarkdown, edition = {}) {
   const t = STRINGS[locale].releaseNotes;
   const body = escapeMarkdownProse(String(notesMarkdown).replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, "")).trim();
-  return `${frontmatter(t.title, t.description)}${t.intro}\n\n${body}\n`;
+  const rows = [];
+  if (edition.version) rows.push(`- **${t.versionLabel}**: ${code(edition.version)}`);
+  if (edition.releaseTag) rows.push(`- **${t.releaseTagLabel}**: ${code(edition.releaseTag)}`);
+  if (edition.sourceSha) rows.push(`- **${t.sourceShaLabel}**: ${code(edition.sourceSha.slice(0, 12))}`);
+  const links = [`[${t.docsHomeLabel}](%ROOT%)`, `[${t.upgradingLabel}](%ROOT%guides/upgrading/)`].join(" · ");
+  const editionBlock = rows.length > 0
+    ? `## ${t.editionHeading}\n\n${rows.join("\n")}\n\n${links}\n\n`
+    : `${links}\n\n`;
+  return `${frontmatter(t.title, t.description)}${t.intro}\n\n${editionBlock}${body}\n`;
 }
 
 export function renderPreviousRoot(locale, previousVersion, currentVersion) {
