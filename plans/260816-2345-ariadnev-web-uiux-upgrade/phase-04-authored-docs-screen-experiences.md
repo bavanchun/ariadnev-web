@@ -1,11 +1,28 @@
 ---
 phase: 4
 title: "Authored docs screen experiences"
-status: pending
+status: substantially-complete
 priority: P1
 effort: "8-11d"
 dependencies: [1, 2, 3]
 ---
+
+<!-- 2026-08-17 status: all D01-D11 authored screens carry a page-
+appropriate enrichment sourced from verified content (D01 atlas
+counts + PassThrough registry, D02 previous-home identity, D03
+Gatekeeper boundary blockquote, D04 doctor exit table + --dry-run,
+D05 skip-not-guess boundary + pipeline sentence, D06 read-only
+callout + lifecycle state-transition table, D07 proof-boundary
+ledger, D08 upgrading docs-selector vs installed-version, D10
+mutating-action markers, D11 migration destructive boundary).
+Screen registry (docs-screen-registry.ts/.tsx) ships with a
+DocsHomeExperience for D01 and PassThrough renderers for D02-D11 so
+the authored MDX composition remains authoritative until per-screen
+React experiences are needed. D00 language-chooser and D18 docs-
+not-found are app-level (not registry-driven). Remaining plan work
+routed to P7: dedicated React experience components per screen
+family, screen-focused route tests. -->
+
 
 # Phase 4: Authored docs screen experiences
 

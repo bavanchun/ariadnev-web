@@ -1,11 +1,20 @@
 ---
 phase: 6
 title: "Marketing surfaces"
-status: pending
+status: substantially-complete
 priority: P1
 effort: "6-8d"
 dependencies: [1, 2]
 ---
+
+<!-- 2026-08-17 status: all five M01 macros shipped (slice2 M02,
+slice3 authority-boundary, slice4 split hero, slice5 path narrative,
+slice6 evidence ledger, slice7 terminal action, slice8 desktop-
+horizontal hero-path). Remaining: step 3 header hover/pressed/current
+polish, step 10 one-shot semantic path transition, step 12 explicit
+1440 render pass. Deferred to P7 verification: cross-viewport
+Playwright walkthroughs. -->
+
 
 # Phase 6: Marketing surfaces
 
