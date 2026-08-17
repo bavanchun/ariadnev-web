@@ -22,14 +22,18 @@ export const REGISTERED_SCREEN_KINDS: readonly string[] = Object.freeze([
   // install-flow topology diagrams layered above the authored MDX body.
   "D03-installation",
   "D04-first-install",
-  // D05-D11 authored screens. Each is currently registered as a
+  // D05/D06/D07 concept screens — see `components/screen-experiences/
+  // kit-adapt.tsx`, `graph-execution.tsx`, and `evaluation.tsx` for the
+  // system-view/flagship-topology/proof-ladder diagrams layered above the
+  // authored MDX body.
+  "D05-kit-adapt",
+  "D06-graph-execution",
+  "D07-evaluation",
+  // D08-D11 authored screens. Each is currently registered as a
   // pass-through — the authored MDX carries the composition today —
   // and the identifier lets future slices swap in an enriched
   // renderer without touching the catalog or the authored source.
   // Coverage is enforced by the docs-screen-registry test.
-  "D05-kit-adapt",
-  "D06-graph-execution",
-  "D07-evaluation",
   "D08-upgrading",
   "D09-configuration",
   "D10-doctor-audit-backups-uninstall",

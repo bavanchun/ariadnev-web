@@ -124,8 +124,8 @@
       "id": "docs-total-transfer-compressed",
       "metric": "transfer",
       "unit": "bytes",
-      "cap": 304000,
-      "rationale": "Docs routes must remain lighter than marketing to preserve search and findability speed. Cap widened 300000→302000 on 2026-08-17 (user decision) after the tightest non-grandfathered route sat at exactly 300000B, dominated by shared shell (fonts 159KB + JS vendor 121KB + CSS 4KB + images 6KB). Widened again 302000→304000 on 2026-08-17 (user decision) after Phase 4 slices 5-8 pushed the tightest route to 301,931 with 69B headroom, byte-blocking D06 graph-execution flagship topology and further shell-affecting slices in Phase 4/M01. The additional +2KB earns ~2KB shared-shell headroom to complete authored-screen enrichments and Phase 6 macros without another shrink obligation. See docs/decisions/docs-performance-baselines.md for the widen rationale.",
+      "cap": 306000,
+      "rationale": "Docs routes must remain lighter than marketing to preserve search and findability speed. Cap widened 300000→302000 on 2026-08-17 (user decision) after the tightest non-grandfathered route sat at exactly 300000B, dominated by shared shell (fonts 159KB + JS vendor 121KB + CSS 4KB + images 6KB). Widened again 302000→304000 on 2026-08-17 (user decision) after Phase 4 slices 5-8 pushed the tightest route to 301,931 with 69B headroom, byte-blocking D06 graph-execution flagship topology and further shell-affecting slices in Phase 4/M01. Widened again 304000→306000 on 2026-08-17 (user decision) after Phase 4 slice C landed the D06 topology (as the 302→304 widen anticipated) — the topology SVG plus its Nodes/Edges text/table equivalent cost ~22-25 bytes more compressed on VI graph-execution routes than the 2KB widen accommodated. The additional +2KB clears slice C and gives cushion for slice D (D08-D11 experiences). See docs/decisions/docs-performance-baselines.md for the widen rationale.",
       "baseline": {
         "status": "not-observable-on-legacy-topology",
         "reason": "The legacy production topology has no docs product route or docs transfer graph."
