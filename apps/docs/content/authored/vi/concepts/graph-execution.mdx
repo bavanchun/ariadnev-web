@@ -55,6 +55,14 @@ av run cancel <run-id> --json
 
 Các tên này là cách gọi của tài liệu này cho hành vi ở trên, không phải năm giai đoạn mà runtime báo cáo dưới nhãn đó.
 
+| Trạng thái | Chuyển sang | Sinh ra | Fail closed khi |
+|---|---|---|---|
+| Compile | Policy | Digest đồ thị, báo cáo lint | Lệch schema, node kind lạ |
+| Policy | Execute, hoặc từ chối | Quyết định quyền cho từng node | Node cần tác động nhưng chưa có executor |
+| Execute | Checkpoint (mỗi chuyển tiếp) | Mục event log, kết quả node | Executor lỗi, runtime hết giờ |
+| Checkpoint | Execute, hoặc Proof | `checkpoint.json`, `state-current.json` | Envelope hỏng, lệch seal |
+| Proof | kết thúc | Envelope JSON ổn định | Lệch danh tính, lệch digest |
+
 ## Hôm nay chạy được gì
 
 Ba workflow chuẩn là `read-only-delivery`, `bugfix-delivery` và `safe-change-delivery` — xem [tham chiếu workflow](%ROOT%reference/workflows/) để biết node và edge. Thực thi chủ động công khai là **chỉ đọc**. `safe-change-delivery` kiểm tra được, nhưng dry-run và thực thi vẫn bị chính sách từ chối cho đến khi có một executor tác động phụ và bề mặt phê duyệt công khai thật; ariadnev không giả lập một thay đổi thành công để trông cho đủ.

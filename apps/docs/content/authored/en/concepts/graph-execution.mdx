@@ -55,6 +55,14 @@ av run cancel <run-id> --json
 
 These names are this documentation's vocabulary for the behaviour above, not five stages the runtime reports under those labels.
 
+| State | Transitions to | Produces | Fails closed on |
+|---|---|---|---|
+| Compile | Policy | Graph digest, lint report | Schema drift, unknown node kind |
+| Policy | Execute, or refuse | Authority decision per node | Effect requested with no executor |
+| Execute | Checkpoint (each transition) | Event log entries, node result | Executor error, runtime timeout |
+| Checkpoint | Execute, or Proof | `checkpoint.json`, `state-current.json` | Envelope corruption, seal mismatch |
+| Proof | terminal | Stable JSON envelope | Identity drift, digest mismatch |
+
 ## What runs today
 
 The three canonical workflows are `read-only-delivery`, `bugfix-delivery`, and `safe-change-delivery` — see the [workflow reference](%ROOT%reference/workflows/) for their nodes and edges. Public active execution is **read-only**. `safe-change-delivery` validates, but dry-run and execution stay policy-denied until a real public side-effect executor and approval input surface exist; ariadnev does not simulate a successful mutation to look complete.
