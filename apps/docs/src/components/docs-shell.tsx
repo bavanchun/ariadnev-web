@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { DocsCatalogPage, DocsContentCatalog, DocsSection } from "@/lib/content-catalog.ts";
-import { SIDEBAR_SECTION_ORDER, resolveSection } from "@/lib/content-catalog.ts";
+import { SIDEBAR_SECTION_ORDER, resolveNavigationVisibility, resolveSection } from "@/lib/content-catalog.ts";
 import { LocaleVersionSwitcher } from "./locale-version-switcher.tsx";
 import { SearchDialog } from "./search-dialog.tsx";
 
@@ -49,7 +49,13 @@ export function DocsShell({ catalog, page, routeVersion, toc, children }: {
   children: ReactNode;
 }) {
   const labels = page.locale === "vi" ? SECTION_LABELS_VI : SECTION_LABELS_EN;
-  const pages = catalog.pages.filter((candidate) => candidate.locale === page.locale && candidate.version === page.version);
+  // Global sidebar shows only pages whose navigation visibility resolves to
+  // "global-sidebar"; reference-only pages (e.g. per-command CLI details)
+  // stay in the catalog for direct URLs and search but never crowd the shelf.
+  const pages = catalog.pages.filter((candidate) =>
+    candidate.locale === page.locale
+    && candidate.version === page.version
+    && resolveNavigationVisibility(candidate) === "global-sidebar");
   // Group in one server pass; the sidebar renders sections in canonical order
   // and skips any empty section so no ghost headers appear.
   const bySection = new Map<DocsSection, DocsCatalogPage[]>();

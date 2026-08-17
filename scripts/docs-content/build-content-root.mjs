@@ -28,7 +28,9 @@ import { fileURLToPath } from "node:url";
 import { extractDocsBundle, TRUSTED_SCHEMA_DIGEST } from "../../packages/contracts/dist/index.js";
 import {
   GENERATED_PAGE_IDS,
-  renderCliReference,
+  cliCommandSlug,
+  renderCliCommandDetail,
+  renderCliCommandIndex,
   renderPreviousRoot,
   renderProviderReference,
   renderReleaseNotes,
@@ -147,8 +149,8 @@ function slugOf(pageId) {
   return pageId === "index" ? [] : pageId.split("/");
 }
 
-function catalogEntry({ locale, version, pageId, canonicalId, title, description }) {
-  return {
+function catalogEntry({ locale, version, pageId, canonicalId, title, description, metadata }) {
+  const entry = {
     id: `${locale}/${version}/${pageId}`,
     canonicalId,
     locale,
@@ -159,6 +161,13 @@ function catalogEntry({ locale, version, pageId, canonicalId, title, description
     description,
     siblings: [],
   };
+  // Optional Living Atlas metadata; only set when provided so an authored page
+  // without metadata still round-trips as-is through parseDocsContentCatalog.
+  if (metadata?.pageKind) entry.pageKind = metadata.pageKind;
+  if (metadata?.screenKind) entry.screenKind = metadata.screenKind;
+  if (metadata?.section) entry.section = metadata.section;
+  if (metadata?.navigationVisibility) entry.navigationVisibility = metadata.navigationVisibility;
+  return entry;
 }
 
 function attachSiblings(entries, currentStable, previousStable) {
@@ -240,20 +249,41 @@ export function buildContentRoot(options) {
     // Authored and generated pages link to each other with `%ROOT%`, which
     // becomes the edition prefix: `stable` for the current release so a reader
     // stays on the alias, the physical version for the previous edition.
-    const add = (locale, version, pageId, canonicalId, title, description, body) => {
-      const entry = catalogEntry({ locale, version, pageId, canonicalId, title, description });
+    const add = (locale, version, pageId, canonicalId, title, description, body, metadata) => {
+      const entry = catalogEntry({ locale, version, pageId, canonicalId, title, description, metadata });
       entries.push(entry);
       const root = `/${locale}/${version === currentStable ? STABLE_ALIAS : version}/`;
       files.set(entry.sourcePath.replace(/^generated\//, ""), body.replaceAll("%ROOT%", root));
     };
     const meta = (body) => parseFrontmatter(body, "generated");
 
+    // D13 CLI command detail metadata — reference-only pages hide from the
+    // global sidebar, so an authored top-level shelf is never crowded by 50+
+    // command entries; catalog consumers still find them by pageKind/screenKind.
+    const commandDetailMeta = { pageKind: "command", screenKind: "D13-cli-command-detail", section: "reference", navigationVisibility: "reference-only" };
+    const emitCliPages = (locale, version, commandList) => {
+      // Index page: light summary + links to every detail page.
+      const indexBody = renderCliCommandIndex(locale, commandList);
+      const indexMeta = meta(indexBody);
+      add(locale, version, GENERATED_PAGE_IDS.cli, GENERATED_PAGE_IDS.cli, indexMeta.title, indexMeta.description, indexBody);
+      // Per-command detail pages. Canonical id embeds the slug so siblings
+      // across locales/editions resolve pairwise even when a command exists in
+      // one edition but not another.
+      for (const command of commandList) {
+        const slug = cliCommandSlug(command.path);
+        const pageId = `reference/cli/${slug}`;
+        const body = renderCliCommandDetail(locale, command);
+        const parsed = meta(body);
+        add(locale, version, pageId, pageId, parsed.title, parsed.description, body, commandDetailMeta);
+      }
+    };
+
     for (const page of loadAuthoredPages(authoredRoot)) {
       add(page.locale, currentStable, page.pageId, page.canonicalId, page.title, page.description, page.body);
     }
     for (const locale of LOCALES) {
+      emitCliPages(locale, currentStable, commands);
       const generated = [
-        [GENERATED_PAGE_IDS.cli, renderCliReference(locale, commands)],
         [GENERATED_PAGE_IDS.providers, renderProviderReference(locale, providers)],
         [GENERATED_PAGE_IDS.skills, renderSkillCatalog(locale, skills)],
         [GENERATED_PAGE_IDS.workflows, renderWorkflowReference(locale, workflows)],
@@ -268,8 +298,7 @@ export function buildContentRoot(options) {
       add(locale, previousStable, "index", "core/index", meta(root).title, meta(root).description, root);
       const projection = previous.historicalProjection ?? {};
       if (projection.cli?.commands) {
-        const body = renderCliReference(locale, projection.cli.commands);
-        add(locale, previousStable, GENERATED_PAGE_IDS.cli, GENERATED_PAGE_IDS.cli, meta(body).title, meta(body).description, body);
+        emitCliPages(locale, previousStable, projection.cli.commands);
       }
       if (projection.providers?.providers) {
         const body = renderProviderReference(locale, projection.providers.providers);

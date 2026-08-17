@@ -21,6 +21,11 @@ const STRINGS = {
       required: "required",
       none: "This command takes no options.",
       onThisRelease: "Commands in this release",
+      indexDescription: "Every ariadnev command in this release, with a link to its detail page.",
+      indexIntro: "Every command below has its own page with arguments, options, and aliases. `ariadnev` and `av` are interchangeable everywhere.",
+      detailIntroPrefix: "This is the reference for the",
+      detailIntroSuffix: "command, projected from the release.",
+      backToIndex: "Back to CLI index",
     },
     providers: {
       title: "Provider reference",
@@ -81,6 +86,11 @@ const STRINGS = {
       required: "bắt buộc",
       none: "Lệnh này không có tùy chọn.",
       onThisRelease: "Các lệnh trong bản phát hành này",
+      indexDescription: "Toàn bộ lệnh ariadnev trong bản phát hành này, kèm đường dẫn tới trang chi tiết.",
+      indexIntro: "Mỗi lệnh dưới đây có trang riêng với tham số, tùy chọn và bí danh. `ariadnev` và `av` dùng thay cho nhau ở mọi nơi.",
+      detailIntroPrefix: "Đây là tham chiếu cho lệnh",
+      detailIntroSuffix: ", chiếu ra từ bản phát hành.",
+      backToIndex: "Về danh mục CLI",
     },
     providers: {
       title: "Tham chiếu provider",
@@ -230,35 +240,94 @@ function sortBy(items, key) {
 
 // ------------------------------------------------------------------ renderers
 
-export function renderCliReference(locale, commands) {
+/**
+ * Route-safe slug for one command's detail page. The root `ariadnev` invocation
+ * keeps its own slug so the disambiguates from `ariadnev install`; every
+ * subcommand strips the leading `ariadnev ` and joins remaining tokens with
+ * `-` so nested subcommands like `ariadnev adapters regenerate` become
+ * `adapters-regenerate` at a single URL depth.
+ */
+export function cliCommandSlug(commandPath) {
+  const path = String(commandPath ?? "").trim();
+  if (path === "ariadnev") return "ariadnev";
+  const rest = path.startsWith("ariadnev ") ? path.slice("ariadnev ".length) : path;
+  return rest.trim().replace(/\s+/g, "-");
+}
+
+/** Full canonical page id for a command detail page (matches catalog `pageId`). */
+export function cliCommandPageId(commandPath) {
+  return `reference/cli/${cliCommandSlug(commandPath)}`;
+}
+
+/**
+ * Compact index page: one row per command with description and link to its
+ * detail page. No arguments or options tables here — those live on the detail
+ * page. This is the load-bearing shrink that lets the previously ~24KB
+ * `reference/cli/` monolith fit inside the frozen per-route byte cap.
+ */
+export function renderCliCommandIndex(locale, commands) {
   const t = STRINGS[locale].cli;
-  const lines = [frontmatter(t.title, t.description).trimEnd(), "", t.intro, "", `## ${t.onThisRelease}`, ""];
+  const lines = [
+    frontmatter(t.title, t.indexDescription).trimEnd(),
+    "",
+    t.indexIntro,
+    "",
+    `## ${t.onThisRelease}`,
+    "",
+    tableRow([t.title, t.description.split(",")[0]]),
+    tableRow(["---", "---"]),
+  ];
   const ordered = sortBy(commands, (command) => command.path);
-  for (const command of ordered) lines.push(`- [${code(command.path)}](#${anchor(command.path)})`);
-  lines.push("");
   for (const command of ordered) {
-    lines.push(`## ${code(command.path)}`, "", escapeMdx(command.description), "");
-    if (command.aliases?.length) lines.push(`${t.aliases}: ${command.aliases.map(code).join(", ")}`, "");
-    if (command.arguments?.length) {
-      lines.push(`### ${t.arguments}`, "");
-      for (const argument of command.arguments) {
-        const name = code(argument.name ?? argument.usage ?? argument.flags ?? "");
-        const flags = [argument.required ? t.required : null, argument.variadic ? "variadic" : null].filter(Boolean);
-        lines.push(`- ${name}${flags.length ? ` (${flags.join(", ")})` : ""}${argument.description ? ` — ${escapeMdx(argument.description)}` : ""}`);
-      }
-      lines.push("");
-    }
-    lines.push(`### ${t.options}`, "");
-    if (!command.options?.length) {
-      lines.push(t.none, "");
-    } else {
-      lines.push(tableRow([t.options, ""]), tableRow(["---", "---"]));
-      for (const option of sortBy(command.options, (option) => option.flags)) {
-        lines.push(tableRow([code(option.flags), escapeMdx(option.description)]));
-      }
-      lines.push("");
-    }
+    const slug = cliCommandSlug(command.path);
+    const summary = escapeMdx(command.description ?? "");
+    lines.push(tableRow([`[${code(command.path)}](%ROOT%reference/cli/${slug}/)`, summary]));
   }
+  lines.push("");
+  return `${lines.join("\n").trimEnd()}\n`;
+}
+
+/**
+ * Detail page for one command: description, aliases, arguments, options. The
+ * front-matter title reads as `code path`-adjacent so the H1 is unambiguously
+ * the command identity, and a link back to the index sits at the bottom so a
+ * reader can navigate without depending on the sidebar (which hides these
+ * pages via `navigationVisibility: "reference-only"`).
+ */
+export function renderCliCommandDetail(locale, command) {
+  const t = STRINGS[locale].cli;
+  const path = String(command.path);
+  const title = path;
+  const description = escapeMdx(command.description ?? "");
+  const lines = [
+    frontmatter(title, description).trimEnd(),
+    "",
+    `${t.detailIntroPrefix} ${code(path)} ${t.detailIntroSuffix}`,
+    "",
+    description,
+    "",
+  ];
+  if (command.aliases?.length) lines.push(`${t.aliases}: ${command.aliases.map(code).join(", ")}`, "");
+  if (command.arguments?.length) {
+    lines.push(`## ${t.arguments}`, "");
+    for (const argument of command.arguments) {
+      const name = code(argument.name ?? argument.usage ?? argument.flags ?? "");
+      const flags = [argument.required ? t.required : null, argument.variadic ? "variadic" : null].filter(Boolean);
+      lines.push(`- ${name}${flags.length ? ` (${flags.join(", ")})` : ""}${argument.description ? ` — ${escapeMdx(argument.description)}` : ""}`);
+    }
+    lines.push("");
+  }
+  lines.push(`## ${t.options}`, "");
+  if (!command.options?.length) {
+    lines.push(t.none, "");
+  } else {
+    lines.push(tableRow([t.options, ""]), tableRow(["---", "---"]));
+    for (const option of sortBy(command.options, (option) => option.flags)) {
+      lines.push(tableRow([code(option.flags), escapeMdx(option.description)]));
+    }
+    lines.push("");
+  }
+  lines.push(`[${t.backToIndex}](%ROOT%reference/cli/)`, "");
   return `${lines.join("\n").trimEnd()}\n`;
 }
 
