@@ -1,7 +1,7 @@
 ---
 phase: 3
 title: "Docs safety, shell, and shared interactions"
-status: pending
+status: sufficient
 priority: P1
 effort: "7-9d"
 dependencies: [1, 2]
@@ -140,21 +140,66 @@ chosen MDX stack permits; hydration injection remains fallback only.
 
 ## Success criteria
 
-- [ ] No docs page-level overflow is masked.
-- [ ] Every published page is reachable in mobile nav without horizontal swipe.
-- [ ] Drawer/disclosure behavior passes pointer, keyboard, Escape, focus return,
-      scroll lock, and no-JS fallback checks.
-- [ ] Sidebar current page and section are distinct from focus/hover state.
-- [ ] Breadcrumb, pager, TOC, search, copy, locale, and version are fully EN/VI.
-- [ ] Previous-edition notice appears on every previous-edition page.
-- [ ] Empty TOC renders nothing; active TOC uses
+Shipped in Phase 3 (slices 2-8, commits f9527f6 through 8574ab6):
+
+- [x] No docs page-level overflow is masked.
+- [x] Sidebar current page and section are distinct from focus/hover state.
+- [x] Previous-edition notice appears on every previous-edition page.
+- [x] Empty TOC renders nothing; active TOC uses
       `aria-current="location"`.
-- [ ] Anchored headings and focused controls are not hidden by sticky UI.
-- [ ] Search has deterministic states and never crosses a partition.
-- [ ] Switcher visible text matches its accessible name.
-- [ ] Docs metadata has dark color scheme/theme color and non-duplicated title.
-- [ ] Static export and `pnpm run test:qualification` pass within Phase 1
-      budgets.
+- [x] Anchored headings and focused controls are not hidden by sticky UI.
+- [x] Switcher visible text matches its accessible name.
+- [x] Docs metadata has dark color scheme/theme color and non-duplicated title.
+- [x] Static export and `pnpm run test:qualification` pass within Phase 1
+      budgets (ratchet integrity verified across every slice; grandfathered
+      ceilings updated with per-entry deltas and `measuredAtHistory` entries).
+- [x] Search never crosses a partition (deterministic partition-isolation
+      shipped in Phase 1; empty / zero-result / partition-failure / focus-
+      restoration UI states already deterministic).
+
+Byte-blocked and re-scoped for revisit after Phase 5 splits reference/skills
+and reference/cli (which reopens ~10-15KB per-route headroom by cutting
+14-24KB reference-index HTML into per-command detail pages):
+
+- [ ] Every published page is reachable in mobile nav without horizontal
+      swipe. **Re-scoped:** slice 9 (mobile drawer server markup + CSS + JS
+      enhancer) reverted after two attempts busted the frozen 300000 cap on
+      content-heavy VI routes (`vi/*/concepts/graph-execution/` sits
+      ~100B under cap; combined markup+CSS+JS added ~550B). The current
+      horizontal-scroll fallback exposes every link but requires swipe. Post
+      Phase 5 splitting, the drawer slice becomes byte-safe.
+- [ ] Drawer/disclosure behavior passes pointer, keyboard, Escape, focus
+      return, scroll lock, and no-JS fallback checks. **Re-scoped** (blocked
+      by the drawer slice above).
+- [ ] Breadcrumb, pager, TOC, search, copy, locale, and version are fully
+      EN/VI. **Partial:** breadcrumb (section labels EN/VI), pager (Previous/
+      Trước · Next/Tiếp), previous-edition notice, and section labels are
+      localized. Chrome-strings authority migration (search dialog, copy
+      buttons, live-status announcements, sidebar `aria-label`) reverted in
+      slice 1 (client import busted cap +1.5KB). **Re-scoped:** the correct
+      server-render-inline pattern is recorded in
+      `docs/decisions/docs-performance-baselines.md`; retry after Phase 5
+      shrink.
+- [ ] Search has grouped results with explicit loading state. **Partial:**
+      partition-safe / zero / error / focus-restoration states are
+      deterministic today. Grouping by section and explicit "Searching…"
+      message re-scoped (byte impact ~200-400B; blocked on graph-execution
+      route headroom).
+- [ ] Heading permalinks are authored in the render tree. **Re-scoped:**
+      requires an MDX rehype plugin change; byte impact + rehype config
+      complexity make this a Phase-4 authored-docs concern rather than
+      shell.
+
+## Exit disposition (2026-08-17)
+
+Phase 3 marked **Sufficient**: every shipped slice passes the ratchet, every
+open success criterion has a documented revisit path anchored to a byte-
+recovery event (Phase 5 reference splitting). No slice was silently dropped;
+each was byte-measured, reverted-on-fail, and its revisit condition recorded.
+
+Phase 4 unblocks from here — Phase 4 owns authored MDX content and safe
+components (per plan.md file ownership), and its byte impact per page is
+content-driven, not shell-driven. Phase 5 unblocks the re-scoped items above.
 
 ## Risk assessment
 
