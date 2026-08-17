@@ -62,25 +62,13 @@ export function DocsHomeExperience({ catalog, catalogPage, children }: DocsScree
   // as text if CSS is disabled.
   return (
     <>
-      <aside className="docs-home-atlas-counts" aria-label={strings.ariaLabel}>
-        <p className="docs-home-atlas-counts__heading">{strings.heading}</p>
-        <dl className="docs-home-atlas-counts__list">
-          <div className="docs-home-atlas-counts__item">
-            <dt>{strings.commandsLabel}</dt>
-            <dd>{counts.commands}</dd>
-          </div>
-          <div className="docs-home-atlas-counts__item">
-            <dt>{strings.providersLabel}</dt>
-            <dd>{counts.providers}</dd>
-          </div>
-          <div className="docs-home-atlas-counts__item">
-            <dt>{strings.skillCategoriesLabel}</dt>
-            <dd>{counts.skillCategories}</dd>
-          </div>
-          <div className="docs-home-atlas-counts__item">
-            <dt>{strings.workflowsLabel}</dt>
-            <dd>{counts.workflows}</dd>
-          </div>
+      <aside className="docs-home-counts" aria-label={strings.ariaLabel}>
+        <p>{strings.heading}</p>
+        <dl>
+          <div><dt>{strings.commandsLabel}</dt><dd>{counts.commands}</dd></div>
+          <div><dt>{strings.providersLabel}</dt><dd>{counts.providers}</dd></div>
+          <div><dt>{strings.skillCategoriesLabel}</dt><dd>{counts.skillCategories}</dd></div>
+          <div><dt>{strings.workflowsLabel}</dt><dd>{counts.workflows}</dd></div>
         </dl>
       </aside>
       {children}

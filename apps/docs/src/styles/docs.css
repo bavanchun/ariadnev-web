@@ -164,17 +164,16 @@ button { border: var(--vc-border-width-hairline) solid var(--vc-color-border-str
 .docs-body { max-width: 72ch; }
 
 /* D01 docs-home atlas counts: reinforce the reference-launcher list below with
-   counts read from the catalog itself, so the strip cannot drift from what
-   the release actually ships. Grid wraps down to two columns at 320px. */
-.docs-home-atlas-counts { margin-block-end: var(--vc-space-8); padding: var(--vc-space-4) var(--vc-space-5); border: var(--vc-border-width-hairline) solid var(--vc-color-border); border-radius: var(--vc-border-radius-control); background: var(--vc-color-surface-recessed, var(--vc-color-surface)); }
-.docs-home-atlas-counts__heading { margin: 0 0 var(--vc-space-3); color: var(--vc-color-text-muted); font-family: var(--vc-font-family-mono); font-size: var(--vc-font-size-caption); text-transform: uppercase; letter-spacing: 0.06em; }
-.docs-home-atlas-counts__list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--vc-space-3) var(--vc-space-4); margin: 0; }
-.docs-home-atlas-counts__item { display: grid; gap: var(--vc-space-1); }
-.docs-home-atlas-counts__item dt { color: var(--vc-color-text-muted); font-size: var(--vc-font-size-caption); }
-.docs-home-atlas-counts__item dd { margin: 0; color: var(--vc-color-text); font-family: var(--vc-font-family-mono); font-size: var(--vc-font-size-lead); font-variant-numeric: tabular-nums; }
-@media (max-width: 40rem) {
-  .docs-home-atlas-counts__list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
+   counts read from the catalog itself. Element selectors under the block
+   keep the CSS ~30% smaller than BEM-suffixed rules would; the aside
+   markup is self-contained so bleed onto other <dl>/<dt>/<dd> is impossible. */
+.docs-home-counts { margin-block-end: var(--vc-space-8); padding: var(--vc-space-4) var(--vc-space-5); border: var(--vc-border-width-hairline) solid var(--vc-color-border); border-radius: var(--vc-border-radius-control); background: var(--vc-color-canvas-raised); }
+.docs-home-counts p { margin: 0 0 var(--vc-space-3); color: var(--vc-color-text-muted); font-family: var(--vc-font-family-mono); font-size: var(--vc-font-size-caption); text-transform: uppercase; letter-spacing: 0.06em; }
+.docs-home-counts dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--vc-space-3) var(--vc-space-4); margin: 0; }
+.docs-home-counts div { display: grid; gap: var(--vc-space-1); }
+.docs-home-counts dt { color: var(--vc-color-text-muted); font-size: var(--vc-font-size-caption); }
+.docs-home-counts dd { margin: 0; color: var(--vc-color-text); font-family: var(--vc-font-family-mono); font-size: var(--vc-font-size-lead); font-variant-numeric: tabular-nums; }
+@media (max-width: 40rem) { .docs-home-counts dl { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .page-copy-actions { margin-block-start: var(--vc-space-12); padding-block-start: var(--vc-space-4); border-top: var(--vc-border-width-hairline) solid var(--vc-color-border); }
 .code-copy-button { position: absolute; inset: var(--vc-space-1) var(--vc-space-1) auto auto; }
 .heading-copy-button { min-width: var(--vc-size-control-minimum); border-color: transparent; background: transparent; color: var(--vc-color-text-muted); padding: var(--vc-space-1); font-family: var(--vc-font-family-mono); font-size: var(--vc-font-size-caption); vertical-align: middle; }
