@@ -1,7 +1,7 @@
 ---
 phase: 3
 title: "Docs safety, shell, and shared interactions"
-status: sufficient
+status: completed
 priority: P1
 effort: "7-9d"
 dependencies: [1, 2]

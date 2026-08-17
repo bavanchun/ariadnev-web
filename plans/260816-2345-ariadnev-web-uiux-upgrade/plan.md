@@ -90,7 +90,7 @@ Command-detail routes add one D13 instance per available command.
 |---|---|---|---|
 | 1 | [Contract gate and measurement spike](./phase-01-contract-gate-and-measurement-spike.md) | — | Complete (5 decisions Accepted, ratchet guard + jitter tolerance shipped, downstream gate PASS) |
 | 2 | [Shared design tokens and foundations](./phase-02-shared-design-tokens-and-shell-primitives.md) | 1 | Complete (tokens expanded additively, 2 decision docs shipped, ratchet ratcheted up +586B/route with per-entry deltas recorded) |
-| 3 | [Docs safety, shell, and shared interactions](./phase-03-docs-safety-and-shell.md) | 1, 2 | Sufficient (slices 2-8 shipped; mobile drawer, chrome-strings full-authority, search grouping/loading, heading permalinks byte-blocked and re-scoped to post-Phase-5 revisit) |
+| 3 | [Docs safety, shell, and shared interactions](./phase-03-docs-safety-and-shell.md) | 1, 2 | Complete (slices 2-8 shipped in first pass; deferred items shipped after P5.slice1 CLI split + cap widen 300000→302000: slice 12 heading permalinks, slice 13 chrome-strings full-authority, slice 14 mobile drawer with focus containment + no-JS fallback, slice 15 search UI grouping/loading/localized fallback) |
 | 4 | [Authored docs screen experiences](./phase-04-authored-docs-screen-experiences.md) | 1, 2, 3 | Pending |
 | 5 | [Generated reference experiences](./phase-05-generated-reference-experience.md) | 1, 2, 3, 4 | In progress (slice 1 shipped: CLI monolith split into index + per-command detail pages, 6 CLI grandfathered ceilings dropped off ratchet, route count 66→384; D14/D15/D16/D17 rebuilds and skills-catalog shrink pending) |
 | 6 | [Marketing surfaces](./phase-06-marketing-surfaces.md) | 1, 2 | Pending |
