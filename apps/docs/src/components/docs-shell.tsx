@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { DocsCatalogPage, DocsContentCatalog, DocsSection } from "@/lib/content-catalog.ts";
 import { SIDEBAR_SECTION_ORDER, resolveNavigationVisibility, resolveSection } from "@/lib/content-catalog.ts";
+import { chromeStrings } from "@/lib/chrome-strings.ts";
 import { LocaleVersionSwitcher } from "./locale-version-switcher.tsx";
 import { SearchDialog } from "./search-dialog.tsx";
 
@@ -34,11 +35,12 @@ function TocLinks({ toc }: { toc: readonly TocItem[] }) {
   return <ol>{toc.map((item) => <li key={item.url} data-depth={item.depth}><a href={item.url}>{item.title}</a></li>)}</ol>;
 }
 
-export function DocsMobileToc({ toc }: { toc: readonly TocItem[] }) {
+export function DocsMobileToc({ toc, locale = "en" }: { toc: readonly TocItem[]; locale?: string }) {
   // Empty TOC renders nothing at all — an empty <details> still consumes
   // a tap target and reads as "On this page" with no items behind it.
   if (toc.length === 0) return null;
-  return <details className="docs-mobile-toc"><summary>On this page</summary><TocLinks toc={toc} /></details>;
+  const strings = chromeStrings(locale);
+  return <details className="docs-mobile-toc"><summary>{strings.tocMobileHeading}</summary><TocLinks toc={toc} /></details>;
 }
 
 export function DocsShell({ catalog, page, routeVersion, toc, children }: {
@@ -49,6 +51,7 @@ export function DocsShell({ catalog, page, routeVersion, toc, children }: {
   children: ReactNode;
 }) {
   const labels = page.locale === "vi" ? SECTION_LABELS_VI : SECTION_LABELS_EN;
+  const strings = chromeStrings(page.locale);
   // Global sidebar shows only pages whose navigation visibility resolves to
   // "global-sidebar"; reference-only pages (e.g. per-command CLI details)
   // stay in the catalog for direct URLs and search but never crowd the shelf.
@@ -75,16 +78,16 @@ export function DocsShell({ catalog, page, routeVersion, toc, children }: {
   const sectionLabel = activeSection === "meta" ? null : labels[activeSection];
   return (
     <div className="docs-frame" data-toc={toc.length > 0 ? "populated" : "empty"} lang={page.locale} dir="ltr">
-      <a className="skip-link" href="#docs-content">Skip to documentation</a>
+      <a className="skip-link" href="#docs-content">{strings.skipToContent}</a>
       <header className="docs-header">
-        <a className="brand" href="/" aria-label="ariadnev docs home">
+        <a className="brand" href="/" aria-label={strings.brandHomeLabel}>
           <img className="brand-logo" src="/ariadnev-logo.webp" width="192" height="128" alt="" />
           <span>ariadnev docs</span>
         </a>
         <SearchDialog locale={page.locale} version={routeVersion} indexUrl={`/search/${page.locale}/${routeVersion}.json`} />
         <LocaleVersionSwitcher catalog={catalog} page={page} routeVersion={routeVersion} />
       </header>
-      <aside className="docs-sidebar" aria-label="Documentation pages">
+      <aside className="docs-sidebar" aria-label={strings.sidebarLabel}>
         <nav>
           {SIDEBAR_SECTION_ORDER.map((section) => {
             const inSection = bySection.get(section);
@@ -99,8 +102,8 @@ export function DocsShell({ catalog, page, routeVersion, toc, children }: {
         </nav>
       </aside>
       <main id="docs-content" tabIndex={-1}>
-        <nav aria-label="Breadcrumb" className="breadcrumb"><ol>
-          <li><a href="/">Docs</a></li>
+        <nav aria-label={strings.breadcrumbLabel} className="breadcrumb"><ol>
+          <li><a href="/">{strings.breadcrumbRoot}</a></li>
           <li><a href={`/${page.locale}/${routeVersion}/`}>{page.locale.toUpperCase()}</a></li>
           {sectionLabel && <li aria-hidden="true">{sectionLabel}</li>}
           <li aria-current="page">{page.title}</li>
@@ -114,8 +117,8 @@ export function DocsShell({ catalog, page, routeVersion, toc, children }: {
         {children}
       </main>
       {toc.length > 0 && (
-        <aside className="docs-toc" aria-label="On this page">
-          <strong>On this page</strong>
+        <aside className="docs-toc" aria-label={strings.tocLabel}>
+          <strong>{strings.tocLabel}</strong>
           <TocLinks toc={toc} />
         </aside>
       )}

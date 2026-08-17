@@ -11,13 +11,20 @@ test("chooser, navigation, search, and copy controls expose static and accessibl
   assert.doesNotMatch(chooser, /use client|router|cookie/i);
 
   const shell = await readFile(new URL("src/components/docs-shell.tsx", app), "utf8");
-  for (const label of ["Breadcrumb", "Documentation pages", "On this page"]) assert.match(shell, new RegExp(label));
+  // Chrome strings now live in a single authority; the shell references them by key
+  // so a VI page cannot silently ship English aria labels. Assert both wiring points.
+  assert.match(shell, /from ["']@\/lib\/chrome-strings\.ts["']/);
+  for (const key of ["breadcrumbLabel", "sidebarLabel", "tocLabel"]) assert.match(shell, new RegExp(`strings\\.${key}`));
   assert.match(shell, /skip-link/);
   assert.match(shell, /lang=\{page\.locale\}/);
 
+  const chromeStrings = await readFile(new URL("src/lib/chrome-strings.ts", app), "utf8");
+  for (const literal of ["Breadcrumb", "Documentation pages", "On this page"]) assert.match(chromeStrings, new RegExp(literal));
+  for (const literal of ["Đường dẫn phân cấp", "Trang tài liệu", "Trong trang này"]) assert.match(chromeStrings, new RegExp(literal));
+
   const switchers = await readFile(new URL("src/components/locale-version-switcher.tsx", app), "utf8");
-  assert.match(switchers, /aria-label=\{`Language: \$\{localeLabel\}`\}>Language · \{page\.locale\.toUpperCase\(\)\}<\/summary>/);
-  assert.match(switchers, /aria-label=\{`Version: \$\{versionLabel\}`\}>Version · \{resolvedVersion\}<\/summary>/);
+  assert.match(switchers, /aria-label=\{`\$\{strings\.switcherLanguageLabel\}: \$\{localeLabel\}`\}/);
+  assert.match(switchers, /aria-label=\{`\$\{strings\.switcherVersionLabel\}: \$\{versionLabel\}`\}/);
   assert.match(switchers, /role="menuitem"/);
   assert.match(switchers, /aria-label=\{accessibleLabel\}/);
   assert.match(switchers, /"Previous stable"/);

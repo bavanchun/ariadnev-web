@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { chromeStrings } from "@/lib/chrome-strings.ts";
 
 const schema = {
   id: "string",
@@ -46,6 +47,7 @@ type LoadedSearchPartition = Awaited<ReturnType<typeof loadSearchPartition>>;
 type PendingResultAction = { readonly action: "focus" | "navigate"; readonly query: string };
 
 export function SearchDialog({ locale, version, indexUrl }: { locale: string; version: string; indexUrl: string }) {
+  const strings = chromeStrings(locale);
   const dialog = useRef<HTMLDialogElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const resultList = useRef<HTMLUListElement>(null);
@@ -166,7 +168,7 @@ export function SearchDialog({ locale, version, indexUrl }: { locale: string; ve
 
   return (
     <div className="search-control">
-      <button type="button" onClick={openSearch}>Search <kbd>/</kbd></button>
+      <button type="button" onClick={openSearch} aria-label={strings.searchOpenLabel}>{strings.searchPlaceholder} <kbd>/</kbd></button>
       <dialog ref={dialog} aria-labelledby={titleId} onClose={() => {
         requestSequence.current += 1;
         pendingResultAction.current = null;
@@ -176,10 +178,10 @@ export function SearchDialog({ locale, version, indexUrl }: { locale: string; ve
         setActiveResult(-1);
       }}>
         <div className="search-heading">
-          <h2 id={titleId}>Search this edition</h2>
-          <button type="button" onClick={() => dialog.current?.close()} aria-label="Close search">Close</button>
+          <h2 id={titleId}>{strings.searchOpenLabel}</h2>
+          <button type="button" onClick={() => dialog.current?.close()} aria-label={strings.searchCloseLabel}>{strings.searchCloseLabel}</button>
         </div>
-        <label htmlFor={`${titleId}-query`}>Search {locale.toUpperCase()} {version}</label>
+        <label htmlFor={`${titleId}-query`}>{strings.searchInputLabel} · {locale.toUpperCase()} {version}</label>
         <input id={`${titleId}-query`} ref={input} value={query} onChange={(event) => void runSearch(event.target.value)} onKeyDown={handleInputKeyDown} type="search" autoComplete="off" />
         <p role="status" aria-live="polite">{message}</p>
         <ul ref={resultList}>{results.map((result, index) => <li key={result.id}><a href={result.url} aria-current={activeResult === index ? "true" : undefined} onFocus={() => setActiveResult(index)} onKeyDown={(event) => handleResultKeyDown(event, index)}><strong>{result.title}</strong><span>{result.description}</span></a></li>)}</ul>

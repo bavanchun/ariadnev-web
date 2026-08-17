@@ -6,6 +6,7 @@ import { PageCopyActions } from "@/components/copy-actions.tsx";
 import { DocumentCopyEnhancer } from "@/components/document-copy-enhancer.tsx";
 import { TocActiveObserver } from "@/components/toc-active-observer.tsx";
 import { enumerateDocsRoutes } from "@/lib/content-catalog.ts";
+import { chromeStrings } from "@/lib/chrome-strings.ts";
 import { getDocsCatalog, getDocsPage } from "@/lib/content-source.ts";
 
 export const dynamicParams = false;
@@ -41,9 +42,9 @@ export default async function DocumentationPage({ params }: { params: Promise<Ro
       <article className="prose">
         <h1 id="page-title">{catalogPage.title}</h1>
         <p className="docs-description">{catalogPage.description}</p>
-        <DocsMobileToc toc={sourcePage.data.toc} />
+        <DocsMobileToc toc={sourcePage.data.toc} locale={catalogPage.locale} />
         <div className="docs-body" id="rendered-markdown"><Content /></div>
-        <PageCopyActions markdownUrl={markdownUrl} headingUrl={new URL(`${route}#page-title`, "https://docs.ariadnev.com").href} />
+        <PageCopyActions markdownUrl={markdownUrl} headingUrl={new URL(`${route}#page-title`, "https://docs.ariadnev.com").href} ariaLabel={chromeStrings(catalogPage.locale).copyOptionsLabel} />
         <DocumentCopyEnhancer rootId="rendered-markdown" />
         <TocActiveObserver rootId="rendered-markdown" />
         <DocsPager catalog={catalog} page={catalogPage} routeVersion={version} />

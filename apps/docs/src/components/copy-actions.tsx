@@ -58,9 +58,9 @@ export function CopyAction({ label, value, sourceUrl, fallbackLabel = "Copy sour
   );
 }
 
-export function PageCopyActions({ markdownUrl, headingUrl }: { markdownUrl: string; headingUrl: string }) {
+export function PageCopyActions({ markdownUrl, headingUrl, ariaLabel = "Copy options" }: { markdownUrl: string; headingUrl: string; ariaLabel?: string }) {
   return (
-    <div className="page-copy-actions" aria-label="Copy options">
+    <div className="page-copy-actions" aria-label={ariaLabel}>
       <CopyAction label="Copy Markdown" sourceUrl={markdownUrl} fallbackLabel="Markdown source" />
       <CopyAction label="Copy heading link" value={headingUrl} />
     </div>
