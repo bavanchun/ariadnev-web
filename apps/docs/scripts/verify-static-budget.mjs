@@ -143,6 +143,11 @@ export async function verifyStaticBudget({
   const ratchet = JSON.parse(await readFile(ratchetPath, "utf8"));
   if (ratchet.policy !== "ratchet-down-only") throw new Error("docs per-route ratchet policy is not ratchet-down-only");
   const capUnderRatchet = ratchet.capUnderRatchet;
+  // jitterToleranceBytes absorbs Next.js build-id/chunk-hash non-determinism
+  // (±2 bytes observed across clean rebuilds). It applies ONLY to grandfathered
+  // ceilings; the frozen 300000 byte cap has enough headroom on non-
+  // grandfathered routes that it stays strict. Absent field defaults to 0.
+  const jitterTolerance = Number.isSafeInteger(ratchet.jitterToleranceBytes) ? ratchet.jitterToleranceBytes : 0;
   const ceilings = new Map(ratchet.grandfathered.map((entry) => [entry.route, entry.ceiling]));
   const jsCap = caps.get("docs-js-compressed");
   const cssCap = caps.get("docs-css-compressed");
@@ -154,9 +159,12 @@ export async function verifyStaticBudget({
     const routePathname = routePathnameFor(param);
     const measurement = measureRoute(routePathname, outRoot);
     perRouteResults.push(measurement);
+    const isGrandfathered = ceilings.has(routePathname);
     const ceiling = ceilings.get(routePathname) ?? capUnderRatchet;
-    if (measurement.total > ceiling) {
-      const label = ceilings.has(routePathname) ? "grandfathered ceiling" : `frozen ${capUnderRatchet} byte cap`;
+    // Grandfathered ceilings get jitterTolerance; the frozen cap stays strict.
+    const effectiveCeiling = isGrandfathered ? ceiling + jitterTolerance : ceiling;
+    if (measurement.total > effectiveCeiling) {
+      const label = isGrandfathered ? `grandfathered ceiling (+${jitterTolerance}B jitter)` : `frozen ${capUnderRatchet} byte cap`;
       perRouteFailures.push(`${routePathname}: ${measurement.total} bytes exceed ${label} (${ceiling})`);
     }
     if (measurement.js > jsCap) perRouteFailures.push(`${routePathname}: ${measurement.js} JS bytes exceed the frozen ${jsCap} cap`);

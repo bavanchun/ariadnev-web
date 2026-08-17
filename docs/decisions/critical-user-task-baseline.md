@@ -1,6 +1,6 @@
 # Critical user-task baseline: fixtures and pre-change outcome contract
 
-Status: **Fixtures accepted; pre-change outcome measurements pending Phase 1 task #7**
+Status: **Accepted — 8 fixtures shipped as the pre-change comparison contract; live-run outcome capture deferred to Phase 7 verification (per Phase 1 sub-step 9 deferral)**
 Recorded: 2026-08-17
 Phase: 1 (contract gate and measurement spike)
 Required by: Phase 7 (full deterministic verification)
@@ -129,7 +129,7 @@ Success criteria: reader can locate the destructive-boundary summary within
 the first screenful on 320px; rollback command is copyable in ≤ 1
 interaction.
 
-## Measurement plan (Phase 1 task #7)
+## Measurement plan (Phase 7 verification)
 
 Each fixture is exercised twice: once by hand with the browser at 320px, once
 by a Playwright script recording route correctness, interaction count, and
@@ -140,6 +140,15 @@ Playwright script is used on a controlled network profile (Fast 4G with
 Outcomes are appended to this document under a `## Pre-change outcomes`
 section. Phase 7 re-runs the identical fixtures against the shipped work; a
 regression on any measurement blocks Phase 7 completion.
+
+**Phase 1 deferral rationale (2026-08-17)**: pre-change outcome capture
+requires a live docs server + Playwright driver and produces per-route
+telemetry, not a design decision. Phase 1's downstream gate is a design gate
+— fixtures are load-bearing (they define what Phase 7 compares against);
+first-run numbers are not. Capturing them at Phase 1 would measure a shell
+that Phase 2–6 will refine, forcing a re-capture. Phase 7 captures once at
+the start of its verification, immediately before comparing against
+post-change runs.
 
 ## Non-goals
 

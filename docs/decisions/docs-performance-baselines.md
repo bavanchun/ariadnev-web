@@ -70,6 +70,16 @@ The frozen `docs-total-transfer-compressed` cap is unchanged at 300000. The
 grandfather list is a temporary enforcement device, not a cap change, and
 lives in its own file so nothing in `performance-budgets.json` moved.
 
+**Jitter tolerance (added 2026-08-17)**: Next.js build-id and chunk-hash
+non-determinism produces ±1–2 byte drift on the same source tree across
+clean rebuilds. The ratchet file's `jitterToleranceBytes: 64` field is
+applied ONLY to grandfathered ceilings (~0.02% of the 300KB cap — big
+enough to absorb the observed drift, small enough that any real regression
+above tens of bytes still trips). The frozen 300000 byte cap on
+non-grandfathered routes has 5–11 KB headroom, so it stays strict with zero
+tolerance. `tests/docs/forbidden-runtime-features.test.mjs` locks the wiring
+so the tolerance cannot silently expand to the frozen cap.
+
 ### Shrink criterion (accepted 2026-08-17)
 
 The 10 grandfathered over-cap routes must land under the 300000-byte cap

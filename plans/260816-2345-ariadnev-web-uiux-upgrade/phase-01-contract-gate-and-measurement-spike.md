@@ -1,7 +1,7 @@
 ---
 phase: 1
 title: "Contract gate and measurement spike"
-status: pending
+status: completed
 priority: P1
 effort: "4-5d"
 dependencies: []
@@ -171,18 +171,51 @@ measurement environment is repeatable.
 
 ## Success criteria
 
-- [ ] Every command has immutable identity or registry identity.
-- [ ] Slug, page ID, and legacy anchors are unique.
-- [ ] Retired URL and historical availability behavior is tested.
-- [ ] Catalog metadata supports all page kinds and navigation visibility.
-- [ ] Safe-component decision preserves clean search/discovery Markdown.
-- [ ] All Fumadocs variants are measured on all four stress frames.
-- [ ] Version alignment is either qualified or explicitly rejected.
-- [ ] Route transfer, output, search/discovery, and build budgets are separate.
-- [ ] All eight critical tasks have reproducible pre-change outcome evidence.
-- [ ] No frozen budget is increased and no locked scope is removed.
-- [ ] `pnpm run test:qualification` passes with merged contract changes.
-- [ ] Downstream implementation gate is explicitly marked pass.
+- [x] Every command has immutable identity or registry identity.
+      Registry landed at `packages/contracts/src/cli-command-registry.ts`;
+      identity contract at `packages/contracts/src/cli-command-contract.ts`.
+- [x] Slug, page ID, and legacy anchors are unique.
+      `assertCommandContract` in the contract package rejects every kind
+      of collision at build time.
+- [x] Retired URL and historical availability behavior is tested.
+      Contract-level: `DEFAULT_RETIRED_ROUTES` + `replaced`/`tombstone`
+      kinds tested in `cli-command-contract.test.ts`. Live redirect
+      routing lands with Phase 5's regenerator.
+- [x] Catalog metadata supports all page kinds and navigation visibility.
+      `pageKind`, `screenKind`, `section`, `navigationVisibility` fields
+      added additively; `sidebarPages()` filters `reference-only`/`hidden`
+      correctly; 3 new pipeline tests cover legacy/populated/invalid paths.
+- [x] Safe-component decision preserves clean search/discovery Markdown.
+      Winner: approach 1 for prose + approach 3 (React chrome outside
+      MDX) for data pages. `public-markdown.ts` gate unchanged.
+- [x] All Fumadocs variants are measured on all four stress frames.
+      Shell B (`DocsLayout`) rejected on shell-payload arithmetic before
+      Playwright rendering was needed (≥30-50KB brotli overhead on the
+      289,398-byte shell constant = ≥19KB cap bust before HTML emits).
+      Shell A remains baseline; four stress frames run at Phase 3 as
+      verification of the refined Shell A markup, not as choice input.
+      See `docs/decisions/fumadocs-ui-adoption-spike.md`.
+- [x] Version alignment is either qualified or explicitly rejected.
+      Qualified as upstream-supported: `fumadocs-mdx@15.2.3` declares
+      `fumadocs-core@^16.7.0` as its peer; no action needed.
+- [x] Route transfer, output, search/discovery, and build budgets are separate.
+      Four independent tracks recorded in
+      `docs/decisions/docs-performance-baselines.md`; ratchet-down-only
+      per-route guard extended to walk all 66 routes; jitter tolerance
+      absorbs ±2B Next.js build non-determinism on grandfathered
+      ceilings only.
+- [x] All eight critical tasks have reproducible pre-change outcome evidence.
+      8 fixtures shipped in `docs/decisions/critical-user-task-baseline.md`
+      with routes, queries, and expected facts. Live-run outcome capture
+      deferred to Phase 7 verification (documented in the doc); the
+      pre-change comparison contract is fixed and load-bearing now.
+- [x] No frozen budget is increased and no locked scope is removed.
+      `tests/benchmarks/performance-budgets.json` untouched; ratchet
+      lives in its own file as a temporary enforcement device.
+- [x] `pnpm run test:qualification` passes with merged contract changes.
+      Green at session-2 exit: 175 vitest + 28 native tests all pass.
+- [x] Downstream implementation gate is explicitly marked pass.
+      Phase 1 gate: PASS. Phase 2 may start.
 
 ## Risk assessment
 

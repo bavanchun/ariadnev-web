@@ -83,6 +83,10 @@ test("full docs build enforces the frozen static transfer budgets", async () => 
   assert.match(verifier, /enumerateDocsRoutes/);
   assert.match(verifier, /docs-per-route-ratchet\.json/);
   assert.match(verifier, /ratchet-down-only/);
+  // jitter tolerance must apply ONLY to grandfathered ceilings; the hard
+  // 300000 byte cap on non-grandfathered routes stays strict.
+  assert.match(verifier, /jitterToleranceBytes/);
+  assert.match(verifier, /isGrandfathered\s*\?\s*ceiling\s*\+\s*jitterTolerance\s*:\s*ceiling/);
 });
 
 test("docs build rejects executable MDX before source generation", async () => {

@@ -13,6 +13,12 @@ test("the per-route ratchet manifest is a well-formed ratchet-down-only contract
   assert.equal(ratchet.schemaVersion, 1);
   assert.equal(ratchet.policy, "ratchet-down-only");
   assert.equal(ratchet.capUnderRatchet, 300000);
+  // jitterToleranceBytes: absorbs Next.js build-id non-determinism on the
+  // grandfathered ceilings only. Small values (≤128) keep the guard useful;
+  // 0 or missing means the ceiling is enforced exactly.
+  if (ratchet.jitterToleranceBytes !== undefined) {
+    assert.ok(Number.isSafeInteger(ratchet.jitterToleranceBytes) && ratchet.jitterToleranceBytes >= 0 && ratchet.jitterToleranceBytes <= 128, "jitterToleranceBytes must be an integer in [0, 128]");
+  }
   assert.match(ratchet.measuredAt, /^\d{4}-\d{2}-\d{2}$/);
   assert.ok(Array.isArray(ratchet.grandfathered));
   const seen = new Set();
