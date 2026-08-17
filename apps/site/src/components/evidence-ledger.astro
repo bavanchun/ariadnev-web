@@ -27,13 +27,24 @@ import { EVIDENCE } from "../data/marketing-facts";
     {
       EVIDENCE.map((entry) => (
         <li class="ledger__row">
-          <span class="ledger__kind" data-kind={entry.kind}>{entry.kind}</span>
-          <div>
-            <p>{entry.statement}</p>
-            <p class="ledger__caveat">
-              Limit: {entry.caveat} · Source: <a href={entry.source}>{entry.sourceLabel}</a>
-            </p>
-          </div>
+          <dl class="ledger__record">
+            <div class="ledger__field ledger__field--kind">
+              <dt>Kind</dt>
+              <dd><span class="ledger__kind" data-kind={entry.kind}>{entry.kind}</span></dd>
+            </div>
+            <div class="ledger__field ledger__field--claim">
+              <dt>Claim</dt>
+              <dd>{entry.statement}</dd>
+            </div>
+            <div class="ledger__field">
+              <dt>Source</dt>
+              <dd><a href={entry.source}>{entry.sourceLabel}</a></dd>
+            </div>
+            <div class="ledger__field">
+              <dt>Limit</dt>
+              <dd>{entry.caveat}</dd>
+            </div>
+          </dl>
         </li>
       ))
     }

@@ -727,16 +727,71 @@ pre {
 }
 
 .ledger__row {
-  display: grid;
-  gap: var(--vcs-space-2);
   padding-block: var(--vcs-space-4);
   border-bottom: var(--vcs-border-width-hairline) solid var(--vcs-surface-border);
 }
 
+.ledger__record {
+  display: grid;
+  gap: var(--vcs-space-2);
+  margin: 0;
+}
+
+.ledger__field {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr);
+  gap: var(--vcs-space-3);
+  align-items: baseline;
+}
+
+.ledger__field dt {
+  margin: 0;
+  font-family: var(--vcs-font-family-mono);
+  font-size: var(--vcs-font-size-xs);
+  color: var(--vcs-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ledger__field dd {
+  margin: 0;
+  color: var(--vcs-text-secondary);
+}
+
+.ledger__field--claim dd {
+  color: var(--vcs-text-primary);
+}
+
+/* Source links stand alone in their cell (not inline in a sentence), so they
+   must meet the WCAG 2.2 44x44 tap-target rule. */
+.ledger__field dd > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
 @media (min-width: 60rem) {
-  .ledger__row {
-    grid-template-columns: 10rem minmax(0, 1fr);
+  .ledger__record {
+    grid-template-columns: 10rem minmax(0, 20rem) minmax(0, 1fr);
     column-gap: var(--vcs-space-5);
+    row-gap: var(--vcs-space-2);
+  }
+  .ledger__field {
+    grid-template-columns: 1fr;
+    gap: var(--vcs-space-1);
+  }
+  .ledger__field--kind {
+    grid-row: span 2;
+  }
+  .ledger__field--claim {
+    grid-row: span 2;
+  }
+}
+
+@media (max-width: 640px) {
+  .ledger__field {
+    grid-template-columns: 1fr;
+    gap: var(--vcs-space-1);
   }
 }
 
