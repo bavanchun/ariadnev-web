@@ -54,6 +54,18 @@ test("chooser, navigation, search, and copy controls expose static and accessibl
   assert.match(documentCopy, /querySelectorAll\("table"\)/);
   assert.match(documentCopy, /scrollWidth\s*>\s*\.?\w*\.?clientWidth/);
   assert.match(documentCopy, /setAttribute\("tabindex",\s*"0"\)/);
+
+  // Active-TOC observer: IntersectionObserver decorates the matching TOC
+  // anchor with aria-current="location" for both desktop and mobile TOCs.
+  // Sticky offset is read from the shared token so scroll math matches the
+  // shell's actual sticky region.
+  const tocObserver = await readFile(new URL("src/components/toc-active-observer.tsx", app), "utf8");
+  assert.match(tocObserver, /IntersectionObserver/);
+  assert.match(tocObserver, /aria-current",\s*"location"/);
+  assert.match(tocObserver, /\.docs-toc a\[href\^="#"\]/);
+  assert.match(tocObserver, /\.docs-mobile-toc a\[href\^="#"\]/);
+  assert.match(tocObserver, /--vcs-layout-docs-sticky-offset/);
+  assert.match(tocObserver, /h2\[id\], h3\[id\], h4\[id\]/);
 });
 
 test("styles enforce touch targets, focus, reduced motion, and responsive overflow containment", async () => {
