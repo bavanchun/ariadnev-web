@@ -31,6 +31,10 @@ Cài đặt là một phép chiếu, không phải sao chép. Adapt engine là t
 
 Nơi provider không có đích đã xác minh cho một artifact, engine **bỏ qua** và liệt kê trong bản tóm tắt cài đặt. Nó không bao giờ bịa đường dẫn. Bảng provider × artifact đầy đủ là [tham chiếu provider](%ROOT%reference/providers/), và `ariadnev contract` in ra từ chính binary.
 
+> **Bỏ qua, không đoán.** Một kind artifact không có đích xác minh trên một provider sẽ bị từ chối, được nêu tên trong bản tóm tắt cài đặt, và để trống trên đĩa. Một đường dẫn "đoán" thầm sẽ tạo file mà provider lẫn `doctor` đều không nhận ra, nên engine chọn một skip có tên thay vì một lần ghi vô danh.
+
+Đường ống kit → adapt → projection → receipt/cache đọc trái sang phải: kit là source đã tác giả, adapt là lớp projection thuần, receipt ghi lại đúng thứ đã ghi, và cache giữ bản phân phối đã trích xuất nhưng chưa sửa đổi mà binary đã gửi kèm.
+
 ## Receipt
 
 Mỗi lần cài ghi `.ariadnev/receipt.json` (hoặc `~/.ariadnev/receipt.json` với phạm vi toàn cục): chính xác các file đã ghi, hash của chúng, và phiên bản đã ghi. Mọi thứ khác xây trên receipt:

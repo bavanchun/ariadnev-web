@@ -31,6 +31,10 @@ Installation is a projection, not a copy. The adapt engine is a set of pure func
 
 Where a provider has no verified target for an artifact, the engine **skips** it and lists the skip in the install summary. It never invents a path. The full provider × artifact table is the [provider reference](%ROOT%reference/providers/), and `ariadnev contract` prints it from the binary.
 
+> **Skip, do not guess.** An artifact kind with no verified target on a provider is refused, reported by name in the install summary, and left absent on disk. A silent "best guess" path would create a file that neither the provider nor `doctor` recognizes, so the engine chooses a named skip over an unattributable write.
+
+The kit → adapt → projection → receipt/cache pipeline reads left to right: the kit is the authored source, adapt is the pure projection layer, the receipt records what was actually written, and the cache holds the extracted-but-unmodified distribution the binary shipped with.
+
 ## The receipt
 
 Every install writes `.ariadnev/receipt.json` (or `~/.ariadnev/receipt.json` for global scope): the exact files written, their hashes, and the version that wrote them. Everything else builds on the receipt:

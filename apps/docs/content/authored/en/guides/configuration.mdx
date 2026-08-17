@@ -11,6 +11,13 @@ Settings live in two files:
 
 The layers do **not** have equal rights. A project file may set workspace-shaped keys — `paths.*`, `plan.*`, `locale.*`, `docs.maxLoc`, `project.*`, `statusline.*`. Everything else is user-only: `privacyBlock`, `trust.enabled`, `assertions`, `scripts.executionPolicy`, and notification destinations. A project file that sets a user-only key has that key dropped and named in a warning, so a repository you cloned cannot turn off your privacy blocking or point your notifications elsewhere.
 
+| Layer | May set | May not set |
+|---|---|---|
+| User (`~/.ariadnev/config.json`) | Every key. | — |
+| Project (`<project>/.ariadnev/config.json`) | `paths.*`, `plan.*`, `locale.*`, `docs.maxLoc`, `project.*`, `statusline.*`. | `privacyBlock`, `trust.enabled`, `assertions`, `scripts.executionPolicy`, notification destinations. |
+
+A rejected key is dropped, not silently accepted; every rejection is named in the resolver output below so a repository can never override a user-only key by hand-editing its own config.
+
 Notification destinations must be `https` URLs on an allowlisted host: `discord.com`, `slack.com`, `api.telegram.org`.
 
 ## See what took effect

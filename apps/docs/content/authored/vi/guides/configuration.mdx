@@ -11,6 +11,13 @@ Cấu hình nằm ở hai file:
 
 Hai lớp **không** có quyền ngang nhau. File dự án có thể đặt các khóa mang hình dạng workspace — `paths.*`, `plan.*`, `locale.*`, `docs.maxLoc`, `project.*`, `statusline.*`. Mọi thứ khác chỉ dành cho người dùng: `privacyBlock`, `trust.enabled`, `assertions`, `scripts.executionPolicy` và các đích thông báo. File dự án đặt một khóa chỉ-người-dùng sẽ bị bỏ khóa đó và nêu tên trong cảnh báo, nên một repository bạn clone không thể tắt chặn quyền riêng tư của bạn hay trỏ thông báo của bạn đi nơi khác.
 
+| Lớp | Được đặt | Không được đặt |
+|---|---|---|
+| Người dùng (`~/.ariadnev/config.json`) | Mọi khóa. | — |
+| Dự án (`<project>/.ariadnev/config.json`) | `paths.*`, `plan.*`, `locale.*`, `docs.maxLoc`, `project.*`, `statusline.*`. | `privacyBlock`, `trust.enabled`, `assertions`, `scripts.executionPolicy`, các đích thông báo. |
+
+Khóa bị từ chối sẽ bị bỏ, không âm thầm chấp nhận; mỗi lần từ chối được nêu tên trong output resolver bên dưới, nên một repository không thể ghi đè khóa chỉ-người-dùng bằng cách sửa tay chính config của nó.
+
 Đích thông báo phải là URL `https` trên host được cho phép: `discord.com`, `slack.com`, `api.telegram.org`.
 
 ## Xem điều gì đã có hiệu lực
