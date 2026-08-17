@@ -1,0 +1,282 @@
+# Full-auto deploy: every push to `main` is qualified, composed into a
+# deployment input, and deployed to staging and then production.
+#
+# This supersedes the "commit the input JSON, then `workflow_dispatch`" ceremony
+# in `deploy.yml` for the common path. `deploy.yml` stays as a manual escape
+# hatch (re-deploy an old input, rehearse a specific commit); this workflow is
+# the everyday path and never touches `deploy.yml` or its committed inputs.
+#
+# The immutable-input gate that `deploy.yml` gets from a human committing the
+# input file is replaced here by two things instead: the qualification gate
+# below must pass before anything is composed, and the `web-production`
+# GitHub environment's approver rule still runs before the production job
+# executes. That approver gate is the load-bearing safety net.
+#
+# Neither the composed evidence file nor the composed deployment input is
+# committed back to `main` — they are build artifacts of this run only, which
+# is what keeps this workflow from ever pushing to the branch that triggers it.
+#
+# Soak (`scripts/deploy/verify-soak.mjs`) is deliberately not run here. It
+# requires a continuous 24-hour healthy window measured from the most recent
+# reset (see docs/operations/deployment-and-rollback.md#soak); a deploy that
+# just happened has an elapsed window of zero by construction, so gating this
+# pipeline on it would either block every deploy forever or require faking a
+# timestamp. Soak stays the human-managed operational check it already is.
+#
+# Every `uses:` is pinned to a full commit SHA, matching `deploy.yml`.
+
+name: auto-deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  # Never cancelled midway: an interrupted deploy leaves the topology
+  # half-swapped, exactly as in deploy.yml.
+  group: auto-deploy-production
+  cancel-in-progress: false
+
+jobs:
+  qualify:
+    name: Qualify productSha
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # tests/site drives the built pages in a real browser (progressive
+      # enhancement, performance budget); the qualification gate is not
+      # complete without it.
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm run test:qualification
+      - name: Record the qualification outcome
+        run: |
+          mkdir -p qualification-summary
+          cat > qualification-summary/summary.json <<EOF
+          {
+            "productSha": "${{ github.sha }}",
+            "gate": "pnpm run test:qualification",
+            "result": "pass",
+            "ranAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "ciRunUrl": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          }
+          EOF
+      - uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v5
+        with:
+          name: qualification-summary-${{ github.sha }}
+          path: qualification-summary/summary.json
+          if-no-files-found: error
+          retention-days: 30
+      # The units this pipeline deploys are built once, here, and never
+      # rebuilt: staging and production both ship exactly the bytes this gate
+      # qualified.
+      - uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v5
+        with:
+          name: web-product-${{ github.sha }}
+          path: |
+            apps/site/dist
+            apps/docs/out
+          if-no-files-found: error
+          retention-days: 30
+
+  compose:
+    name: Compose deployment inputs
+    needs: qualify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # compose-deployment-input.mjs reads TRUSTED_SCHEMA_DIGEST from the built
+      # contracts package; nothing else this job does needs a full build.
+      - run: pnpm --filter @ariadnev-web/contracts build
+      - name: Compose the evidence file
+        # A distinct 40-hex value derived from this run, not a committed
+        # descendant commit — see the workflow header for why soak-style
+        # commit provenance does not apply to a same-run pipeline.
+        run: |
+          mkdir -p "$RUNNER_TEMP/deployment-inputs"
+          EVIDENCE_SHA=$(printf '%s' "evidence:${{ github.sha }}:${{ github.run_id }}" | sha256sum | cut -c1-40)
+          echo "EVIDENCE_SHA=$EVIDENCE_SHA" >> "$GITHUB_ENV"
+          cat > "$RUNNER_TEMP/deployment-inputs/evidence.json" <<EOF
+          {
+            "schemaVersion": 1,
+            "productSha": "${{ github.sha }}",
+            "evidenceSha": "$EVIDENCE_SHA",
+            "gate": "pnpm run test:qualification",
+            "result": "pass",
+            "ciRunUrl": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+            "composedAtUtc": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+      - name: Compose the staging input
+        run: >
+          pnpm run compose:input -- --environment staging
+          --product-sha "${{ github.sha }}" --evidence-sha "$EVIDENCE_SHA"
+          --out "$RUNNER_TEMP/deployment-inputs/staging-input.json"
+      - name: Compose the production input
+        run: >
+          pnpm run compose:input -- --environment production
+          --product-sha "${{ github.sha }}" --evidence-sha "$EVIDENCE_SHA"
+          --out "$RUNNER_TEMP/deployment-inputs/production-input.json"
+      - name: Validate both composed inputs
+        run: |
+          node scripts/deploy/validate-deployment-input.mjs "$RUNNER_TEMP/deployment-inputs/staging-input.json"
+          node scripts/deploy/validate-deployment-input.mjs "$RUNNER_TEMP/deployment-inputs/production-input.json"
+      - uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v5
+        with:
+          name: deployment-inputs-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/deployment-inputs/evidence.json
+            ${{ runner.temp }}/deployment-inputs/staging-input.json
+            ${{ runner.temp }}/deployment-inputs/production-input.json
+          if-no-files-found: error
+          retention-days: 14
+
+  deploy-staging:
+    name: Deploy staging
+    needs: compose
+    runs-on: ubuntu-latest
+    environment: web-staging
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          name: web-product-${{ github.sha }}
+          path: apps
+      - name: Refuse to deploy without both unit outputs
+        run: test -f apps/site/dist/index.html && test -f apps/docs/out/index.html
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          name: deployment-inputs-${{ github.sha }}
+          path: .deployment-input
+      - name: Prove the input names this checkout
+        run: |
+          INPUT_PATH=".deployment-input/staging-input.json"
+          test "$(node -p "require('./$INPUT_PATH').productSha")" = "$(git rev-parse HEAD)"
+          echo "INPUT_PATH=$INPUT_PATH" >> "$GITHUB_ENV"
+      - run: pnpm run sync:release -- "$INPUT_PATH"
+      - name: Reconcile the source-owned ingress rule
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WAF_TOKEN }}
+        run: node scripts/manage-edge-ingress-rule.mjs apply staging
+      - name: Deploy in topology order and smoke every machine route
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DEPLOY_TOKEN }}
+        run: |
+          set -o pipefail
+          date -u +%Y-%m-%dT%H:%M:%SZ > deploy-started-at.txt
+          pnpm run deploy:units -- "$INPUT_PATH" | tee deploy-result.json
+      - name: Verify convergence against the declared release
+        run: |
+          set -o pipefail
+          pnpm run verify:convergence -- "$INPUT_PATH" | tee convergence.json
+      - name: Probe the public edge
+        run: pnpm run probe:edge -- --environment staging
+      - name: Write the sanitized cutover record
+        run: |
+          node scripts/deploy/compose-cutover-record.mjs "$INPUT_PATH" \
+            --deploy-result deploy-result.json --convergence convergence.json \
+            --started-at "$(cat deploy-started-at.txt)" --out cutover-record.json
+      - uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v5
+        with:
+          name: cutover-record-staging-${{ github.sha }}
+          path: cutover-record.json
+          if-no-files-found: error
+          retention-days: 90
+
+  deploy-production:
+    name: Deploy production
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    # Human approval and branch policy come from the GitHub environment, not
+    # from logic in this file that a caller could route around. This is the
+    # safety net that replaces the removed immutable-input ceremony.
+    environment: web-production
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          name: web-product-${{ github.sha }}
+          path: apps
+      - name: Refuse to deploy without both unit outputs
+        run: test -f apps/site/dist/index.html && test -f apps/docs/out/index.html
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          name: deployment-inputs-${{ github.sha }}
+          path: .deployment-input
+      - name: Prove the input names this checkout
+        run: |
+          INPUT_PATH=".deployment-input/production-input.json"
+          test "$(node -p "require('./$INPUT_PATH').productSha")" = "$(git rev-parse HEAD)"
+          echo "INPUT_PATH=$INPUT_PATH" >> "$GITHUB_ENV"
+      - run: pnpm run sync:release -- "$INPUT_PATH"
+      - name: Reconcile the source-owned ingress rule
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WAF_TOKEN }}
+        run: node scripts/manage-edge-ingress-rule.mjs apply production
+      - name: Deploy in topology order and smoke every machine route
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DEPLOY_TOKEN }}
+        run: |
+          set -o pipefail
+          date -u +%Y-%m-%dT%H:%M:%SZ > deploy-started-at.txt
+          pnpm run deploy:units -- "$INPUT_PATH" | tee deploy-result.json
+      - name: Verify convergence against the declared release
+        run: |
+          set -o pipefail
+          pnpm run verify:convergence -- "$INPUT_PATH" | tee convergence.json
+      - name: Probe the public edge
+        run: pnpm run probe:edge -- --environment production
+      - name: Write the sanitized cutover record
+        run: |
+          node scripts/deploy/compose-cutover-record.mjs "$INPUT_PATH" \
+            --deploy-result deploy-result.json --convergence convergence.json \
+            --started-at "$(cat deploy-started-at.txt)" --out cutover-record.json
+      - uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v5
+        with:
+          name: cutover-record-production-${{ github.sha }}
+          path: cutover-record.json
+          if-no-files-found: error
+          retention-days: 90
