@@ -11,7 +11,7 @@
   "scripts": {
     "test": "pnpm run test:native && vitest run",
     "test:native": "node --test tests/contracts/public-edge-contract.test.mjs landing-consistency.test.mjs scripts/edge-ingress-rule.test.mjs scripts/legacy-host-redirect.test.mjs workers/edge/src/index.test.mjs workers/edge/src/github-app-auth.test.mjs workers/bridge/src/index.test.mjs tests/deployment/deployment-control-plane.test.mjs tests/deployment/compose-deployment-input.test.mjs tests/deployment/probe-public-edge.test.mjs tests/tokens/token-contract.test.mjs tests/tokens/font-contract.test.mjs tests/tokens/generated-css.test.mjs && pnpm run test:docs",
-    "test:qualification": "pnpm run docs:content && pnpm run contracts && pnpm run typecheck && pnpm run build && pnpm run test && pnpm run test:visual",
+    "test:qualification": "pnpm --filter @ariadnev-web/contracts run build && pnpm run docs:content && pnpm run contracts && pnpm run typecheck && pnpm run build && pnpm run test && pnpm run test:visual",
     "test:visual": "playwright test --project=chromium && playwright test --project=firefox tests/visual/journeys/ && playwright test --project=webkit tests/visual/journeys/",
     "test:visual:update": "playwright test --project=chromium --update-snapshots=all",
     "test:visual:lighthouse": "node tests/visual/lighthouse.mjs",
