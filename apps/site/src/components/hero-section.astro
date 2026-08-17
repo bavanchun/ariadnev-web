@@ -1,0 +1,64 @@
+---
+// Macro 1 — split hero / live path.
+//
+// The promise (eyebrow, heading, three lines, actions, install command, and
+// the optional release pin) sits in the left column of a 5/7 desktop split.
+// The right column is a static complete rendering of the execution path — the
+// same five states the execution-map macro then narrates in depth. Both
+// columns are present in the initial DOM: no script, no fetch, no motion is
+// required for either to read.
+//
+// The section keeps id="promise" as the stable first-macro anchor so header
+// anchors, structure tests, and existing bookmarks continue to resolve.
+import { PROMISE, INSTALL, SITE, EXECUTION_MAP, loadReleasePin } from "../data/marketing-facts";
+import InstallCommand from "./install-command.astro";
+
+const release = loadReleasePin();
+---
+
+<section class="shell hero" id="promise" aria-labelledby="promise-heading">
+  <div class="hero__promise">
+    <p class="eyebrow">{PROMISE.eyebrow}</p>
+    <h1 id="promise-heading">{PROMISE.heading}</h1>
+
+    <ul class="promise__lines">
+      {PROMISE.lines.map((line) => <li>{line}</li>)}
+    </ul>
+
+    <div class="action-row">
+      <a class="action action--primary" href="#install">Install ariadnev</a>
+      <a class="action" href={SITE.docsEntry}>Read the docs</a>
+    </div>
+
+    <div class="command-list promise__command">
+      <InstallCommand id="promise-install-unix" label={INSTALL.unixLabel} command={INSTALL.unixCommand} />
+    </div>
+
+    {
+      release !== null && (
+        <p class="release-pin">
+          Current release{" "}
+          <a href={release.releaseUrl}>{release.tag}</a>{" "}
+          · published {release.publishedAt.slice(0, 10)}
+        </p>
+      )
+    }
+  </div>
+
+  <figure class="hero__path" aria-labelledby="hero-path-caption">
+    <ol class="hero-path">
+      {
+        EXECUTION_MAP.map((state, index) => (
+          <li class="hero-path__step" data-hero-step={state.id}>
+            <span class="hero-path__num" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+            <span class="hero-path__label">{state.label}</span>
+            <span class="hero-path__produces">{state.produces}</span>
+          </li>
+        ))
+      }
+    </ol>
+    <figcaption class="note" id="hero-path-caption">
+      Every <code>av run</code> moves through these five states in this order. The map below narrates each one.
+    </figcaption>
+  </figure>
+</section>
