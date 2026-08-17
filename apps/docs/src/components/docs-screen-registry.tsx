@@ -2,6 +2,9 @@ import type { ReactNode } from "react";
 import type { DocsCatalogPage, DocsContentCatalog } from "@/lib/content-catalog.ts";
 import { REGISTERED_SCREEN_KINDS, hasRegisteredScreen, isGeneratedPassthroughScreen } from "./docs-screen-registry.ts";
 import { DocsHomeExperience } from "./screen-experiences/docs-home.tsx";
+import { PreviousHomeExperience } from "./screen-experiences/previous-home.tsx";
+import { InstallationExperience } from "./screen-experiences/installation.tsx";
+import { FirstInstallExperience } from "./screen-experiences/first-install.tsx";
 import { CliCommandIndexExperience } from "./reference/cli-command-index.tsx";
 import { CliCommandDetailExperience } from "./reference/cli-command-detail.tsx";
 import { ProviderReferenceExperience } from "./reference/provider-reference.tsx";
@@ -36,12 +39,12 @@ const PassThroughExperience: ScreenExperience = ({ children }) => children;
 
 const RENDERERS: Readonly<Record<string, ScreenExperience>> = Object.freeze({
   "D01-current-docs-home": DocsHomeExperience,
-  "D02-previous-home": PassThroughExperience,
-  // D03-D11 authored screens: registered as pass-through today so the
+  "D02-previous-home": PreviousHomeExperience,
+  // D05-D11 authored screens: registered as pass-through today so the
   // authored MDX composition ships unchanged. Future slices swap in
   // dedicated experiences without touching consumers of the registry.
-  "D03-installation": PassThroughExperience,
-  "D04-first-install": PassThroughExperience,
+  "D03-installation": InstallationExperience,
+  "D04-first-install": FirstInstallExperience,
   "D05-kit-adapt": PassThroughExperience,
   "D06-graph-execution": PassThroughExperience,
   "D07-evaluation": PassThroughExperience,

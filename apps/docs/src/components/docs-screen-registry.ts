@@ -12,20 +12,21 @@
  */
 export const REGISTERED_SCREEN_KINDS: readonly string[] = Object.freeze([
   "D01-current-docs-home",
-  // D02 formalizes the previous-stable home identity. The persistent
-  // edition notice is rendered at the shell layer (DocsShell already
-  // shows a copper indicator bar on any 1.0.0 route), so the D02
-  // renderer is currently a pass-through; the identifier exists so
-  // search and analytics can target the exact page and future slices
-  // can enrich it without another metadata migration.
+  // D02 formalizes the previous-stable home identity — see
+  // `components/screen-experiences/previous-home.tsx` for the catalog-
+  // derived edition notice, published-destination list, and stable-return
+  // link layered above the authored MDX body.
   "D02-previous-home",
-  // D03-D11 authored screens. Each is currently registered as a
+  // D03/D04 onboarding screens — see `components/screen-experiences/
+  // installation.tsx` and `first-install.tsx` for the integrity-flow and
+  // install-flow topology diagrams layered above the authored MDX body.
+  "D03-installation",
+  "D04-first-install",
+  // D05-D11 authored screens. Each is currently registered as a
   // pass-through — the authored MDX carries the composition today —
   // and the identifier lets future slices swap in an enriched
   // renderer without touching the catalog or the authored source.
   // Coverage is enforced by the docs-screen-registry test.
-  "D03-installation",
-  "D04-first-install",
   "D05-kit-adapt",
   "D06-graph-execution",
   "D07-evaluation",
