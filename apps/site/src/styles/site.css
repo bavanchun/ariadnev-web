@@ -704,6 +704,44 @@ pre {
   max-width: var(--vcs-size-prose-max);
 }
 
+/* Broken-graphite route for M02. The nodes use the same execution-cartography
+   graphite the marketing home draws with, but the middle node is tinted copper
+   (the human-gate/recovery colour) and a small fracture symbol replaces the
+   continuous stroke between it and its neighbours. Purely presentational —
+   the surrounding heading + lede carry the semantic message. */
+.not-found__map {
+  width: 100%;
+  max-width: 30rem;
+  height: auto;
+  margin-block: var(--vcs-space-2) 0;
+  color: var(--vcs-color-graphite-500, currentColor);
+}
+
+.not-found__map-nodes circle {
+  fill: currentColor;
+  opacity: 0.85;
+}
+
+.not-found__map-nodes .not-found__map-node--broken {
+  fill: var(--vcs-color-copper-500, currentColor);
+  opacity: 1;
+}
+
+.not-found__map-edges line {
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0.6;
+}
+
+.not-found__map-fracture {
+  stroke: var(--vcs-color-copper-500, currentColor);
+  stroke-width: 2;
+  stroke-linecap: round;
+  fill: none;
+  opacity: 0.9;
+}
+
 /* ----------------------------------------------------------------- print */
 
 @media print {

@@ -21,6 +21,36 @@ import InstallCommand from "../components/install-command.astro";
     <div class="not-found">
       <p class="eyebrow">404</p>
       <h1>This path does not exist</h1>
+
+      {/* Broken-graphite execution route. Decorative reinforcement of the "path
+          not found" idea, drawn as the same compile → policy → execute →
+          checkpoint → proof route the home page uses, but with a break between
+          the middle nodes so the visual reads as a fractured trail. Hidden from
+          assistive tech because the heading + lede already carry the meaning. */}
+      <svg
+        class="not-found__map"
+        viewBox="0 0 480 96"
+        role="img"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <g class="not-found__map-nodes">
+          <circle cx="40" cy="48" r="8" />
+          <circle cx="140" cy="48" r="8" />
+          <circle cx="240" cy="48" r="8" class="not-found__map-node--broken" />
+          <circle cx="340" cy="48" r="8" />
+          <circle cx="440" cy="48" r="8" />
+        </g>
+        <g class="not-found__map-edges">
+          <line x1="48" y1="48" x2="132" y2="48" />
+          {/* Fractured segment between policy and execute. */}
+          <line x1="148" y1="48" x2="200" y2="48" stroke-dasharray="4 6" />
+          <path d="M 210 42 L 220 54 M 220 42 L 232 54" class="not-found__map-fracture" />
+          <line x1="248" y1="48" x2="332" y2="48" stroke-dasharray="4 6" />
+          <line x1="348" y1="48" x2="432" y2="48" />
+        </g>
+      </svg>
+
       <p class="lede">
         Nothing is served here. If you followed a link to a release asset or an installer path, it either moved or was
         never published — the site does not substitute a page for a missing file.
