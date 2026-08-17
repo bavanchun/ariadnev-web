@@ -200,6 +200,14 @@ button { border: var(--vc-border-width-hairline) solid var(--vc-color-border-str
 .cli-command-related ul { margin: var(--vc-space-2) 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: var(--vc-space-2); }
 .cli-command-related a { display: inline-flex; align-items: center; min-height: var(--vc-size-control-minimum); padding: var(--vc-space-1) var(--vc-space-3); border: var(--vc-border-width-hairline) solid var(--vc-color-border); border-radius: var(--vc-border-radius-control); text-decoration: none; }
 
+/* D14 provider reference: server-rendered jump nav straight to a provider's
+   mobile record, ahead of the wide comparison matrix. Always visible, no
+   JavaScript dependency — it is a plain anchor list. */
+.provider-reference-jump { margin-block-end: var(--vc-space-4); }
+.provider-reference-jump-label { display: block; color: var(--vc-color-text-muted); font-size: var(--vc-font-size-caption); margin-block-end: var(--vc-space-1); }
+.provider-reference-jump ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: var(--vc-space-2); }
+.provider-reference-jump a { display: inline-flex; align-items: center; min-height: var(--vc-size-control-minimum); padding: var(--vc-space-1) var(--vc-space-3); border: var(--vc-border-width-hairline) solid var(--vc-color-border); border-radius: var(--vc-border-radius-control); text-decoration: none; }
+
 @media (max-width: 64rem) {
   .docs-frame { grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr); }
   .docs-toc { grid-column: 2; border-inline-start: 0; border-top: var(--vc-border-width-hairline) solid var(--vc-color-border); }

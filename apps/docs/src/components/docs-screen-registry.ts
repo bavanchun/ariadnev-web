@@ -37,6 +37,8 @@ export const REGISTERED_SCREEN_KINDS: readonly string[] = Object.freeze([
   // `components/reference/cli-command-index.tsx` and `cli-command-detail.tsx`.
   "D12-cli-command-index",
   "D13-cli-command-detail",
+  // D14 provider reference — see `components/reference/provider-reference.tsx`.
+  "D14-provider-reference",
 ]);
 
 /**

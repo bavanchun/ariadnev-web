@@ -328,6 +328,11 @@ export function buildContentRoot(options) {
     // filter, and lets other pages (e.g. the docs-home atlas strip) query
     // command counts by identity instead of guessing from route shape.
     const cliIndexMeta = { pageKind: "reference-index", screenKind: "D12-cli-command-index", section: "reference" };
+    // D14 provider reference metadata — same shape for the current edition's
+    // full comparison + records page and the previous edition's historical
+    // projection page; `provider-reference.tsx` picks its data source by
+    // comparing the page's own `version` against the catalog's `currentStable`.
+    const providerReferenceMeta = { pageKind: "reference-index", screenKind: "D14-provider-reference", section: "reference" };
     const emitCliPages = (locale, version, commandList) => {
       // Index page: light summary + links to every detail page.
       const indexBody = renderCliCommandIndex(locale, commandList);
@@ -358,13 +363,13 @@ export function buildContentRoot(options) {
         sourceSha: extracted.manifest.sourceSha,
       };
       const generated = [
-        [GENERATED_PAGE_IDS.providers, renderProviderReference(locale, providers)],
-        [GENERATED_PAGE_IDS.workflows, renderWorkflowReference(locale, workflows)],
-        [GENERATED_PAGE_IDS.releaseNotes, renderReleaseNotes(locale, releaseNotes, releaseEdition)],
+        [GENERATED_PAGE_IDS.providers, renderProviderReference(locale, providers), providerReferenceMeta],
+        [GENERATED_PAGE_IDS.workflows, renderWorkflowReference(locale, workflows), undefined],
+        [GENERATED_PAGE_IDS.releaseNotes, renderReleaseNotes(locale, releaseNotes, releaseEdition), undefined],
       ];
-      for (const [pageId, body] of generated) {
+      for (const [pageId, body, pageMeta] of generated) {
         const { title, description } = meta(body);
-        add(locale, currentStable, pageId, pageId, title, description, body);
+        add(locale, currentStable, pageId, pageId, title, description, body, pageMeta);
       }
       // Previous edition: root + the reference the historical projection carries.
       // The previous-home carries screenKind:D02 so the registry recognizes it
@@ -381,7 +386,7 @@ export function buildContentRoot(options) {
       }
       if (projection.providers?.providers) {
         const body = renderProviderReference(locale, projection.providers.providers);
-        add(locale, previousStable, GENERATED_PAGE_IDS.providers, GENERATED_PAGE_IDS.providers, meta(body).title, meta(body).description, body);
+        add(locale, previousStable, GENERATED_PAGE_IDS.providers, GENERATED_PAGE_IDS.providers, meta(body).title, meta(body).description, body, providerReferenceMeta);
       }
     }
     for (const locale of LOCALES) {
