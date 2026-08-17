@@ -38,6 +38,50 @@ test("discovery export writes deterministic physical Markdown and bounded LLM fi
   }
 });
 
+test("retired CLI routes keep their static Markdown route but never join llms.txt/llms-full.txt", async () => {
+  const base = catalogFixture();
+  const locale = "en";
+  const version = base.currentStable;
+  const retiredPage = {
+    id: `${locale}/${version}/reference/cli/old-doctor`,
+    canonicalId: `${locale}/${version}/reference/cli/old-doctor`,
+    locale,
+    version,
+    slug: ["reference", "cli", "old-doctor"],
+    sourcePath: `generated/docs/${locale}/${version}/reference/cli/old-doctor.mdx`,
+    title: "Retired: old-doctor",
+    description: "This CLI URL has moved. The command still exists under a new slug.",
+    siblings: [],
+    pageKind: "command",
+    screenKind: "D13-cli-command-retired",
+    section: "reference",
+    navigationVisibility: "reference-only",
+  };
+  const catalog = parseDocsContentCatalog({ ...base, pages: [...base.pages, retiredPage] });
+  const fixture = await temporaryContent(catalog);
+  await writeFile(
+    join(fixture.root, retiredPage.sourcePath),
+    `---\ntitle: ${retiredPage.title}\ndescription: ${retiredPage.description}\n---\n\n## Retired\n\nSee the current command.\n`,
+    "utf8",
+  );
+  const outRoot = await mkdtemp(join(tmpdir(), "ariadnev-discovery-retired-"));
+  try {
+    for (const route of enumerateDocsRoutes(catalog)) {
+      const directory = join(outRoot, route.locale, route.version, ...route.slug);
+      await mkdir(directory, { recursive: true });
+      await writeFile(join(directory, "index.html"), "<!doctype html><title>fixture</title>\n", "utf8");
+    }
+    const written = await exportStaticDiscovery(catalog, fixture.root, outRoot);
+    assert.ok(written.includes("/en/stable/reference/cli/old-doctor.md"), "retired route keeps its static Markdown export for URL compatibility");
+    const llms = await readFile(join(outRoot, "llms.txt"), "utf8");
+    assert.doesNotMatch(llms, /old-doctor/, "llms.txt must not list a retired CLI route");
+    const llmsFull = await readFile(join(outRoot, "llms-full.txt"), "utf8");
+    assert.doesNotMatch(llmsFull, /old-doctor/, "llms-full.txt must not list a retired CLI route");
+  } finally {
+    await Promise.all([fixture.root, outRoot].map((path) => rm(path, { recursive: true, force: true })));
+  }
+});
+
 test("public Markdown rejects executable MDX", () => {
   assert.match(publicMarkdown("## Example\n\n```json\n{\"safe\": true}\n```\n"), /\{"safe": true\}/);
   for (const source of [
