@@ -23,15 +23,25 @@ const notFound = readFileSync(HTML_404, "utf8");
 const sectionIds = [...html.matchAll(/<section\b[^>]*\bid="([^"]+)"/g)].map((match) => match[1]);
 
 describe("information architecture", () => {
-  it("renders exactly the six approved sections in order", () => {
+  it("renders exactly the five approved macro sections in order", () => {
+    // Workflows and providers are article subregions inside the
+    // authority-boundary macro; they are asserted separately below.
     expect(sectionIds).toEqual([
       "promise",
       "execution-map",
-      "workflows",
-      "providers",
+      "authority-boundary",
       "evidence",
       "install",
     ]);
+  });
+
+  it("keeps workflow and provider as distinct subregions inside authority-boundary", () => {
+    const authority = html.slice(
+      html.indexOf('id="authority-boundary"'),
+      html.indexOf("</section>", html.indexOf('id="authority-boundary"')),
+    );
+    expect(authority).toMatch(/<article[^>]*\bid="workflows"/);
+    expect(authority).toMatch(/<article[^>]*\bid="providers"/);
   });
 
   it("has exactly one h1", () => {

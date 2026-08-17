@@ -508,6 +508,22 @@ pre {
   text-decoration: none;
 }
 
+/* ------------------------------------------------------- authority boundary */
+
+.authority__regions {
+  display: grid;
+  gap: var(--vcs-space-6);
+}
+
+.authority__region {
+  display: block;
+}
+
+.authority__region + .authority__region {
+  padding-top: var(--vcs-space-6);
+  border-top: var(--vcs-border-width-hairline) solid var(--vcs-surface-border);
+}
+
 /* ------------------------------------------------------------- workflows */
 
 .workflows {

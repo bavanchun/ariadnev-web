@@ -1,0 +1,30 @@
+---
+// M01 macro 3 — authority boundary.
+//
+// Workflow lanes and provider projection share one macro but remain distinct
+// subregions. The workflow subregion compares authority, gate, and recovery
+// across the three canonical graphs; the provider subregion states one
+// principle and links the generated matrix. Neither loses content in this
+// composition; the outer section frames both under a shared boundary heading
+// so a reader sees "what the graph is allowed to do" and "what a provider is
+// allowed to do" as one truth, not two.
+import WorkflowSection from "./workflow-section.astro";
+import ProviderProjection from "./provider-projection.astro";
+---
+
+<section class="shell section authority" id="authority-boundary" aria-labelledby="authority-boundary-heading">
+  <div class="section__head">
+    <p class="eyebrow">Authority boundary</p>
+    <h2 id="authority-boundary-heading">Where the graph stops, and where the provider stops</h2>
+    <p class="lede">
+      Both the workflow and the provider have an authority that is stated, not implied. The workflow says what it may do
+      and where it hands control to a human. The provider projection says which parts of the kit are actually written
+      for the runtime a reader will run.
+    </p>
+  </div>
+
+  <div class="authority__regions">
+    <WorkflowSection />
+    <ProviderProjection />
+  </div>
+</section>

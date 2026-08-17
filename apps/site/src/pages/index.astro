@@ -1,5 +1,7 @@
 ---
-// The marketing page: six sections, in this order, and nothing else.
+// The marketing page: five macro sections, in this order, and nothing else.
+// Workflows and providers now share the authority-boundary macro as distinct
+// article subregions; every verified fact on the page is preserved.
 //
 // Structured data is limited to what can be verified from the public surface —
 // a name, a description, the site URL, and the platforms the installer
@@ -9,8 +11,7 @@ import BaseLayout from "../layouts/base-layout.astro";
 import SiteHeader from "../components/site-header.astro";
 import PromiseSection from "../components/promise-section.astro";
 import ExecutionMap from "../components/execution-map.astro";
-import WorkflowSection from "../components/workflow-section.astro";
-import ProviderProjection from "../components/provider-projection.astro";
+import AuthorityBoundary from "../components/authority-boundary.astro";
 import EvidenceLedger from "../components/evidence-ledger.astro";
 import FinalInstall from "../components/final-install.astro";
 import { SITE, DOCS } from "../data/marketing-facts";
@@ -34,8 +35,7 @@ const structuredData = {
   <main id="main">
     <PromiseSection />
     <ExecutionMap />
-    <WorkflowSection />
-    <ProviderProjection />
+    <AuthorityBoundary />
     <EvidenceLedger />
     <FinalInstall />
   </main>

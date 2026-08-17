@@ -8,10 +8,10 @@
 import { WORKFLOWS, WORKFLOW_SOURCE } from "../data/marketing-facts";
 ---
 
-<section class="shell section" id="workflows" aria-labelledby="workflows-heading">
+<article class="authority__region" id="workflows" aria-labelledby="workflows-heading">
   <div class="section__head">
     <p class="eyebrow">Canonical workflows</p>
-    <h2 id="workflows-heading">Three graphs, three authority boundaries</h2>
+    <h3 id="workflows-heading">Three graphs, three authority boundaries</h3>
     <p class="lede">
       These are the workflows that ship in the kit. What matters is not how many steps each one has, but what it is
       permitted to do and where it stops for you.
@@ -23,7 +23,7 @@ import { WORKFLOWS, WORKFLOW_SOURCE } from "../data/marketing-facts";
       WORKFLOWS.map((workflow) => (
         <article class="workflow" aria-labelledby={`workflow-${workflow.id}`}>
           <p class="workflow__id"><code>{workflow.id}</code></p>
-          <h3 id={`workflow-${workflow.id}`}>{workflow.title}</h3>
+          <h4 id={`workflow-${workflow.id}`}>{workflow.title}</h4>
           <dl class="workflow__facets">
             <div class="workflow__facet">
               <dt>Authority</dt>
@@ -47,4 +47,4 @@ import { WORKFLOWS, WORKFLOW_SOURCE } from "../data/marketing-facts";
   <p class="note">
     Source: <a href={WORKFLOW_SOURCE.source}>{WORKFLOW_SOURCE.sourceLabel}</a>. {WORKFLOW_SOURCE.caveat}
   </p>
-</section>
+</article>

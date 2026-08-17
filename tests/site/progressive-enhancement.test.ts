@@ -55,7 +55,9 @@ describe("with JavaScript disabled", () => {
     const text = await page.locator("body").innerText();
     for (const fact of ESSENTIAL) expect(text, `missing without JS: ${fact}`).toContain(fact);
 
-    expect(await page.locator("main > section").count()).toBe(6);
+    // Five macro sections; workflows and providers are article subregions
+    // inside the authority-boundary macro.
+    expect(await page.locator("main > section").count()).toBe(5);
     expect(await page.locator("[data-map-step]").count()).toBe(5);
     expect(await page.locator(".workflow").count()).toBe(3);
 
