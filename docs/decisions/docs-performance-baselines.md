@@ -76,9 +76,22 @@ clean rebuilds. The ratchet file's `jitterToleranceBytes: 64` field is
 applied ONLY to grandfathered ceilings (~0.02% of the 300KB cap — big
 enough to absorb the observed drift, small enough that any real regression
 above tens of bytes still trips). The frozen 300000 byte cap on
-non-grandfathered routes has 5–11 KB headroom, so it stays strict with zero
+non-grandfathered routes has 4–6 KB headroom, so it stays strict with zero
 tolerance. `tests/docs/forbidden-runtime-features.test.mjs` locks the wiring
 so the tolerance cannot silently expand to the frozen cap.
+
+**Phase 2 ratchet-up (2026-08-17)**: the Phase 2 token expansion (state /
+content / layout roles landing in `packages/tokens/src/tokens.json`) grew
+every grandfathered ceiling by ~586 bytes compressed. That is entirely
+shell CSS — the per-route HTML fraction did not change. Every ceiling
+in `docs-per-route-ratchet.json` was measured, updated, and annotated with
+the delta and the reason. This is a designed, load-bearing change: Phase 3
+consumes the new tokens to compose Shell A's refined markup. Phase 3's
+shrink criterion (all grandfathered ceilings = 300000 before Phase 3
+completes) now covers both the pre-Phase-2 gap (4–13KB per route) and the
+Phase-2 shell-CSS growth (~586B per route). The frozen 300000 byte cap
+was not moved; the installation route sits at 296,011 bytes with ~4KB
+headroom, and 56 of 66 routes remain under cap unchanged.
 
 ### Shrink criterion (accepted 2026-08-17)
 

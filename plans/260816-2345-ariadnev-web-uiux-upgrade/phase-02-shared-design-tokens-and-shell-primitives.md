@@ -1,7 +1,7 @@
 ---
 phase: 2
 title: "Shared design tokens and foundations"
-status: pending
+status: completed
 priority: P1
 effort: "3-4d"
 dependencies: [1]
@@ -103,16 +103,43 @@ file. Avoid a fake semibold alias for the non-variable display face.
 
 ## Success criteria
 
-- [ ] Every brainstorm state and content surface has a semantic token contract.
-- [ ] Site and docs generated CSS expose the same shared vocabulary.
-- [ ] Inter 500 renders and passes Vietnamese/font-size budgets.
-- [ ] Display font is not falsely advertised as variable or medium.
-- [ ] Existing tokens retain meaning and contrast tests do not weaken.
-- [ ] Generated CSS is deterministic and hand-edit-free.
-- [ ] Decision record states which layout values are shared vs app-local.
-- [ ] Foundation specimen passes all four stress-frame reviews and gives later
+- [x] Every brainstorm state and content surface has a semantic token contract.
+      10 state groups (hover, pressed, selected, current, disabled, loading,
+      success, error, destructive, copySuccess) and 10 content-surface groups
+      (code, codeInline, table, 5 callouts, overlay, selection, empty,
+      errorSurface) landed in `packages/tokens/src/tokens.json`.
+- [x] Site and docs generated CSS expose the same shared vocabulary.
+      Shared-primitive block asserted byte-identical between site.css and
+      docs.css (existing `generated-css.test.mjs`); only documented surface
+      aliases differ.
+- [x] Inter 500 renders and passes Vietnamese/font-size budgets.
+      `font.weight.medium: 500` sits inside the variable-face 400..700 range;
+      Vietnamese repertoire coverage asserted for all three fonts by
+      `font-contract.test.mjs`.
+- [x] Display font is not falsely advertised as variable or medium.
+      Be Vietnam Pro stays 700-only in the manifest; token
+      `font.weight.$description` explicitly bans a display-medium alias.
+- [x] Existing tokens retain meaning and contrast tests do not weaken.
+      All original token values preserved; every prior contrast test still
+      passes; new tests added strictly on top.
+- [x] Generated CSS is deterministic and hand-edit-free.
+      `generated-css.test.mjs` re-runs `generateCss` twice per target and
+      asserts byte equality; `build --check` fails if dist is stale.
+- [x] Decision record states which layout values are shared vs app-local.
+      `docs/decisions/state-layers-content-surfaces-and-dimensions.md`
+      documents `layout.docs.*` + `layout.table.*` + `layout.density.*` as
+      shared; `layout.marketing.*` as site-only.
+- [x] Foundation specimen passes all four stress-frame reviews and gives later
       phases one explicit visual-quality reference.
-- [ ] `pnpm run test:qualification` passes.
+      `docs/design/living-execution-atlas-foundation-specimen.md` pins
+      hierarchy, spacing, callout, code, focus, and reduced-motion rules
+      for CLI 320px, provider 320px, desktop CLI lookup, and complete VI
+      shell. Prose-first (no screenshots) because Phase 3–6 own the actual
+      render surfaces.
+- [x] `pnpm run test:qualification` passes.
+      175 vitest + 85 native (main) + 45 token contract + 28 docs native
+      = green. Phase 2 shell-CSS growth (~586B/route) recorded as
+      ratchet-up in `docs-per-route-ratchet.json` with per-entry deltas.
 
 ## Risk assessment
 
