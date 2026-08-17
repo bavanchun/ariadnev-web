@@ -64,7 +64,15 @@ export async function buildSearchPartition(
     if (sourceByPage.has(source.pageId)) throw new Error("duplicate search source page id");
     sourceByPage.set(source.pageId, source.content);
   }
-  const pages = catalog.pages.filter((page) => findCatalogPage(catalog, locale, routeVersion, page.slug)?.id === page.id);
+  // Retired CLI routes (`D13-cli-command-retired`) render a thin
+  // replaced/tombstone notice, not command content, and always name the same
+  // command a live `D13-cli-command-detail` page already covers. Indexing
+  // both would surface two search hits for one command; only the canonical
+  // detail page (or, once retired, the index/tombstone as appropriate) is
+  // ever a real result, so retired-route pages never enter the partition.
+  const pages = catalog.pages.filter(
+    (page) => page.screenKind !== "D13-cli-command-retired" && findCatalogPage(catalog, locale, routeVersion, page.slug)?.id === page.id,
+  );
   const database = create({ schema: SEARCH_SCHEMA });
   const documentIds = new Set<string>();
   for (const page of [...pages].sort((left, right) => left.id.localeCompare(right.id))) {

@@ -26,6 +26,36 @@ test("Orama partitions are deterministic, isolated, and within the frozen budget
   }
 });
 
+test("retired CLI routes never produce a second search hit for an already-canonical command", async () => {
+  const base = catalogFixture();
+  const locale = "en";
+  const version = base.currentStable;
+  const retiredPage = {
+    id: `${locale}/${version}/reference/cli/old-doctor`,
+    canonicalId: `${locale}/${version}/reference/cli/old-doctor`,
+    locale,
+    version,
+    slug: ["reference", "cli", "old-doctor"],
+    sourcePath: `generated/docs/${locale}/${version}/reference/cli/old-doctor.mdx`,
+    title: "Retired: old-doctor",
+    description: "This CLI URL has moved. The command still exists under a new slug.",
+    siblings: [],
+    pageKind: "command",
+    screenKind: "D13-cli-command-retired",
+    section: "reference",
+    navigationVisibility: "reference-only",
+  };
+  const catalog = parseDocsContentCatalog({ ...base, pages: [...base.pages, retiredPage] });
+  const sources = catalog.pages.map((page) => ({
+    pageId: page.id,
+    content: page.id === retiredPage.id ? "doctor renamed retired notice" : "doctor command detail content",
+  }));
+  const envelope = await buildSearchPartition(catalog, locale, version, sources);
+  assert.ok(!envelope.documentIds.includes(`${locale}/${version}/reference/cli/old-doctor`), "retired route must not enter the search partition");
+  const hits = await querySearchPartition(envelope, "doctor");
+  assert.equal(hits.filter((document) => document.url.includes("old-doctor")).length, 0);
+});
+
 test("search generation rejects duplicate source IDs and partition drift", async () => {
   const catalog = parseDocsContentCatalog(catalogFixture());
   await assert.rejects(buildSearchPartition(catalog, "en", "stable", [

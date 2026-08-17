@@ -10,10 +10,13 @@ import { useEffect, useId, useRef, useState } from "react";
 // the index remains fully usable without JS, matching the phase-05
 // requirement that client-side filtering is enhancement only.
 //
-// Grouping structure it expects: a sequence of `<h3>` + `<table>` siblings
-// directly inside the root element (exactly what `CliCommandIndexExperience`
-// renders). A group's heading and table hide together once every row in
-// that table is filtered out.
+// Grouping structure it expects: a sequence of `<h3>` + `<table>` pairs in
+// document order somewhere inside the root element — each pair may sit
+// directly inside `root` or be wrapped in an intermediate container (e.g.
+// `CliCommandIndexExperience`'s per-namespace `<div>`), since it walks
+// `root.querySelectorAll` rather than only `root.children`. A group's
+// heading and table hide together once every row in that table is filtered
+// out.
 export function ReferenceIndexFilter({
   rootId,
   label,
@@ -37,13 +40,12 @@ export function ReferenceIndexFilter({
 
     let lastHeading: HTMLElement | null = null;
     let visibleGroups = 0;
-    for (const child of Array.from(root.children)) {
-      if (child.tagName === "H3") {
-        lastHeading = child as HTMLElement;
+    for (const node of Array.from(root.querySelectorAll<HTMLElement>("h3, table"))) {
+      if (node.tagName === "H3") {
+        lastHeading = node;
         continue;
       }
-      if (child.tagName !== "TABLE") continue;
-      const table = child as HTMLTableElement;
+      const table = node as HTMLTableElement;
       const rows = Array.from(table.querySelectorAll<HTMLTableRowElement>("tbody tr"));
       let visibleRows = 0;
       for (const row of rows) {
