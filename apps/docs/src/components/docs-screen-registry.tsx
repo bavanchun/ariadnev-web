@@ -31,6 +31,18 @@ const PassThroughExperience: ScreenExperience = ({ children }) => children;
 const RENDERERS: Readonly<Record<string, ScreenExperience>> = Object.freeze({
   "D01-current-docs-home": DocsHomeExperience,
   "D02-previous-home": PassThroughExperience,
+  // D03-D11 authored screens: registered as pass-through today so the
+  // authored MDX composition ships unchanged. Future slices swap in
+  // dedicated experiences without touching consumers of the registry.
+  "D03-installation": PassThroughExperience,
+  "D04-first-install": PassThroughExperience,
+  "D05-kit-adapt": PassThroughExperience,
+  "D06-graph-execution": PassThroughExperience,
+  "D07-evaluation": PassThroughExperience,
+  "D08-upgrading": PassThroughExperience,
+  "D09-configuration": PassThroughExperience,
+  "D10-doctor-audit-backups-uninstall": PassThroughExperience,
+  "D11-migration": PassThroughExperience,
 });
 
 // Cross-check the two halves at module load. Every declared kind in the

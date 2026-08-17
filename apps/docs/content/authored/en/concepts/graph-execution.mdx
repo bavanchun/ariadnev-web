@@ -1,6 +1,7 @@
 ---
 title: "Graph execution"
 description: "How av run compiles a provider-neutral workflow, decides policy locally, and records durable, resumable state."
+screenKind: "D06-graph-execution"
 ---
 
 `av run` is ariadnev's local execution control plane. It compiles a canonical, provider-neutral workflow from the kit, enforces policy before any provider executes, and records enough private durable state to resume after interruption. Codex and Claude Code implement the same executor contract; provider settings never enter the graph.
