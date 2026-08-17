@@ -61,14 +61,14 @@ jobs:
       # enhancement, performance budget); the qualification gate is not
       # complete without it.
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm run test:qualification
+      - run: pnpm run test:qualification:ci
       - name: Record the qualification outcome
         run: |
           mkdir -p qualification-summary
           cat > qualification-summary/summary.json <<EOF
           {
             "productSha": "${{ github.sha }}",
-            "gate": "pnpm run test:qualification",
+            "gate": "pnpm run test:qualification:ci",
             "result": "pass",
             "ranAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "ciRunUrl": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
@@ -124,7 +124,7 @@ jobs:
             "schemaVersion": 1,
             "productSha": "${{ github.sha }}",
             "evidenceSha": "$EVIDENCE_SHA",
-            "gate": "pnpm run test:qualification",
+            "gate": "pnpm run test:qualification:ci",
             "result": "pass",
             "ciRunUrl": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
             "composedAtUtc": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
