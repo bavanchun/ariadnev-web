@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { DocsMobileToc, DocsShell } from "@/components/docs-shell.tsx";
+import { DocsPager } from "@/components/docs-pager.tsx";
 import { PageCopyActions } from "@/components/copy-actions.tsx";
 import { DocumentCopyEnhancer } from "@/components/document-copy-enhancer.tsx";
 import { enumerateDocsRoutes } from "@/lib/content-catalog.ts";
@@ -43,6 +44,7 @@ export default async function DocumentationPage({ params }: { params: Promise<Ro
         <div className="docs-body" id="rendered-markdown"><Content /></div>
         <PageCopyActions markdownUrl={markdownUrl} headingUrl={new URL(`${route}#page-title`, "https://docs.ariadnev.com").href} />
         <DocumentCopyEnhancer rootId="rendered-markdown" />
+        <DocsPager catalog={catalog} page={catalogPage} routeVersion={version} />
       </article>
     </DocsShell>
   );
