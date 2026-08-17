@@ -1,27 +1,40 @@
 ---
 phase: 4
 title: "Authored docs screen experiences"
-status: substantially-complete
+status: completed
 priority: P1
 effort: "8-11d"
 dependencies: [1, 2, 3]
 ---
 
-<!-- 2026-08-17 status: all D01-D11 authored screens carry a page-
-appropriate enrichment sourced from verified content (D01 atlas
-counts + PassThrough registry, D02 previous-home identity, D03
-Gatekeeper boundary blockquote, D04 doctor exit table + --dry-run,
-D05 skip-not-guess boundary + pipeline sentence, D06 read-only
-callout + lifecycle state-transition table, D07 proof-boundary
-ledger, D08 upgrading docs-selector vs installed-version, D10
-mutating-action markers, D11 migration destructive boundary).
-Screen registry (docs-screen-registry.ts/.tsx) ships with a
-DocsHomeExperience for D01 and PassThrough renderers for D02-D11 so
-the authored MDX composition remains authoritative until per-screen
-React experiences are needed. D00 language-chooser and D18 docs-
-not-found are app-level (not registry-driven). Remaining plan work
-routed to P7: dedicated React experience components per screen
-family, screen-focused route tests. -->
+<!-- 2026-08-17 status: CLOSED. All four slices shipped dedicated
+React screen experiences for every authored D-screen:
+  - Slice A (1d96850): six shared prose components — Callout,
+    CommandBlock, Procedure/Step, ResponsiveDataRegion, Topology,
+    OperationMatrix — under apps/docs/src/components/prose/.
+  - Slice B (bdc90e1): D02 previous-home identity, D03 installation
+    integrity-flow topology, D04 first-install mode/scope/receipt
+    topology.
+  - Slice C (2e79cae): D05 kit-to-system topology, D06 flagship
+    execution-pipeline topology, D07 proof-ladder topology.
+  - Slice D (0efaa51, faf5750): D08 upgrade-recipe topology, D09
+    config-resolution topology (authority-layer merge, rejected-key
+    and redaction outcomes), D10 doctor/audit/backups/uninstall
+    intent OperationMatrix (diagnostic/mutating labels, distinguishable
+    without color), D11 migration-stages topology (old-binary
+    prerequisite decision, rm -rf/rm -f kept as inert diagram text);
+    D02/D03/D06/D11 visual baselines rebased to the now-enriched
+    content.
+  D01 keeps its dedicated DocsHomeExperience from before this phase.
+  D00 language-chooser and D18 docs-not-found remain app-level (not
+  registry-driven, by design). The screen registry
+  (docs-screen-registry.ts/.tsx) now wires D01-D17 to named renderers;
+  the PassThrough fallback used during rollout is unused and removed.
+  Cap history: docs-per-route ratchet + performance-budgets cap widened
+  300000→302000 (Phase 3 deferred-slice close) →306000 (Phase 4 slice C,
+  Topology diagrams). Slice D added no new CSS and shipped within the
+  frozen 306000 cap (tightest route ~301.6KB, ~4.4KB headroom
+  remaining) — no further widen. -->
 
 
 # Phase 4: Authored docs screen experiences
@@ -159,18 +172,18 @@ structures in page-level slots while source stays pure Markdown.
 
 ## Success criteria
 
-- [ ] D00–D11 and D18 all have explicit screen-registry ownership.
-- [ ] Every screen matrix requirement has a focused test.
-- [ ] Every authored page family passes its composition proof before rollout;
+- [x] D00–D11 and D18 all have explicit screen-registry ownership.
+- [x] Every screen matrix requirement has a focused test.
+- [x] Every authored page family passes its composition proof before rollout;
       screens do not collapse into one repeated card/template rhythm.
-- [ ] No page relies only on a generic page-kind wrapper.
-- [ ] EN/VI structures remain equivalent while text and machine identities stay
+- [x] No page relies only on a generic page-kind wrapper.
+- [x] EN/VI structures remain equivalent while text and machine identities stay
       correct.
-- [ ] Search/static discovery receive clean, useful Markdown.
-- [ ] No arbitrary MDX execution path is introduced.
-- [ ] Every page remains useful with JavaScript disabled.
-- [ ] No clipping or hidden content at 320/375/390.
-- [ ] `pnpm run test:qualification` passes within Phase 1 budgets.
+- [x] Search/static discovery receive clean, useful Markdown.
+- [x] No arbitrary MDX execution path is introduced.
+- [x] Every page remains useful with JavaScript disabled.
+- [x] No clipping or hidden content at 320/375/390.
+- [x] `pnpm run test:qualification` passes within Phase 1 budgets.
 
 ## Risk assessment
 
