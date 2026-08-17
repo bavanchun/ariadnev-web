@@ -59,3 +59,15 @@ test("the docs-home page is present in both locales of the current stable editio
     assert.equal(home.screenKind, "D01-current-docs-home", `${locale} docs-home did not carry the D01 screenKind`);
   }
 });
+
+test("the previous-home page carries D02 in both locales of the previous stable edition", async () => {
+  const catalog = await currentCatalog();
+  for (const locale of ["en", "vi"]) {
+    const home = catalog.pages.find(
+      (page) => page.locale === locale && page.version === catalog.previousStable && page.canonicalId === "core/index",
+    );
+    assert.ok(home, `${locale} previous-home is missing from the previous stable edition`);
+    assert.equal(home.screenKind, "D02-previous-home", `${locale} previous-home did not carry the D02 screenKind`);
+    assert.ok(hasRegisteredScreen(home.screenKind), "D02 screenKind must have a registry owner");
+  }
+});

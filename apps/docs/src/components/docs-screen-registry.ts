@@ -12,6 +12,13 @@
  */
 export const REGISTERED_SCREEN_KINDS: readonly string[] = Object.freeze([
   "D01-current-docs-home",
+  // D02 formalizes the previous-stable home identity. The persistent
+  // edition notice is rendered at the shell layer (DocsShell already
+  // shows a copper indicator bar on any 1.0.0 route), so the D02
+  // renderer is currently a pass-through; the identifier exists so
+  // search and analytics can target the exact page and future slices
+  // can enrich it without another metadata migration.
+  "D02-previous-home",
 ]);
 
 /**

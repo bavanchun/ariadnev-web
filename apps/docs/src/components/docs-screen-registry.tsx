@@ -21,8 +21,16 @@ export interface DocsScreenContext {
 
 type ScreenExperience = (context: DocsScreenContext) => ReactNode;
 
+// Pass-through renderer for screens whose composition is fully carried
+// by the authored MDX body and the shell chrome. Registered so the
+// coverage test can rely on every declared authored screenKind having a
+// named owner, and so a future slice can swap in an enriched renderer
+// without touching any consumer of the registry.
+const PassThroughExperience: ScreenExperience = ({ children }) => children;
+
 const RENDERERS: Readonly<Record<string, ScreenExperience>> = Object.freeze({
   "D01-current-docs-home": DocsHomeExperience,
+  "D02-previous-home": PassThroughExperience,
 });
 
 // Cross-check the two halves at module load. Every declared kind in the

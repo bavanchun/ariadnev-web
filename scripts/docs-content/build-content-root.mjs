@@ -361,8 +361,14 @@ export function buildContentRoot(options) {
         add(locale, currentStable, pageId, pageId, title, description, body);
       }
       // Previous edition: root + the reference the historical projection carries.
+      // The previous-home carries screenKind:D02 so the registry recognizes it
+      // as the persistent-edition-notice page. The visible notice itself is
+      // shell-wide (rendered by DocsShell on any 1.0.0 route); D02 formalizes
+      // the identity so search, analytics, and future enrichment can target
+      // this exact page without another metadata migration.
+      const previousHomeMeta = { pageKind: "home", screenKind: "D02-previous-home" };
       const root = renderPreviousRoot(locale, previousStable, currentStable);
-      add(locale, previousStable, "index", "core/index", meta(root).title, meta(root).description, root);
+      add(locale, previousStable, "index", "core/index", meta(root).title, meta(root).description, root, previousHomeMeta);
       const projection = previous.historicalProjection ?? {};
       if (projection.cli?.commands) {
         emitCliPages(locale, previousStable, projection.cli.commands);
