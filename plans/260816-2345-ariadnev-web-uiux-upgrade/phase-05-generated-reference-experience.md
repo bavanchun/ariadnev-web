@@ -1,7 +1,7 @@
 ---
 phase: 5
 title: "Generated reference experiences"
-status: pending
+status: completed
 priority: P1
 effort: "7-9d"
 dependencies: [1, 2, 3, 4]
