@@ -36,6 +36,16 @@ When `ARIADNEV_EVAL_CMD` is set, an LLM judge scores skills as well. It never re
 
 Capability-gated Codex and Claude Code probes report only the pinned runtime and model that actually ran. A pinned-runtime result says nothing about a different runtime or a different model.
 
+## Proof-boundary ledger
+
+| Tier | Proves | Does not prove |
+|---|---|---|
+| Static contracts | Structural, authority, recovery, evidence, capability shape of the kit source. | Any runtime behaviour of a provider executing that graph. |
+| Tier 1 | Skill source quality clears the release floor. | That a skill behaves correctly at run time. |
+| Tier 2 | Committed scenarios (routing, trajectory, recovery, authority, duplicate-effect) hold in fresh fixtures. | Scenarios not encoded in the fixture suite; general correctness. |
+| Tier 3 | An LLM judge's rating of skill copy against a rubric. | Anything about actual execution or a different runtime. |
+| Runtime probes | The pinned runtime + model that actually ran did so with the reported result. | A different runtime, a different model, or an unpinned combination. |
+
 ## What is not proven
 
 - That any provider behaves correctly at run time merely because its graph validates.

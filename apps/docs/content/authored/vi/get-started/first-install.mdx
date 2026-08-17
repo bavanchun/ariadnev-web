@@ -42,7 +42,15 @@ ariadnev list            # nội dung kit và trạng thái cài theo provider
 ariadnev doctor          # kiểm tra sức khỏe bản cài so với receipt
 ```
 
-`doctor` thoát `0` khỏe, `1` suy giảm, `2` không khỏe, nên CI có thể chặn theo đó.
+Mã thoát của `doctor` là cổng CI:
+
+| Mã | Trạng thái | Nghĩa là |
+|---|---|---|
+| `0` | khỏe | Mọi artifact đã ghi đều còn và khớp với receipt. |
+| `1` | suy giảm | Ít nhất một artifact thiếu hoặc lệch; bản cài vẫn chạy được. |
+| `2` | không khỏe | Chính receipt không đọc được hoặc bản cài không phục hồi được nếu không cài lại. |
+
+Dùng `--dry-run` với `install` hoặc `av install` ở trên để xem chính xác những gì sẽ ghi và những gì bị bỏ qua trước khi chạm đĩa.
 
 ## Sau đó, trong agent của bạn
 

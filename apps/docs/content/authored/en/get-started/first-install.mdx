@@ -42,7 +42,15 @@ ariadnev list            # kit contents and per-provider install state
 ariadnev doctor          # health-check the install against its receipt
 ```
 
-`doctor` exits `0` healthy, `1` degraded, `2` unhealthy, so CI can gate on it.
+`doctor` exit codes are the CI gate:
+
+| Code | State | What it means |
+|---|---|---|
+| `0` | healthy | Every recorded artifact is present and matches its receipt entry. |
+| `1` | degraded | At least one artifact is missing or diverged; the install still works. |
+| `2` | unhealthy | The receipt itself is unreadable or the install is unrecoverable without reinstall. |
+
+Use `--dry-run` on either `install` or `av install` above to see the exact writes and refusals before anything touches disk.
 
 ## Then, in your agent
 

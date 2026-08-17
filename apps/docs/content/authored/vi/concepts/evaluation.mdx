@@ -36,6 +36,16 @@ Khi đặt `ARIADNEV_EVAL_CMD`, một LLM judge cũng chấm skill. Nó không b
 
 Các thăm dò Codex và Claude Code có cổng năng lực chỉ báo cáo runtime và model đã ghim thực sự chạy. Kết quả với runtime đã ghim không nói gì về runtime khác hay model khác.
 
+## Sổ ranh giới chứng minh
+
+| Tầng | Chứng minh | Không chứng minh |
+|---|---|---|
+| Hợp đồng tĩnh | Cấu trúc, thẩm quyền, phục hồi, evidence, hình dạng capability của source kit. | Bất kỳ hành vi runtime nào của một provider khi thực thi graph đó. |
+| Tầng 1 | Chất lượng source skill đạt sàn phát hành. | Rằng một skill hành xử đúng khi chạy. |
+| Tầng 2 | Các kịch bản đã commit (routing, trajectory, recovery, authority, duplicate-effect) đúng trong fixture sạch. | Kịch bản không có trong bộ fixture; tính đúng đắn tổng quát. |
+| Tầng 3 | Đánh giá của LLM judge trên copy skill so với rubric. | Bất cứ điều gì về thực thi thật hoặc một runtime khác. |
+| Thăm dò runtime | Runtime + model đã pin đúng là thứ đã chạy với kết quả đã báo cáo. | Một runtime khác, một model khác, hoặc tổ hợp không pin. |
+
 ## Điều không được chứng minh
 
 - Rằng một provider hành xử đúng lúc chạy chỉ vì đồ thị của nó hợp lệ.
