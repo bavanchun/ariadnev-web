@@ -124,8 +124,8 @@
       "id": "docs-total-transfer-compressed",
       "metric": "transfer",
       "unit": "bytes",
-      "cap": 300000,
-      "rationale": "Docs routes must remain lighter than marketing to preserve search and findability speed.",
+      "cap": 302000,
+      "rationale": "Docs routes must remain lighter than marketing to preserve search and findability speed. Cap widened from 300000 to 302000 (2026-08-17, user decision) after evidence showed the tightest non-grandfathered route (vi/1.1.0/concepts/graph-execution) sits at 300000 exactly with 0B headroom, dominated by shared shell (fonts 159KB + JS vendor 121KB + CSS 4KB + images 6KB). A +2KB widen unblocks Phase 3 shell interactions (mobile drawer, chrome-strings full-authority, search grouping/loading, heading permalinks) that were byte-blocked at 300000. See docs/decisions/docs-performance-baselines.md for the widen rationale and the plan to keep it fixed after the Phase 5 skill-catalog rebuild lands.",
       "baseline": {
         "status": "not-observable-on-legacy-topology",
         "reason": "The legacy production topology has no docs product route or docs transfer graph."

@@ -1,6 +1,6 @@
 # Docs performance baselines and the four independent budgets
 
-Status: **Accepted — baselines observed, projected-route cost measured, shrink criterion re-scoped to Phase 5 (2026-08-17)**
+Status: **Accepted — baselines observed, projected-route cost measured, shrink criterion re-scoped to Phase 5 (2026-08-17), per-route cap widened 300000 → 302000 after evidence of hard shell floor (2026-08-17)**
 Recorded: 2026-08-17
 Phase: 1 (contract gate and measurement spike)
 Required by: every downstream phase (frozen caps)
@@ -23,7 +23,7 @@ caps so no single cap silently absorbs another's growth.
 
 | Group | Metric | Current observation | Frozen cap |
 |---|---|---|---|
-| Per-route transfer | brotli-compressed HTML+CSS+JS+fonts+images along one route | see route table below | 300000 bytes (`docs-total-transfer-compressed`) |
+| Per-route transfer | brotli-compressed HTML+CSS+JS+fonts+images along one route | see route table below | 302000 bytes (`docs-total-transfer-compressed`, widened from 300000 on 2026-08-17 — see [Cap widen](#cap-widen-accepted-2026-08-17)) |
 | Total static output | bytes on disk under `apps/docs/out` | see baseline | none yet |
 | Search / discovery | brotli-compressed search partition, en/vi × stable/1.1.0/1.0.0 | see partition table | 160000 bytes each (`search-index-{en,vi}-compressed`) |
 | Discovery outputs | `llms.txt` + `llms-full.txt` + per-page `.md` | see baseline | none yet |
@@ -267,10 +267,11 @@ Retry Phase 3 slice with the plain-string-props pattern above.
 
 ## Stop conditions
 
-- **Route transfer**: any viable shell variant exceeds 300KB per route after
-  optimization. Stop for user decision; no silent cap increase, no scope cut.
-  **The 10 currently over-cap routes are held under the ratchet guard** and
-  must land under cap before Phase 3 completes (see Shrink criterion above).
+- **Route transfer**: any viable shell variant exceeds 302KB per route after
+  optimization (widened 2026-08-17; see Cap widen below). Stop for user
+  decision; no silent cap increase, no scope cut. **The 4 remaining
+  over-cap routes are held under the ratchet guard** and must land under cap
+  before Phase 5 completes (see Shrink criterion above).
 - **Total output / build cost**: unresolvable growth after optimization and
   CI sharding. Historical scope stays; unresolved cost blocks Phase 1.
 - **Search partitions**: cross 160,000 compressed on any partition. First
@@ -285,3 +286,42 @@ Retry Phase 3 slice with the plain-string-props pattern above.
 - No baseline extension to include Lighthouse LCP/INP/CLS in this decision —
   those live in `performance-budgets.json` already and are outside Phase 1
   scope.
+
+## Cap widen (accepted 2026-08-17)
+
+`docs-total-transfer-compressed` cap raised from **300000 → 302000 bytes**.
+Ratchet `capUnderRatchet` mirrors the change. User decision fork, explicit.
+
+Evidence that prompted the widen:
+
+- After Phase 5 slice 1 (CLI monolith split), the tightest non-grandfathered
+  route `vi/1.1.0/concepts/graph-execution/` measured **exactly 300000 bytes**
+  with **0 bytes headroom** against the cap.
+- Byte breakdown for that route: **HTML 9,118B** (page-specific) + **shared
+  shell 290,882B**: JS 121,101 + fonts 159,432 + CSS 4,454 + images 5,876.
+- Shared shell is a hard floor for any content route because those bytes are
+  not owned by the page. Reference-split slices (P5) help reference/ routes
+  only; a content route like `concepts/graph-execution` cannot benefit.
+- Phase 3 shell interactions (mobile drawer +550B, chrome-strings +300B,
+  search grouping/loading unknown-but-shell, heading permalinks +150B/page)
+  each grow shell or per-page HTML and would deterministically bust the
+  frozen 300000 cap on `vi/1.1.0/concepts/graph-execution/`.
+
+Why widen instead of the other unblocks considered:
+
+- **Drop a font (~30-80KB)** would deliver more headroom but is a design
+  regression (JetBrains Mono owns code blocks; Be Vietnam Pro owns display).
+  User rejected in favor of preserving the accepted brand contract.
+- **Further reference splitting** does not touch content routes. Splitting
+  the skills catalog helps `reference/skills/` only.
+- **Widen cap** is the minimum-risk, minimum-regret change: +2KB (~0.67%
+  of cap) that fits the observed shell floor plus expected Phase 3 growth
+  with ~1.4KB residual headroom.
+
+Guardrails kept by this widen:
+
+- The ratchet-down-only policy remains in force at the new 302000 cap.
+- All 4 remaining grandfathered ceilings (`reference/skills/*`) unchanged;
+  the Phase 5 skill-catalog rebuild slice must still shrink them under cap.
+- No route measured today exceeds the new cap; the widen only creates
+  headroom for shipped-and-verified Phase 3 slices, not open scope.
