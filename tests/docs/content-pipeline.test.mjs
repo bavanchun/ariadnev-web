@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import test from "node:test";
 import { buildContentRoot, loadAuthoredPages, parseArguments, parseFrontmatter } from "../../scripts/docs-content/build-content-root.mjs";
-import { code, escapeMarkdownProse, escapeMdx, renderReleaseNotes, renderSkillCatalog } from "../../scripts/docs-content/render-reference-pages.mjs";
+import { code, escapeMarkdownProse, escapeMdx, renderReleaseNotes, renderSkillCatalog, renderSkillCategoryPage } from "../../scripts/docs-content/render-reference-pages.mjs";
 import {
   parseDocsContentCatalog,
   resolveNavigationVisibility,
@@ -93,18 +93,29 @@ test("an authored body with an H1 is rejected because the title is the H1", () =
 test("bundle text is escaped so it cannot become MDX syntax", () => {
   assert.equal(escapeMdx("use <Tag> and {expr} or [x]"), "use \\<Tag\\> and \\{expr\\} or \\[x\\]");
   assert.equal(code("a `tick` b"), "``a `tick` b``");
-  const page = renderSkillCatalog("en", [
+  // The main index page: intro + category links, no dense rows. Dense rows
+  // live on the per-category detail pages (renderSkillCategoryPage) so the
+  // main /reference/skills/ route stays comfortably under the frozen cap.
+  const index = renderSkillCatalog("en", [
     { name: "av:one", category: "cat", description: "Has <jsx/> and {curly}", argumentHint: "[x]" },
     { name: "two", category: "cat", description: "plain" },
   ]);
-  // The compact table rows keep every skill in initial HTML while dropping the
-  // per-skill H3 markup that previously blew the per-route transfer cap.
-  assert.match(page, /## cat \(2\)/);
-  assert.match(page, /\| `av:one` \|/);
-  assert.match(page, /\| `av:two` \|/);
-  // Description text is escaped inside the table cell (no MDX interpretation).
-  assert.match(page, /Has \\<jsx\/\\> and \\\{curly\\\}/);
-  assert.doesNotThrow(() => publicMarkdown(page));
+  assert.match(index, /- \[cat \(2\)\]\(%ROOT%reference\/skills\/cat\/\)/);
+  assert.doesNotMatch(index, /\| `av:/);
+  assert.doesNotThrow(() => publicMarkdown(index));
+
+  // Per-category detail page: back link + intro + dense two-column table.
+  const detail = renderSkillCategoryPage("en", "cat", [
+    { name: "av:one", category: "cat", description: "Has <jsx/> and {curly}", argumentHint: "[x]" },
+    { name: "two", category: "cat", description: "plain" },
+  ]);
+  assert.match(detail, /^---\ntitle: "Skills: cat"/);
+  assert.match(detail, /\[← Back to skill catalog\]\(%ROOT%reference\/skills\/\)/);
+  assert.match(detail, /\| `av:one` \|/);
+  assert.match(detail, /\| `av:two` \|/);
+  // Bundle text is escaped so it renders literally inside the MDX table cell.
+  assert.match(detail, /Has \\<jsx\/\\> and \\\{curly\\\}/);
+  assert.doesNotThrow(() => publicMarkdown(detail));
 });
 
 // -------------------------------------------------- catalog metadata (P1)

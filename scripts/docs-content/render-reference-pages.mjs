@@ -39,10 +39,17 @@ const STRINGS = {
       title: "Skill catalog",
       description: "The Agent Skills the kit installs, grouped by category, with the argument hint each one declares.",
       intro: "Every skill below is installed as `av:<name>`. The counts and descriptions come from the release itself, so this page cannot drift from what `ariadnev list` reports.",
+      indexIntro: "Every skill below is installed as `av:<name>`. Open a category to see its skills, arguments, and descriptions. Counts and descriptions come from the release itself, so this page cannot drift from what `ariadnev list` reports.",
       total: "skills in this release",
       argumentHint: "Arguments",
       skill: "Skill",
       details: "Details",
+      categoryDetailPrefix: "Skills:",
+      categoryDetailDescriptionPrefix: "Agent Skills in the",
+      categoryDetailDescriptionSuffix: "category, with argument hints and descriptions from the release.",
+      backToIndex: "Back to skill catalog",
+      inThisCategory: "skills in this category",
+      uncategorizedLabel: "uncategorized",
     },
     workflows: {
       title: "Workflow reference",
@@ -106,10 +113,17 @@ const STRINGS = {
       title: "Danh mục skill",
       description: "Các Agent Skill mà kit cài đặt, nhóm theo danh mục, kèm gợi ý tham số mỗi skill khai báo.",
       intro: "Mọi skill dưới đây được cài với tên `av:<name>`. Số lượng và mô tả lấy trực tiếp từ bản phát hành, nên trang này không thể lệch với những gì `ariadnev list` báo cáo.",
+      indexIntro: "Mọi skill dưới đây được cài với tên `av:<name>`. Mở một danh mục để xem các skill, tham số và mô tả. Số lượng và mô tả lấy trực tiếp từ bản phát hành, nên trang này không thể lệch với những gì `ariadnev list` báo cáo.",
       total: "skill trong bản phát hành này",
       argumentHint: "Tham số",
       skill: "Skill",
       details: "Chi tiết",
+      categoryDetailPrefix: "Skill:",
+      categoryDetailDescriptionPrefix: "Các Agent Skill thuộc danh mục",
+      categoryDetailDescriptionSuffix: ", kèm gợi ý tham số và mô tả từ bản phát hành.",
+      backToIndex: "Quay lại danh mục skill",
+      inThisCategory: "skill trong danh mục này",
+      uncategorizedLabel: "chưa phân loại",
     },
     workflows: {
       title: "Tham chiếu workflow",
@@ -349,36 +363,148 @@ export function renderProviderReference(locale, providers) {
   return `${lines.join("\n").trimEnd()}\n`;
 }
 
+const SKILL_CATEGORY_UNCATEGORIZED = "uncategorized";
+// Any category with more skills than this is chunked into consecutive
+// alphabetical pages (base slug + `-2`, `-3` …) so no single detail page
+// blows the frozen per-route transfer cap. Currently only `utilities`
+// (40 skills) triggers the split; the threshold gives it two pages of
+// 20 each and leaves headroom against the 302,000 byte cap for future
+// skill count growth in other categories.
+const SKILL_CATEGORY_PAGE_MAX = 25;
+
 /**
- * The catalog renders one dense two-column table per category (skill name +
- * merged description/arguments). Previously each skill was an H3 heading with
- * a prose paragraph and a separate argument line; that pattern paid heading
- * markup + rehype-autolink-headings anchors 105 times and pushed all four
- * skill routes past the frozen per-route transfer cap. Compact table rows
- * carry the same data, keep every description present in initial HTML for
- * no-JS scan / in-page search, and are the load-bearing shrink Phase 5 owes
- * (see docs/decisions/docs-performance-baselines.md#shrink-criterion).
+ * Normalize a category label into a URL slug. `uncategorized` is the stable
+ * key both locales use so cross-locale sibling resolution matches by identity;
+ * the visible label is localized on the detail page.
+ */
+export function skillCategorySlug(category) {
+  const raw = String(category ?? "").trim().toLowerCase();
+  const slug = raw.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return slug || SKILL_CATEGORY_UNCATEGORIZED;
+}
+
+/**
+ * Canonical page id for a per-category skills page — used by
+ * `attachSiblings` to match categories across locales/editions.
+ */
+export function skillCategoryPageId(category) {
+  return `reference/skills/${skillCategorySlug(category)}`;
+}
+
+/**
+ * Group skills by their source category, keeping key stable across locales.
+ * Category-less entries collapse to `uncategorized`.
+ */
+export function groupSkillsByCategory(skills) {
+  const groups = new Map();
+  for (const skill of skills) {
+    const key = skill.category?.trim() || SKILL_CATEGORY_UNCATEGORIZED;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(skill);
+  }
+  return groups;
+}
+
+/**
+ * Chunk a category's skills into consecutive alphabetical pages that each
+ * fit the per-route cap. Returns one chunk per detail page, in link order.
+ * Each chunk carries the slug the page will be published under and its
+ * position in the pager so the detail renderer can emit prev/next links.
+ */
+export function planSkillCategoryPages(category, skills) {
+  const sorted = sortBy(skills, (item) => item.name);
+  const baseSlug = skillCategorySlug(category);
+  if (sorted.length <= SKILL_CATEGORY_PAGE_MAX) {
+    return [{ slug: baseSlug, skills: sorted, index: 0, total: 1 }];
+  }
+  const total = Math.ceil(sorted.length / SKILL_CATEGORY_PAGE_MAX);
+  const perChunk = Math.ceil(sorted.length / total);
+  const pages = [];
+  for (let position = 0; position < total; position += 1) {
+    const chunk = sorted.slice(position * perChunk, (position + 1) * perChunk);
+    const slug = position === 0 ? baseSlug : `${baseSlug}-${position + 1}`;
+    pages.push({ slug, skills: chunk, index: position, total });
+  }
+  return pages;
+}
+
+/**
+ * Main `/reference/skills/` page: intro + category index (linked list only).
+ * The dense skill rows live on the per-category detail pages this same slice
+ * emits. Splitting is the load-bearing shrink Phase 5 owes — a monolithic
+ * catalog of all 105 skills sits ~10KB above the frozen 302,000 byte cap
+ * even with the compact-table markup rewrite (see slice 2). Per-category
+ * pages keep every description in initial HTML; the main index is tiny.
+ * See docs/decisions/docs-performance-baselines.md#shrink-criterion.
  */
 export function renderSkillCatalog(locale, skills) {
   const t = STRINGS[locale].skills;
-  const lines = [frontmatter(t.title, t.description).trimEnd(), "", t.intro, "", `**${skills.length}** ${t.total}.`, ""];
-  const groups = new Map();
-  for (const skill of skills) {
-    const category = skill.category || "uncategorized";
-    if (!groups.has(category)) groups.set(category, []);
-    groups.get(category).push(skill);
-  }
-  for (const category of [...groups.keys()].sort((left, right) => left.localeCompare(right, "en"))) {
-    const members = sortBy(groups.get(category), (skill) => skill.name);
-    lines.push(`## ${escapeMdx(category)} (${members.length})`, "");
-    lines.push(tableRow([t.skill, t.details]), tableRow(["---", "---"]));
-    for (const skill of members) {
-      const name = skill.name.startsWith("av:") ? skill.name : `av:${skill.name}`;
-      const desc = escapeMdx(skill.description);
-      const args = skill.argumentHint ? ` — ${t.argumentHint}: ${code(skill.argumentHint)}` : "";
-      lines.push(tableRow([code(name), `${desc}${args}`]));
+  const groups = groupSkillsByCategory(skills);
+  const lines = [
+    frontmatter(t.title, t.description).trimEnd(),
+    "",
+    t.indexIntro,
+    "",
+    `**${skills.length}** ${t.total}.`,
+    "",
+  ];
+  const categories = [...groups.keys()].sort((left, right) => left.localeCompare(right, "en"));
+  for (const category of categories) {
+    const members = groups.get(category);
+    const label = category === SKILL_CATEGORY_UNCATEGORIZED ? t.uncategorizedLabel : category;
+    const pages = planSkillCategoryPages(category, members);
+    if (pages.length === 1) {
+      lines.push(`- [${escapeMdx(label)} (${members.length})](%ROOT%reference/skills/${pages[0].slug}/)`);
+      continue;
     }
-    lines.push("");
+    // Category is chunked across multiple detail pages; index links to each
+    // chunk so no user path depends on JS-driven pagination.
+    lines.push(`- **${escapeMdx(label)}** (${members.length}) — ${pages
+      .map((page, order) => `[${order + 1}/${pages.length}](%ROOT%reference/skills/${page.slug}/) (${page.skills.length})`)
+      .join(" · ")}`);
+  }
+  return `${lines.join("\n").trimEnd()}\n`;
+}
+
+/**
+ * Per-category detail page: back link + optional pager + dense two-column
+ * table (`Skill | Details`). Description/arguments come from source
+ * unchanged. When a category is chunked across multiple pages, `page` and
+ * `siblingPages` supply the pager metadata so each detail page carries a
+ * static "n of N" plus previous/next links to its neighbours.
+ */
+export function renderSkillCategoryPage(locale, category, skills, options = {}) {
+  const t = STRINGS[locale].skills;
+  const label = category === SKILL_CATEGORY_UNCATEGORIZED ? t.uncategorizedLabel : category;
+  const siblings = options.siblingPages ?? [];
+  const position = options.pageIndex ?? 0;
+  const hasSiblings = siblings.length > 1;
+  const suffix = hasSiblings ? ` (${position + 1}/${siblings.length})` : "";
+  const title = `${t.categoryDetailPrefix} ${label}${suffix}`;
+  const description = `${t.categoryDetailDescriptionPrefix} ${label} ${t.categoryDetailDescriptionSuffix}`;
+  const lines = [
+    frontmatter(title, description).trimEnd(),
+    "",
+    `[← ${t.backToIndex}](%ROOT%reference/skills/)`,
+    "",
+    `**${skills.length}** ${t.inThisCategory}.`,
+    "",
+    tableRow([t.skill, t.details]),
+    tableRow(["---", "---"]),
+  ];
+  for (const skill of sortBy(skills, (item) => item.name)) {
+    const name = skill.name.startsWith("av:") ? skill.name : `av:${skill.name}`;
+    const desc = escapeMdx(skill.description);
+    const args = skill.argumentHint ? ` — ${t.argumentHint}: ${code(skill.argumentHint)}` : "";
+    lines.push(tableRow([code(name), `${desc}${args}`]));
+  }
+  if (hasSiblings) {
+    const previous = siblings[position - 1];
+    const next = siblings[position + 1];
+    const parts = [];
+    if (previous) parts.push(`[← ${position}/${siblings.length}](%ROOT%reference/skills/${previous.slug}/)`);
+    if (next) parts.push(`[${position + 2}/${siblings.length} →](%ROOT%reference/skills/${next.slug}/)`);
+    if (parts.length > 0) lines.push("", parts.join(" · "));
   }
   return `${lines.join("\n").trimEnd()}\n`;
 }

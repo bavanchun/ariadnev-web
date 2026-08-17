@@ -31,7 +31,7 @@ const siblingSchema = z.object({
 // controls whether the page enters that shelf at all. Command detail pages
 // are the reason `"reference-only"` exists: they must be discoverable by
 // search and static export, but never enumerated in the global sidebar.
-const PAGE_KINDS = ["home", "get-started", "concept", "guide", "reference-index", "release-notes", "not-found", "command"] as const;
+const PAGE_KINDS = ["home", "get-started", "concept", "guide", "reference-index", "release-notes", "not-found", "command", "skill-category"] as const;
 const NAVIGATION_VISIBILITIES = ["global-sidebar", "reference-only", "hidden"] as const;
 const SECTIONS = ["get-started", "concepts", "guides", "reference", "release-notes", "meta"] as const;
 

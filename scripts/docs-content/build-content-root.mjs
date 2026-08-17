@@ -29,12 +29,15 @@ import { extractDocsBundle, TRUSTED_SCHEMA_DIGEST } from "../../packages/contrac
 import {
   GENERATED_PAGE_IDS,
   cliCommandSlug,
+  groupSkillsByCategory,
+  planSkillCategoryPages,
   renderCliCommandDetail,
   renderCliCommandIndex,
   renderPreviousRoot,
   renderProviderReference,
   renderReleaseNotes,
   renderSkillCatalog,
+  renderSkillCategoryPage,
   renderWorkflowReference,
 } from "./render-reference-pages.mjs";
 
@@ -261,6 +264,33 @@ export function buildContentRoot(options) {
     // global sidebar, so an authored top-level shelf is never crowded by 50+
     // command entries; catalog consumers still find them by pageKind/screenKind.
     const commandDetailMeta = { pageKind: "command", screenKind: "D13-cli-command-detail", section: "reference", navigationVisibility: "reference-only" };
+    // D15 per-category skills page metadata — reference-only so the global
+    // sidebar stays anchored to the authored top-level shelf; the main
+    // /reference/skills/ index is the single sidebar entry that links out to
+    // every category. Splitting is the load-bearing shrink that brings all
+    // four grandfathered skills ceilings under the frozen 302,000 byte cap
+    // (see docs/decisions/docs-performance-baselines.md#shrink-criterion).
+    const skillCategoryMeta = { pageKind: "skill-category", screenKind: "D15-skill-category", section: "reference", navigationVisibility: "reference-only" };
+    const emitSkillPages = (locale, version, skillList) => {
+      // Main index: intro + category links only. Full descriptions live on
+      // per-category detail pages so each page comfortably fits the cap.
+      const indexBody = renderSkillCatalog(locale, skillList);
+      const indexMeta = meta(indexBody);
+      add(locale, version, GENERATED_PAGE_IDS.skills, GENERATED_PAGE_IDS.skills, indexMeta.title, indexMeta.description, indexBody);
+      // Per-category detail pages. Canonical id keys off the page slug so
+      // sibling resolution matches by identity across locales/editions,
+      // including chunked pages of a large category (e.g. `utilities-2`).
+      const groups = groupSkillsByCategory(skillList);
+      for (const category of [...groups.keys()].sort((left, right) => left.localeCompare(right, "en"))) {
+        const pages = planSkillCategoryPages(category, groups.get(category));
+        for (const page of pages) {
+          const pageId = `reference/skills/${page.slug}`;
+          const body = renderSkillCategoryPage(locale, category, page.skills, { pageIndex: page.index, siblingPages: pages });
+          const parsed = meta(body);
+          add(locale, version, pageId, pageId, parsed.title, parsed.description, body, skillCategoryMeta);
+        }
+      }
+    };
     const emitCliPages = (locale, version, commandList) => {
       // Index page: light summary + links to every detail page.
       const indexBody = renderCliCommandIndex(locale, commandList);
@@ -283,9 +313,9 @@ export function buildContentRoot(options) {
     }
     for (const locale of LOCALES) {
       emitCliPages(locale, currentStable, commands);
+      emitSkillPages(locale, currentStable, skills);
       const generated = [
         [GENERATED_PAGE_IDS.providers, renderProviderReference(locale, providers)],
-        [GENERATED_PAGE_IDS.skills, renderSkillCatalog(locale, skills)],
         [GENERATED_PAGE_IDS.workflows, renderWorkflowReference(locale, workflows)],
         [GENERATED_PAGE_IDS.releaseNotes, renderReleaseNotes(locale, releaseNotes)],
       ];
