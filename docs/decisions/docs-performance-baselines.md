@@ -1,6 +1,6 @@
 # Docs performance baselines and the four independent budgets
 
-Status: **Baselines observed; projected-route measurement pending Phase 1 spike**
+Status: **Accepted — baselines observed, projected-route cost measured, shrink criterion amended to Phase-3-exit**
 Recorded: 2026-08-17
 Phase: 1 (contract gate and measurement spike)
 Required by: every downstream phase (frozen caps)
@@ -70,10 +70,10 @@ The frozen `docs-total-transfer-compressed` cap is unchanged at 300000. The
 grandfather list is a temporary enforcement device, not a cap change, and
 lives in its own file so nothing in `performance-budgets.json` moved.
 
-### Shrink criterion (PENDING FORK — awaiting user decision)
+### Shrink criterion (accepted 2026-08-17)
 
-The recommended fork amends the earlier "must land before Phase 3 begins"
-language to **"must land before Phase 3 completes"**. Rationale:
+The 10 grandfathered over-cap routes must land under the 300000-byte cap
+**before Phase 3 completes** (not before it begins). Rationale:
 
 - The shell payload is a constant 289,398 bytes compressed
   (`js=120,565 + css=3,525 + fonts=159,432 + images=5,876`). Per-route HTML
@@ -81,16 +81,12 @@ language to **"must land before Phase 3 completes"**. Rationale:
 - Shrinking the reference-index HTML alone cannot recover the over-cap routes;
   the levers are **fonts subsetting** and **JS bundle reduction** — both
   squarely Phase 2/3 shell-rewrite work.
-- The ratchet guard means nothing worsens in the interim. An entry criterion
-  would force optimizing markup that Phase 5's regenerator throws away.
+- The ratchet guard makes the softer criterion safe: nothing worsens in the
+  interim, and an entry criterion would force optimizing markup that Phase 5's
+  regenerator throws away.
 - A cap widening (an explicit user decision that lands in
   `performance-budgets.json` first) remains available as a fallback if shell
-  shrink demonstrably cannot reach the frozen cap.
-
-If accepted, the "Stop conditions" section below reads "unresolved after
-Phase 3 completion" instead of "before Phase 3 begins." Not applied yet:
-the caller stopped for user go-ahead per the "no silent stop-condition edit"
-rule. Task tracker item `P1.L`.
+  shrink demonstrably cannot reach the frozen cap during Phase 3.
 
 Every measured route shares the same shell payload budget consumption:
 `js=120,565`, `css=3,525`, `fonts=159,432`, `images=5,876`, `html=variable`.
@@ -205,8 +201,8 @@ would not reflect the pressure the plan is testing for.
 
 - **Route transfer**: any viable shell variant exceeds 300KB per route after
   optimization. Stop for user decision; no silent cap increase, no scope cut.
-  **The 10 currently over-cap routes are held under the ratchet guard**; the
-  recommended amendment above defers final shrink to Phase 3 completion.
+  **The 10 currently over-cap routes are held under the ratchet guard** and
+  must land under cap before Phase 3 completes (see Shrink criterion above).
 - **Total output / build cost**: unresolvable growth after optimization and
   CI sharding. Historical scope stays; unresolved cost blocks Phase 1.
 - **Search partitions**: cross 160,000 compressed on any partition. First
