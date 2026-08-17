@@ -302,12 +302,19 @@ export function buildContentRoot(options) {
     // four grandfathered skills ceilings under the frozen 302,000 byte cap
     // (see docs/decisions/docs-performance-baselines.md#shrink-criterion).
     const skillCategoryMeta = { pageKind: "skill-category", screenKind: "D15-skill-category", section: "reference", navigationVisibility: "reference-only" };
+    // D15 skill catalog index metadata — the compact generated Markdown body
+    // (category links + counts) stays byte-minimal and search-indexed
+    // unchanged; `skill-catalog.tsx` recognises this screenKind and replaces
+    // the rendered body with the complete, filterable, source-derived
+    // catalog of every skill so the D15 "complete grouped list in initial
+    // HTML" requirement is met on the one page a reader lands on.
+    const skillCatalogMeta = { pageKind: "reference-index", screenKind: "D15-skill-catalog", section: "reference" };
     const emitSkillPages = (locale, version, skillList) => {
       // Main index: intro + category links only. Full descriptions live on
       // per-category detail pages so each page comfortably fits the cap.
       const indexBody = renderSkillCatalog(locale, skillList);
       const indexMeta = meta(indexBody);
-      add(locale, version, GENERATED_PAGE_IDS.skills, GENERATED_PAGE_IDS.skills, indexMeta.title, indexMeta.description, indexBody);
+      add(locale, version, GENERATED_PAGE_IDS.skills, GENERATED_PAGE_IDS.skills, indexMeta.title, indexMeta.description, indexBody, skillCatalogMeta);
       // Per-category detail pages. Canonical id keys off the page slug so
       // sibling resolution matches by identity across locales/editions,
       // including chunked pages of a large category (e.g. `utilities-2`).

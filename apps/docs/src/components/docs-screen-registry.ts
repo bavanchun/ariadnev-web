@@ -39,6 +39,12 @@ export const REGISTERED_SCREEN_KINDS: readonly string[] = Object.freeze([
   "D13-cli-command-detail",
   // D14 provider reference — see `components/reference/provider-reference.tsx`.
   "D14-provider-reference",
+  // D15 skill catalog — see `components/reference/skill-catalog.tsx`. The
+  // index page's composition is already complete/minimal (formalised
+  // identity only); the per-category detail page gets the progressive
+  // name/description filter, so it graduated out of the pass-through list.
+  "D15-skill-catalog",
+  "D15-skill-category",
 ]);
 
 /**
@@ -52,7 +58,6 @@ export const REGISTERED_SCREEN_KINDS: readonly string[] = Object.freeze([
  */
 export const GENERATED_PASSTHROUGH_SCREEN_KINDS: readonly string[] = Object.freeze([
   "D13-cli-command-retired",
-  "D15-skill-category",
 ]);
 
 /** True when the registry knows how to render the given `screenKind`. */
