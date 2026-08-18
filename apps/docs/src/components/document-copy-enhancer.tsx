@@ -12,11 +12,15 @@ export function DocumentCopyEnhancer({ rootId }: { rootId: string }) {
     if (!root) return;
     const controls: HTMLButtonElement[] = [];
 
-    async function copy(value: string, success: string) {
+    async function copy(value: string, success: string, targetButton?: HTMLButtonElement, originalLabel?: string) {
       try {
         await navigator.clipboard.writeText(value);
         setFallbackText("");
         setMessage(success);
+        if (targetButton && originalLabel) {
+          targetButton.textContent = "Copied ✓";
+          setTimeout(() => { targetButton.textContent = originalLabel; }, 2000);
+        }
       } catch {
         setFallbackText(value);
         requestAnimationFrame(() => {
@@ -34,7 +38,7 @@ export function DocumentCopyEnhancer({ rootId }: { rootId: string }) {
       button.className = "code-copy-button";
       button.textContent = "Copy code";
       button.setAttribute("aria-label", "Copy code block");
-      button.addEventListener("click", () => void copy(code, "Code copied"));
+      button.addEventListener("click", () => void copy(code, "Code copied", button, "Copy code"));
       block.prepend(button);
       controls.push(button);
       // Make horizontal-scroll regions keyboard reachable. Adding tabindex

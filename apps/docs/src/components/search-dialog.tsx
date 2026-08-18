@@ -215,6 +215,11 @@ export function SearchDialog({ locale, version, indexUrl }: { locale: string; ve
             ))}</ul>
           </li>
         ))}</ul>
+        <div className="search-footer" aria-hidden="true">
+          <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+          <span><kbd>↵</kbd> select</span>
+          <span><kbd>ESC</kbd> close</span>
+        </div>
       </dialog>
     </div>
   );
