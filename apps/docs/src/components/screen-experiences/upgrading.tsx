@@ -21,13 +21,13 @@ const STRINGS = {
 
 const NODES: Record<"en" | "vi", readonly TopologyNode[]> = {
   en: [
-    { id: "check", label: "ariadnev update --check", shape: "pill" },
+    { id: "check", label: "ariadnev update --check", shape: "diamond" },
     { id: "update", label: "ariadnev update" },
     { id: "reinstall", label: "ariadnev install (per provider)" },
     { id: "doctor", label: "ariadnev doctor", shape: "pill" },
   ],
   vi: [
-    { id: "check", label: "ariadnev update --check", shape: "pill" },
+    { id: "check", label: "ariadnev update --check", shape: "diamond" },
     { id: "update", label: "ariadnev update" },
     { id: "reinstall", label: "ariadnev install (từng provider)" },
     { id: "doctor", label: "ariadnev doctor", shape: "pill" },

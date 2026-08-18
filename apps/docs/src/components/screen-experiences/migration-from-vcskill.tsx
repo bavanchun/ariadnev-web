@@ -59,6 +59,55 @@ const EDGES: Record<"en" | "vi", readonly TopologyEdge[]> = {
   ],
 };
 
+interface DiffRow {
+  aspect: string;
+  vcskill: string;
+  ariadnev: string;
+}
+
+const DIFF_ROWS: Record<"en" | "vi", readonly DiffRow[]> = {
+  en: [
+    { aspect: "Binary command", vcskill: "vc", ariadnev: "ariadnev" },
+    { aspect: "State directory", vcskill: "~/.vcskill/", ariadnev: "~/.ariadnev/" },
+    { aspect: "Receipt file", vcskill: ".vcskill/receipt.json", ariadnev: ".ariadnev/receipt.json" },
+    { aspect: "Env prefix", vcskill: "VCSKILL_*", ariadnev: "ARIADNEV_*" },
+  ],
+  vi: [
+    { aspect: "Lệnh binary", vcskill: "vc", ariadnev: "ariadnev" },
+    { aspect: "Thư mục state", vcskill: "~/.vcskill/", ariadnev: "~/.ariadnev/" },
+    { aspect: "Tệp receipt", vcskill: ".vcskill/receipt.json", ariadnev: ".ariadnev/receipt.json" },
+    { aspect: "Tiền tố biến môi trường", vcskill: "VCSKILL_*", ariadnev: "ARIADNEV_*" },
+  ],
+};
+
+function MigrationDiffTable({ locale }: { locale: "en" | "vi" }) {
+  const rows = DIFF_ROWS[locale] ?? DIFF_ROWS.en;
+  const isVi = locale === "vi";
+  return (
+    <div className="migration-diff-table" tabIndex={0}>
+      <table>
+        <caption>{isVi ? "Bảng đối chiếu chuyển đổi" : "Quick Migration Mapping"}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{isVi ? "Hạng mục" : "Aspect"}</th>
+            <th scope="col">vcskill (Legacy)</th>
+            <th scope="col">ariadnev (Current)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.aspect}>
+              <td><strong>{row.aspect}</strong></td>
+              <td><code>{row.vcskill}</code></td>
+              <td><code>{row.ariadnev}</code></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export function MigrationFromVcskillExperience({ catalogPage, children }: DocsScreenContext) {
   const locale = catalogPage.locale;
   const strings = STRINGS[locale] ?? STRINGS.en;
@@ -67,6 +116,7 @@ export function MigrationFromVcskillExperience({ catalogPage, children }: DocsSc
   return (
     <>
       <Topology locale={locale} heading={strings.heading} nodes={nodes} edges={edges} />
+      <MigrationDiffTable locale={locale} />
       {children}
     </>
   );

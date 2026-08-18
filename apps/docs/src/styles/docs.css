@@ -262,6 +262,12 @@ button { border: var(--vc-border-width-hairline) solid var(--vc-color-border-str
    each kind ("Breaking" / "Security" / "Migration"); shape (pill) plus
    text, never color alone. */
 .release-timeline-badge { display: inline-flex; align-items: center; min-height: var(--vc-size-control-minimum); padding: var(--vc-space-1) var(--vc-space-3); border: var(--vc-border-width-strong) solid var(--vc-color-border-strong); border-radius: var(--vc-border-radius-panel); text-decoration: none; font-weight: var(--vc-font-weight-semibold); }
+.migration-diff-table { margin-block: var(--vc-space-6); overflow-x: auto; border: var(--vc-border-width-hairline) solid color-mix(in oklch, var(--vc-color-border) 80%, transparent); border-radius: var(--vc-border-radius-control); background: color-mix(in oklch, var(--vc-color-canvas-raised) 70%, transparent); }
+.migration-diff-table table { width: 100%; border-collapse: collapse; }
+.migration-diff-table caption { padding: var(--vc-space-3); font-weight: var(--vcs-font-weight-bold); text-align: start; border-bottom: var(--vc-border-width-hairline) solid var(--vc-color-border); color: var(--vc-color-text); }
+.migration-diff-table th, .migration-diff-table td { padding: var(--vc-space-2) var(--vc-space-3); border-bottom: var(--vc-border-width-hairline) solid color-mix(in oklch, var(--vc-color-border) 50%, transparent); }
+.migration-diff-table code { color: var(--vcs-color-spectral-400); }
+
 
 /* Phase 1 Prose Foundations: Callouts, Badges, Procedure Steppers, and Active States */
 .callout { display: grid; gap: var(--vc-space-2); margin-block: var(--vc-space-6); padding: var(--vc-space-4); border-radius: var(--vc-border-radius-control); border-inline-start: var(--vc-border-width-gate) solid var(--vc-color-border-strong); background: var(--vc-color-canvas-raised); }
