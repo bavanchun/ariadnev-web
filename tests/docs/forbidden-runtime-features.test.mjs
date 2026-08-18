@@ -68,6 +68,7 @@ test("full docs build enforces the frozen static transfer budgets", async () => 
   assert.match(build, /scripts\/verify-static-budget\.mjs/);
   const sourceConfig = await readFile(new URL("source.config.ts", root), "utf8");
   assert.match(sourceConfig, /resolveDocsContentRoot/);
+  assert.match(sourceConfig, /\.source/);
   const temporaryExport = await readFile(new URL("../../tests/docs/run-temporary-export.mjs", root), "utf8");
   assert.match(temporaryExport, /--content-root/);
   assert.doesNotMatch(temporaryExport, /\bcp\(/);

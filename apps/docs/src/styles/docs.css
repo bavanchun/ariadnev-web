@@ -316,6 +316,7 @@ button { border: var(--vc-border-width-hairline) solid var(--vc-color-border-str
   }
 }
 
+@media (max-width: 64rem) {
   .docs-frame { grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr); }
   .docs-toc { grid-column: 2; border-inline-start: 0; border-top: var(--vc-border-width-hairline) solid var(--vc-color-border); }
 }

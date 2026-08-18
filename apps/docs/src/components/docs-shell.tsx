@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { cloneElement, isValidElement, type ReactNode } from "react";
 import type { DocsCatalogPage, DocsContentCatalog, DocsSection } from "@/lib/content-catalog.ts";
 import { SIDEBAR_SECTION_ORDER, resolveNavigationVisibility, resolveSection } from "@/lib/content-catalog.ts";
 import { chromeStrings } from "@/lib/chrome-strings.ts";
@@ -31,8 +31,27 @@ function href(page: DocsCatalogPage, version: string): string {
   return `/${[page.locale, version, ...page.slug].join("/")}/`;
 }
 
+function cleanTocTitle(node: ReactNode): ReactNode {
+  if (node === null || node === undefined || typeof node === "boolean") return null;
+  if (typeof node === "string" || typeof node === "number") return node;
+  if (Array.isArray(node)) {
+    const cleaned = node.map(cleanTocTitle).filter((child) => child !== null && child !== "");
+    return cleaned.length === 1 ? cleaned[0] : cleaned.length === 0 ? null : cleaned;
+  }
+  if (isValidElement(node)) {
+    const props = node.props as { className?: string; children?: ReactNode };
+    if (node.type === "a" || (typeof props?.className === "string" && props.className.includes("heading-anchor"))) {
+      return null;
+    }
+    if (props?.children) {
+      return cloneElement(node, {}, cleanTocTitle(props.children));
+    }
+  }
+  return node;
+}
+
 function TocLinks({ toc }: { toc: readonly TocItem[] }) {
-  return <ol>{toc.map((item) => <li key={item.url} data-depth={item.depth}><a href={item.url}>{item.title}</a></li>)}</ol>;
+  return <ol>{toc.map((item) => <li key={item.url} data-depth={item.depth}><a href={item.url}>{cleanTocTitle(item.title)}</a></li>)}</ol>;
 }
 
 export function DocsMobileToc({ toc, locale = "en" }: { toc: readonly TocItem[]; locale?: string }) {
@@ -82,7 +101,8 @@ export function DocsShell({ catalog, page, routeVersion, toc, children }: {
       <header className="docs-header">
         <a className="brand" href="/" aria-label={strings.brandHomeLabel}>
           <img className="brand-logo" src="/ariadnev-logo.webp" width="192" height="128" alt="" />
-          <span>ariadnev docs</span>
+          <span className="brand-title">ariadnev</span>
+          <span className="brand-badge">docs</span>
         </a>
         <SearchDialog locale={page.locale} version={routeVersion} indexUrl={`/search/${page.locale}/${routeVersion}.json`} />
         <LocaleVersionSwitcher catalog={catalog} page={page} routeVersion={routeVersion} />

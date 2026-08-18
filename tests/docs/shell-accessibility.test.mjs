@@ -15,6 +15,7 @@ test("chooser, navigation, search, and copy controls expose static and accessibl
   // so a VI page cannot silently ship English aria labels. Assert both wiring points.
   assert.match(shell, /from ["']@\/lib\/chrome-strings\.ts["']/);
   for (const key of ["breadcrumbLabel", "sidebarLabel", "tocLabel"]) assert.match(shell, new RegExp(`strings\\.${key}`));
+  assert.match(shell, /cleanTocTitle/);
   assert.match(shell, /skip-link/);
   assert.match(shell, /lang=\{page\.locale\}/);
   // Mobile drawer: server-rendered <details> is the no-JS fallback; the enhancer

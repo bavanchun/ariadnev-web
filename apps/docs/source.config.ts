@@ -4,7 +4,8 @@ import { fileURLToPath } from "node:url";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import { resolveDocsContentRoot } from "./src/lib/docs-content-root.ts";
 
-const appRoot = fileURLToPath(new URL("./", import.meta.url));
+const rawRoot = fileURLToPath(new URL("./", import.meta.url));
+const appRoot = rawRoot.replace(/[/\\]\.source[/\\]?$/, "");
 const contentRoot = resolveDocsContentRoot(appRoot);
 
 export const docs = defineDocs({
