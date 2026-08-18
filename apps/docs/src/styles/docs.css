@@ -227,7 +227,10 @@ button { border: var(--vc-border-width-hairline) solid var(--vc-color-border-str
    capability, never remove content that would otherwise be reachable. */
 .reference-index-filter { display: grid; gap: var(--vc-space-1); margin-block-end: var(--vc-space-4); max-width: 28rem; }
 .reference-index-filter label { color: var(--vc-color-text-muted); font-size: var(--vc-font-size-caption); }
-.reference-index-filter input { width: 100%; min-height: var(--vc-size-control-minimum); border: var(--vc-border-width-strong) solid var(--vc-color-border); border-radius: var(--vc-border-radius-control); background: var(--vc-color-canvas-raised); padding: var(--vc-space-2); }
+.reference-filter-input-wrap { position: relative; display: flex; align-items: center; }
+.reference-index-filter input { width: 100%; min-height: var(--vc-size-control-minimum); border: var(--vc-border-width-hairline) solid color-mix(in oklch, var(--vc-color-border) 80%, transparent); border-radius: var(--vc-border-radius-control); background: var(--vc-color-canvas-raised); padding: var(--vc-space-2); color: var(--vc-color-text); }
+.reference-filter-clear { position: absolute; inset-inline-end: var(--vc-space-1); min-width: var(--vc-size-control-minimum); min-height: var(--vc-size-control-minimum); display: inline-flex; align-items: center; justify-content: center; border: none; background: transparent; color: var(--vc-color-text-muted); cursor: pointer; border-radius: var(--vcs-border-radius-pill); }
+.reference-filter-clear:hover { color: var(--vc-color-text); }
 
 /* D13 CLI command detail: related-commands nav in the same source-derived
    namespace, server-rendered from the catalog. */
@@ -303,8 +306,16 @@ button { border: var(--vc-border-width-hairline) solid var(--vc-color-border-str
 .docs-sidebar a { transition: background-color var(--vcs-motion-duration-fast) var(--vcs-motion-easing-standard), color var(--vcs-motion-duration-fast) var(--vcs-motion-easing-standard); }
 .docs-sidebar a[aria-current="page"] { background: color-mix(in oklch, var(--vcs-color-spectral-600) 18%, transparent); color: var(--vcs-color-spectral-400); font-weight: var(--vcs-font-weight-bold); }
 
+@media (min-width: 48rem) {
+  .provider-reference-matrix table th:first-child,
+  .provider-reference-matrix table td:first-child {
+    position: sticky;
+    inset-inline-start: 0;
+    z-index: 5;
+    background: var(--vc-color-canvas);
+  }
+}
 
-@media (max-width: 64rem) {
   .docs-frame { grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr); }
   .docs-toc { grid-column: 2; border-inline-start: 0; border-top: var(--vc-border-width-hairline) solid var(--vc-color-border); }
 }

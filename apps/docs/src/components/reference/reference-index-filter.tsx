@@ -31,6 +31,7 @@ export function ReferenceIndexFilter({
   const inputId = useId();
   const statusId = useId();
   const [query, setQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const statusRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -40,6 +41,7 @@ export function ReferenceIndexFilter({
 
     let lastHeading: HTMLElement | null = null;
     let visibleGroups = 0;
+    let totalVisibleRows = 0;
     for (const node of Array.from(root.querySelectorAll<HTMLElement>("h3, table"))) {
       if (node.tagName === "H3") {
         lastHeading = node;
@@ -53,6 +55,7 @@ export function ReferenceIndexFilter({
         row.hidden = !matches;
         if (matches) visibleRows += 1;
       }
+      totalVisibleRows += visibleRows;
       const groupVisible = needle === "" || visibleRows > 0;
       table.hidden = !groupVisible;
       if (lastHeading) lastHeading.hidden = !groupVisible;
@@ -60,22 +63,45 @@ export function ReferenceIndexFilter({
     }
 
     if (statusRef.current) {
-      statusRef.current.textContent = needle !== "" && visibleGroups === 0 ? noMatchesLabel : "";
+      statusRef.current.textContent =
+        needle !== "" && visibleGroups === 0 ? noMatchesLabel : needle !== "" ? `${totalVisibleRows} results` : "";
     }
   }, [query, rootId, noMatchesLabel]);
 
   return (
     <div className="reference-index-filter" role="search">
       <label htmlFor={inputId}>{label}</label>
-      <input
-        id={inputId}
-        type="text"
-        placeholder={placeholder}
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        autoComplete="off"
-        aria-describedby={statusId}
-      />
+      <div className="reference-filter-input-wrap">
+        <input
+          id={inputId}
+          ref={inputRef}
+          type="text"
+          placeholder={placeholder}
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Escape" && query) {
+              event.preventDefault();
+              setQuery("");
+            }
+          }}
+          autoComplete="off"
+          aria-describedby={statusId}
+        />
+        {query && (
+          <button
+            type="button"
+            className="reference-filter-clear"
+            onClick={() => {
+              setQuery("");
+              inputRef.current?.focus();
+            }}
+            aria-label="Clear filter"
+          >
+            ✕
+          </button>
+        )}
+      </div>
       <div id={statusId} role="status" aria-live="polite" className="visually-hidden" ref={statusRef} />
     </div>
   );
