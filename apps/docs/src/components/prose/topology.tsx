@@ -113,18 +113,35 @@ function layoutTopology(nodes: readonly TopologyNode[], edges: readonly Topology
   const laidOut: LaidOutNode[] = [];
   let maxWidth = 0;
   const layers = [...byLayer.keys()].sort((left, right) => left - right);
+  const layerWidths = new Map<number, number>();
+
   for (const layer of layers) {
     let cursorX = MARGIN;
+    for (const node of byLayer.get(layer)!) {
+      const isDiamond = node.shape === "diamond";
+      const width = Math.max(isDiamond ? 120 : 72, node.label.length * (isDiamond ? CHAR_WIDTH * 1.25 : CHAR_WIDTH) + (isDiamond ? NODE_PADDING * 2 : NODE_PADDING));
+      cursorX += width + NODE_GAP;
+    }
+    const totalW = cursorX - NODE_GAP + MARGIN;
+    layerWidths.set(layer, totalW);
+    maxWidth = Math.max(maxWidth, totalW);
+  }
+
+  const diagramWidth = Math.max(maxWidth, 240);
+
+  for (const layer of layers) {
+    const layerW = layerWidths.get(layer) ?? 0;
+    let cursorX = MARGIN + Math.max(0, (diagramWidth - layerW) / 2);
     const y = MARGIN + layer * (NODE_HEIGHT + LAYER_GAP);
     for (const node of byLayer.get(layer)!) {
-      const width = Math.max(64, node.label.length * CHAR_WIDTH + NODE_PADDING);
+      const isDiamond = node.shape === "diamond";
+      const width = Math.max(isDiamond ? 120 : 72, node.label.length * (isDiamond ? CHAR_WIDTH * 1.25 : CHAR_WIDTH) + (isDiamond ? NODE_PADDING * 2 : NODE_PADDING));
       laidOut.push({ ...node, x: cursorX, y, width });
       cursorX += width + NODE_GAP;
     }
-    maxWidth = Math.max(maxWidth, cursorX);
   }
-  const height = MARGIN * 2 + (layers.length > 0 ? layers.length - 1 : 0) * (NODE_HEIGHT + LAYER_GAP) + NODE_HEIGHT + 40;
-  return { nodes: laidOut, width: Math.max(maxWidth, MARGIN * 2 + 64), height };
+  const height = MARGIN * 2 + (layers.length > 0 ? layers.length - 1 : 0) * (NODE_HEIGHT + LAYER_GAP) + NODE_HEIGHT + 20;
+  return { nodes: laidOut, width: diagramWidth, height };
 }
 
 export interface TopologyProps {
@@ -189,7 +206,7 @@ export function Topology({ locale, heading, nodes, edges, id }: TopologyProps) {
             <Fragment key={node.id}>
               {shape === "diamond" && (
                 <polygon
-                  points={`${node.x},${cy} ${cx},${node.y} ${node.x + node.width},${cy} ${cx},${node.y + NODE_HEIGHT}`}
+                  points={`${node.x},${cy} ${cx},${node.y - 4} ${node.x + node.width},${cy} ${cx},${node.y + NODE_HEIGHT + 4}`}
                   className="wd-node wd-node-gate"
                 />
               )}

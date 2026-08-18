@@ -33,6 +33,10 @@ export async function buildSearchIndexes({ catalogPath = resolve(contentRoot, "g
       await mkdir(resolve(outputDirectory, locale), { recursive: true });
       await writeFile(target, raw, "utf8");
       outputs.push(target);
+      // Mirror to public/search so `next dev` can serve search partitions locally
+      const publicTarget = resolve(appRoot, "public/search", locale, `${version}.json`);
+      await mkdir(resolve(appRoot, "public/search", locale), { recursive: true });
+      await writeFile(publicTarget, raw, "utf8");
     }
   }
   return outputs.sort();
