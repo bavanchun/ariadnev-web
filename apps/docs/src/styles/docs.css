@@ -81,8 +81,11 @@ button { border: var(--vc-border-width-hairline) solid var(--vc-color-border-str
 .not-found-block { display: grid; gap: var(--vc-space-3); margin-block-end: var(--vc-space-8); }
 .chooser-logo { width: calc(var(--vc-space-16) * 2); height: auto; }
 .chooser-page h1, .not-found h1 { font-family: var(--vc-font-family-display); font-size: clamp(2rem, 8vw, var(--vc-font-size-display)); line-height: var(--vc-font-line-height-tight); letter-spacing: var(--vc-font-letter-spacing-tight); }
-.language-chooser, .not-found nav { display: flex; flex-wrap: wrap; gap: var(--vc-space-3); }
-.language-chooser a, .not-found a { display: inline-flex; align-items: center; border: var(--vc-border-width-strong) solid var(--vc-color-border-strong); border-radius: var(--vc-border-radius-panel); padding: var(--vc-space-3) var(--vc-space-4); font-weight: var(--vc-font-weight-semibold); }
+.language-chooser, .not-found nav { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: var(--vc-space-4); max-width: 36rem; }
+.language-chooser a, .not-found a { display: grid; gap: var(--vc-space-1); border: var(--vc-border-width-hairline) solid color-mix(in oklch, var(--vc-color-border) 80%, transparent); border-radius: var(--vc-border-radius-panel); background: color-mix(in oklch, var(--vc-color-canvas-raised) 70%, transparent); padding: var(--vc-space-4); text-decoration: none; transition: transform var(--vcs-motion-duration-fast) var(--vcs-motion-easing-standard), border-color var(--vcs-motion-duration-fast) var(--vcs-motion-easing-standard), box-shadow var(--vcs-motion-duration-fast) var(--vcs-motion-easing-standard); }
+.language-chooser a:hover { transform: translateY(-2px); border-color: var(--vcs-color-spectral-400); box-shadow: 0 8px 24px -6px color-mix(in oklch, var(--vcs-color-spectral-400) 20%, transparent); }
+.language-chooser-title { color: var(--vc-color-text); font-weight: var(--vc-font-weight-semibold); font-size: var(--vcs-font-size-md); }
+.language-chooser-desc { color: var(--vc-color-text-muted); font-size: var(--vcs-font-size-xs); }
 .docs-frame { display: grid; grid-template: auto minmax(0, 1fr) / minmax(13rem, 18rem) minmax(0, 1fr) minmax(12rem, 16rem); min-height: 100vh; }
 /* When the page has no TOC, reclaim the right rail for content. Attribute
  * selector avoids the :has() shim so the guard works on every supported
@@ -180,12 +183,12 @@ button { border: var(--vc-border-width-hairline) solid var(--vc-color-border-str
    counts read from the catalog itself. Element selectors under the block
    keep the CSS ~30% smaller than BEM-suffixed rules would; the aside
    markup is self-contained so bleed onto other <dl>/<dt>/<dd> is impossible. */
-.docs-home-counts { margin-block-end: var(--vc-space-8); padding: var(--vc-space-4) var(--vc-space-5); border: var(--vc-border-width-hairline) solid var(--vc-color-border); border-radius: var(--vc-border-radius-control); background: var(--vc-color-canvas-raised); }
+.docs-home-counts { margin-block-end: var(--vc-space-8); padding: var(--vc-space-4) var(--vc-space-5); border: var(--vc-border-width-hairline) solid color-mix(in oklch, var(--vc-color-border) 80%, transparent); border-radius: var(--vc-border-radius-panel); background: color-mix(in oklch, var(--vc-color-canvas-raised) 80%, transparent); box-shadow: 0 4px 20px -4px color-mix(in oklch, var(--vcs-color-ink-900) 50%, transparent); }
 .docs-home-counts p { margin: 0 0 var(--vc-space-3); color: var(--vc-color-text-muted); font-family: var(--vc-font-family-mono); font-size: var(--vc-font-size-caption); text-transform: uppercase; letter-spacing: 0.06em; }
 .docs-home-counts dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--vc-space-3) var(--vc-space-4); margin: 0; }
-.docs-home-counts div { display: grid; gap: var(--vc-space-1); }
+.docs-home-counts div { display: flex; flex-direction: column-reverse; gap: var(--vc-space-1); }
 .docs-home-counts dt { color: var(--vc-color-text-muted); font-size: var(--vc-font-size-caption); }
-.docs-home-counts dd { margin: 0; color: var(--vc-color-text); font-family: var(--vc-font-family-mono); font-size: var(--vc-font-size-lead); font-variant-numeric: tabular-nums; }
+.docs-home-counts dd { margin: 0; color: var(--vcs-color-spectral-400); font-family: var(--vc-font-family-mono); font-size: var(--vcs-font-size-xl); font-weight: var(--vcs-font-weight-bold); font-variant-numeric: tabular-nums; }
 @media (max-width: 40rem) { .docs-home-counts dl { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 /* Responsive data region narrow-viewport record-card reflow: DEFERRED.
