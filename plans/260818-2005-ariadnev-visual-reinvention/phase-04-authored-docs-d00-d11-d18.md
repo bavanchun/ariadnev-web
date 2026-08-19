@@ -1,7 +1,7 @@
 ---
 phase: 4
 title: "Authored docs D00-D11 and D18"
-status: in-progress
+status: completed
 priority: P1
 effort: "7-9 engineer-days"
 dependencies:
@@ -86,18 +86,18 @@ constants.
 
 ## Function and interface checklist
 
-- [ ] Registry still maps each `pageKind/screenId` deterministically and has no
+- [x] Registry still maps each `pageKind/screenId` deterministically and has no
   pass-through fallback for owned authored screens.
-- [ ] Safe prose barrel exports remain explicit and public Markdown remains
+- [x] Safe prose barrel exports remain explicit and public Markdown remains
   free of JSX/HTML/image/runtime dependencies.
-- [ ] Topology retains accessible adjacency/text and marks SVG supplemental.
-- [ ] Responsive data regions retain visible overflow cue, focusable local
+- [x] Topology retains accessible adjacency/text and marks SVG supplemental.
+- [x] Responsive data regions retain visible overflow cue, focusable local
   scroller, caption/label, and stacked alternative where appropriate.
-- [ ] Operation matrix distinguishes diagnostic/mutating/destructive in text
+- [x] Operation matrix distinguishes diagnostic/mutating/destructive in text
   and shape, not color alone.
-- [ ] Migration diff and destructive commands preserve exact command text and
+- [x] Migration diff and destructive commands preserve exact command text and
   rollback/source facts.
-- [ ] D18 keeps bilingual content without locale detection or redirect.
+- [x] D18 keeps bilingual content without locale detection or redirect.
 
 ## Implementation steps
 
@@ -146,21 +146,21 @@ D06 pilot + shared shell
 
 ## Todo
 
-- [ ] Expand fixture coverage to every authored archetype.
-- [ ] Recompose D00-D05, D07-D11, and D18.
-- [ ] Preserve/integrate D06 pilot.
-- [ ] Pass safe-content, EN/VI, no-JS, accessibility, and budget gates.
-- [ ] Seed/rotate and stabilize authored-screen baselines.
+- [x] Expand fixture coverage to every authored archetype.
+- [x] Recompose D00-D05, D07-D11, and D18.
+- [x] Preserve/integrate D06 pilot.
+- [x] Pass safe-content, EN/VI, no-JS, accessibility, and budget gates.
+- [x] Seed/rotate and stabilize authored-screen baselines.
 
 ## Success criteria
 
-- [ ] D00-D11 and D18 each have a distinct job-aligned composition and visual
+- [x] D00-D11 and D18 each have a distinct job-aligned composition and visual
   evidence at required widths.
-- [ ] All authored body/source/route contracts remain unchanged.
-- [ ] Installation, first install, destructive migration, edition recovery, and
+- [x] All authored body/source/route contracts remain unchanged.
+- [x] Installation, first install, destructive migration, edition recovery, and
   bilingual recovery task outcomes pass.
-- [ ] No old gradient/glass/glow/bento/pill-default treatment remains.
-- [ ] Native docs tests, budgets, accessibility modes, and two visual runs pass.
+- [x] No old gradient/glass/glow/bento/pill-default treatment remains.
+- [x] Native docs tests, budgets, accessibility modes, and two visual runs pass.
 
 ## Risk assessment
 

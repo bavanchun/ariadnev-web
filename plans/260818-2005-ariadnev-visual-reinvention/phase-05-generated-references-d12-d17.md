@@ -1,7 +1,7 @@
 ---
 phase: 5
 title: "Generated references D12-D17"
-status: pending
+status: in-progress
 priority: P1
 effort: "5-7 engineer-days"
 dependencies:
