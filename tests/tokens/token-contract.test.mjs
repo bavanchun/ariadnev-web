@@ -10,50 +10,10 @@ import { dirname, join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
+import { contrastRatio, parseOklch } from "./color-contrast.mjs";
+
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const tokens = JSON.parse(readFileSync(join(repoRoot, "packages/tokens/src/tokens.json"), "utf8"));
-
-const OKLCH = /^oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*(?:\/\s*([\d.]+)\s*)?\)$/;
-
-// --- OKLCH -> sRGB ---------------------------------------------------------
-// Björn Ottosson's Oklab transform, then the standard sRGB transfer function.
-
-function oklchToLinearSrgb(lightness, chroma, hueDegrees) {
-  const hue = (hueDegrees * Math.PI) / 180;
-  const a = chroma * Math.cos(hue);
-  const b = chroma * Math.sin(hue);
-
-  const l = (lightness + 0.3963377774 * a + 0.2158037573 * b) ** 3;
-  const m = (lightness - 0.1055613458 * a - 0.0638541728 * b) ** 3;
-  const s = (lightness - 0.0894841775 * a - 1.291485548 * b) ** 3;
-
-  return [
-    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
-    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
-    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
-  ];
-}
-
-/** WCAG 2.x relative luminance from linear sRGB. */
-function relativeLuminance([red, green, blue]) {
-  const clamp = (channel) => Math.min(Math.max(channel, 0), 1);
-  return 0.2126 * clamp(red) + 0.7152 * clamp(green) + 0.0722 * clamp(blue);
-}
-
-export function parseOklch(value) {
-  const match = OKLCH.exec(value);
-  assert.ok(match, `not an OKLCH colour: ${value}`);
-  return { l: Number(match[1]), c: Number(match[2]), h: Number(match[3]) };
-}
-
-export function contrastRatio(foreground, background) {
-  const luminance = (value) => {
-    const { l, c, h } = parseOklch(value);
-    return relativeLuminance(oklchToLinearSrgb(l, c, h));
-  };
-  const [light, dark] = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
-  return (light + 0.05) / (dark + 0.05);
-}
 
 /** Walk a `{a.b.c}` alias chain down to its authored literal. */
 function resolve(reference) {
@@ -112,8 +72,6 @@ test("every alias resolves to an authored literal", () => {
   }
   for (const group of ["state", "content"]) {
     for (const { role, node } of collectLeafRoles(group, [group])) {
-      // scrim uses a raw color literal (an alpha over-black); accept it.
-      if (typeof node.$value === "string" && node.$value.startsWith("oklch")) continue;
       assert.doesNotMatch(resolve(node.$value), /^\{/, `${group}.${role} is unresolved`);
     }
   }
@@ -122,8 +80,7 @@ test("every alias resolves to an authored literal", () => {
 test("semantic roles never expose a raw palette step to an app", () => {
   // Apps consume surface/text/topology/state/content. Those roles must alias
   // the palette rather than restate a literal, so a palette change propagates
-  // in one edit. Exception: content.overlay.scrim is a color-with-alpha and
-  // is authored as an oklch literal because no palette entry carries alpha.
+  // in one edit.
   const flatten = (node, roleParts) => {
     const results = [];
     if (node === null || typeof node !== "object") return results;
@@ -142,7 +99,6 @@ test("semantic roles never expose a raw palette step to an app", () => {
   }
   for (const group of ["state", "content"]) {
     for (const { role, node } of flatten(tokens[group], [group])) {
-      if (role === "content.overlay.scrim") continue;
       assert.match(node.$value, /^\{(?:color|surface|text|topology)\./, `${group}.${role} must alias a semantic role or the palette`);
     }
   }

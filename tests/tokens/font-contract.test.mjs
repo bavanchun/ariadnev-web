@@ -19,6 +19,7 @@ import { fileURLToPath } from "node:url";
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const tokensRoot = join(repoRoot, "packages", "tokens");
 const manifest = JSON.parse(readFileSync(join(tokensRoot, "src", "font-manifest.json"), "utf8"));
+const tokens = JSON.parse(readFileSync(join(tokensRoot, "src", "tokens.json"), "utf8"));
 
 // The full repertoire Vietnamese needs beyond ASCII: the seven modified base
 // letters, their capitals, every precomposed tone form, and the dong sign.
@@ -135,6 +136,22 @@ const sha256 = (bytes) => `sha256:${createHash("sha256").update(bytes).digest("h
 
 test("the manifest declares a display, body, and mono face", () => {
   assert.deepEqual(manifest.fonts.map((font) => font.id).sort(), ["body", "display", "mono"]);
+});
+
+test("the exact self-hosted family and weight contract remains fixed", () => {
+  const expected = {
+    display: { family: "Be Vietnam Pro", weights: [700], variable: false },
+    body: { family: "Inter", weights: [400, 700], variable: true },
+    mono: { family: "JetBrains Mono", weights: [400, 700], variable: true },
+  };
+  for (const font of manifest.fonts) {
+    assert.deepEqual(
+      { family: font.family, weights: font.weights, variable: font.variable },
+      expected[font.id],
+      `${font.id} family or weight range drifted`,
+    );
+    assert.equal(tokens.font.family[font.id].$value[0], font.family, `${font.id} token does not name its manifest face`);
+  }
 });
 
 for (const font of manifest.fonts) {

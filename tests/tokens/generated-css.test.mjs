@@ -57,6 +57,27 @@ test("shared primitives are byte-identical and only surface aliases differ", () 
   assert.equal(strip(read("site")), strip(read("docs")), "the shared primitive block diverged between apps");
 });
 
+test("all four surface contexts emit identical shared custom properties", () => {
+  const roles = [
+    "canvas", "raised", "border", "border-strong", "text-primary", "text-muted",
+    "link-default", "link-hover", "focus-ring", "selection-layer", "selection-text",
+    "disabled-layer", "disabled-text", "disabled-border",
+    "active-layer", "active-text", "active-indicator",
+    "verified-layer", "verified-text", "verified-indicator",
+    "gate-layer", "gate-text", "gate-indicator",
+    "destructive-layer", "destructive-text", "destructive-indicator",
+  ];
+  for (const context of ["brand", "reading", "instrument", "overlay"]) {
+    for (const role of roles) {
+      const declaration = `--vcs-context-${context}-${role}:`;
+      assert.ok(read("site").includes(declaration), `site.css missing ${declaration}`);
+      assert.ok(read("docs").includes(declaration), `docs.css missing ${declaration}`);
+    }
+  }
+  assert.ok(read("site").includes("--vcs-context-overlay-scrim:"));
+  assert.ok(read("docs").includes("--vcs-context-overlay-scrim:"));
+});
+
 test("both entry points expose the documented app aliases", () => {
   for (const target of ["site", "docs"]) {
     const css = read(target);
