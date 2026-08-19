@@ -39,22 +39,17 @@ for (const fixture of DOCS_FIXTURES) {
       });
     }
 
-    // Skip axe on the 404 fixture — the not-found page ships without
-    // page identity contracts we'd fail on legitimately (no <h1> is
-    // deliberate on some 404s and we don't want to lock that in here).
-    if (fixture.expectStatus !== 404) {
-      test(`${fixture.id} axe (WCAG 2.x A/AA)`, async ({ page }) => {
-        await page.setViewportSize({ width: 1440, height: 900 });
-        await page.goto(`${ORIGIN}${fixture.route}`, {
-          waitUntil: "networkidle",
-        });
-        await readyForScreenshot(page);
-        const violations = await runAxe(page);
-        expect(
-          violations.map((v) => ({ id: v.id, impact: v.impact })),
-          `axe violations on ${fixture.id}`,
-        ).toEqual([]);
+    test(`${fixture.id} axe (WCAG 2.x A/AA)`, async ({ page }) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.goto(`${ORIGIN}${fixture.route}`, {
+        waitUntil: "networkidle",
       });
-    }
+      await readyForScreenshot(page);
+      const violations = await runAxe(page);
+      expect(
+        violations.map((v) => ({ id: v.id, impact: v.impact })),
+        `axe violations on ${fixture.id}`,
+      ).toEqual([]);
+    });
   });
 }
