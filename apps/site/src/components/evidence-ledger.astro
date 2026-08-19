@@ -18,8 +18,7 @@ import { EVIDENCE } from "../data/marketing-facts";
     <p class="eyebrow">Evidence ledger</p>
     <h2 id="evidence-heading">What is proven, and where the proof stops</h2>
     <p class="lede">
-      Each row states a claim, links the source it comes from, and says what it does not establish. A claim without a
-      caveat is a claim nobody has checked.
+      Claim, source, and limit stay together in every record.
     </p>
   </div>
 
@@ -28,19 +27,19 @@ import { EVIDENCE } from "../data/marketing-facts";
       EVIDENCE.map((entry) => (
         <li class="ledger__row">
           <dl class="ledger__record">
-            <div class="ledger__field ledger__field--kind">
+            <div class="ledger__field--kind">
               <dt>Kind</dt>
               <dd><span class="ledger__kind" data-kind={entry.kind}>{entry.kind}</span></dd>
             </div>
-            <div class="ledger__field ledger__field--claim">
+            <div class="ledger__field--claim">
               <dt>Claim</dt>
               <dd>{entry.statement}</dd>
             </div>
-            <div class="ledger__field">
+            <div>
               <dt>Source</dt>
               <dd><a href={entry.source}>{entry.sourceLabel}</a></dd>
             </div>
-            <div class="ledger__field">
+            <div>
               <dt>Limit</dt>
               <dd>{entry.caveat}</dd>
             </div>

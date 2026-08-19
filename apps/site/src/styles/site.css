@@ -512,10 +512,6 @@ pre {
 
 /* ----------------------------------------------------------- promise */
 
-.promise {
-  padding-block: var(--vcs-space-7) var(--vcs-space-7);
-}
-
 .promise__lines {
   display: grid;
   gap: var(--vcs-space-3);
@@ -581,14 +577,14 @@ pre {
   margin: var(--vcs-space-3) 0 0;
 }
 
-.map__step-facet {
+.map__step-facets > div {
   display: grid;
   grid-template-columns: 6rem 1fr;
   gap: var(--vcs-space-3);
   align-items: baseline;
 }
 
-.map__step-facet dt {
+.map__step-facets dt {
   margin: 0;
   font-family: var(--vcs-font-family-mono);
   font-size: var(--vcs-font-size-xs);
@@ -597,64 +593,42 @@ pre {
   letter-spacing: 0.04em;
 }
 
-.map__step-facet dd {
+.map__step-facets dd {
   margin: 0;
   color: var(--vcs-text-secondary);
 }
 
 @media (max-width: 640px) {
-  .map__step-facet {
+  .map__step-facets > div {
     grid-template-columns: 1fr;
     gap: var(--vcs-space-1);
   }
 }
 
-.map__svg {
-  display: block;
-  width: 100%;
-  min-width: 34rem;
-  height: auto;
+.map__trace {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(5rem, 1fr));
+  min-width: 30rem;
+  margin-bottom: var(--vcs-space-4);
 }
 
-.map__node-shape {
-  fill: var(--vcs-topology-node);
-  stroke: var(--vcs-topology-edge);
-  stroke-width: 1;
-}
-
-.map__node-label {
-  fill: var(--vcs-text-primary);
+.map__trace li {
+  display: grid;
+  gap: var(--vcs-space-1);
+  padding: var(--vcs-space-2);
+  border-top: var(--vcs-border-width-hairline) solid var(--vcs-topology-edge);
   font-family: var(--vcs-font-family-mono);
-  font-size: 13px;
 }
 
-.map__node-produces {
-  fill: var(--vcs-text-muted);
-  font-family: var(--vcs-font-family-body);
-  font-size: 11px;
+.map__trace span,
+.map__trace small {
+  color: var(--vcs-text-muted);
+  font-size: var(--vcs-font-size-xs);
 }
 
-.map__edge {
-  stroke: var(--vcs-topology-edge);
-  stroke-width: 1.5;
-  fill: none;
-}
-
-.map__edge-head {
-  fill: var(--vcs-topology-edge);
-}
-
-/*
- * Emphasis is the only thing the enhancer changes, and it is additive: without
- * the script every node keeps its default, fully legible appearance.
- */
-.map__node[data-emphasis="on"] .map__node-shape {
-  stroke: var(--vcs-topology-node-active);
-  stroke-width: 2;
-}
-
-.map__node[data-emphasis="on"] .map__node-label {
-  fill: var(--vcs-topology-witness);
+.map__trace [data-emphasis="on"] {
+  border-top-color: var(--vcs-topology-node-active);
+  color: var(--vcs-topology-witness);
 }
 
 .map__steps {
@@ -678,22 +652,16 @@ pre {
   background: var(--vcs-surface-raised);
 }
 
-.map__step-index {
+.map__step > p {
   font-family: var(--vcs-font-family-mono);
   font-size: var(--vcs-font-size-xs);
   letter-spacing: var(--vcs-font-tracking-wide);
   color: var(--vcs-text-muted);
 }
 
-.map__step-index::before {
+.map__step > p::before {
   counter-increment: map-step;
   content: counter(map-step) " / ";
-}
-
-.map__step-produces {
-  font-family: var(--vcs-font-family-mono);
-  font-size: var(--vcs-font-size-xs);
-  color: var(--vcs-topology-witness);
 }
 
 .map__jump {
@@ -774,7 +742,7 @@ pre {
 
   .workflow__id,
   .workflow h4,
-  .workflow__availability {
+  .workflow > p:last-child {
     grid-column: 1;
   }
 
@@ -795,7 +763,7 @@ pre {
   gap: var(--vcs-space-4);
 }
 
-.workflow__facet dt {
+.workflow__facets dt {
   font-family: var(--vcs-font-family-mono);
   font-size: var(--vcs-font-size-xs);
   letter-spacing: var(--vcs-font-tracking-wide);
@@ -804,7 +772,7 @@ pre {
   margin-bottom: var(--vcs-space-1);
 }
 
-.workflow__facet dd {
+.workflow__facets dd {
   margin: 0;
   color: var(--vcs-text-secondary);
 }
@@ -813,7 +781,7 @@ pre {
   color: var(--vcs-context-reading-gate-text);
 }
 
-.workflow__availability {
+.workflow > p:last-child {
   font-size: var(--vcs-font-size-sm);
   color: var(--vcs-text-muted);
 }
@@ -842,13 +810,13 @@ pre {
   }
 }
 
-.provider__id {
+.provider > :first-child {
   font-family: var(--vcs-font-family-mono);
   font-size: var(--vcs-font-size-sm);
   color: var(--vcs-text-primary);
 }
 
-.provider__note {
+.provider > :last-child {
   color: var(--vcs-text-secondary);
 }
 
@@ -888,14 +856,14 @@ pre {
   margin: 0;
 }
 
-.ledger__field {
+.ledger__record > div {
   display: grid;
   grid-template-columns: 6rem minmax(0, 1fr);
   gap: var(--vcs-space-3);
   align-items: baseline;
 }
 
-.ledger__field dt {
+.ledger__record dt {
   margin: 0;
   font-family: var(--vcs-font-family-mono);
   font-size: var(--vcs-font-size-xs);
@@ -904,7 +872,7 @@ pre {
   letter-spacing: 0.04em;
 }
 
-.ledger__field dd {
+.ledger__record dd {
   margin: 0;
   color: var(--vcs-text-secondary);
 }
@@ -915,7 +883,7 @@ pre {
 
 /* Source links stand alone in their cell (not inline in a sentence), so they
    must meet the WCAG 2.2 44x44 tap-target rule. */
-.ledger__field dd > a {
+.ledger__record dd > a {
   display: inline-flex;
   align-items: center;
   min-height: var(--vcs-size-touch-target);
@@ -927,7 +895,7 @@ pre {
     column-gap: var(--vcs-space-5);
     row-gap: var(--vcs-space-2);
   }
-  .ledger__field {
+  .ledger__record > div {
     grid-template-columns: 1fr;
     gap: var(--vcs-space-1);
   }
@@ -940,7 +908,7 @@ pre {
 }
 
 @media (max-width: 640px) {
-  .ledger__field {
+  .ledger__record > div {
     grid-template-columns: 1fr;
     gap: var(--vcs-space-1);
   }
@@ -970,11 +938,6 @@ pre {
 
 .ledger__kind[data-kind="boundary"] {
   color: var(--vcs-context-reading-gate-text);
-}
-
-.ledger__caveat {
-  color: var(--vcs-text-muted);
-  font-size: var(--vcs-font-size-sm);
 }
 
 /* ----------------------------------------------------------------- final */
@@ -1151,27 +1114,6 @@ pre {
 
   .map__figure {
     overflow: visible;
-  }
-
-  /* The drawing is stroked in dark-theme colours; on white paper it would be
-     invisible. Re-ink it rather than dropping it, since the ordered list below
-     already carries the facts and the shape still helps. */
-  .map__node-shape {
-    fill: none;
-    stroke: CanvasText;
-  }
-
-  .map__node-label,
-  .map__node-produces {
-    fill: CanvasText;
-  }
-
-  .map__edge {
-    stroke: CanvasText;
-  }
-
-  .map__edge-head {
-    fill: CanvasText;
   }
 
   /* A printed page cannot be clicked, so link targets are printed inline. */

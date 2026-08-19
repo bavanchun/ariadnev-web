@@ -4,8 +4,9 @@
 // Two representations of the same authored data, both present in the initial
 // DOM:
 //
-//   * The SVG is a drawing. It carries no information the text does not, so it
-//     is `aria-hidden` and never becomes the only place a fact lives.
+//   * The compact trace is a drawing made from semantic HTML. It carries no
+//     information the text does not, so it is hidden from assistive tech and
+//     never becomes the only place a fact lives.
 //   * The ordered list is the content. It is a real `<ol>`, so it reads
 //     correctly with JavaScript disabled, in print, in a headless fetch, and in
 //     a screen reader, in the order execution actually happens.
@@ -14,19 +15,7 @@
 // to the matching step. The enhancer only adds emphasis on top of that.
 import { EXECUTION_MAP, EXECUTION_MAP_SOURCE } from "../data/marketing-facts";
 
-// Geometry for the drawing. Five nodes on one horizontal track.
-const NODE_WIDTH = 104;
-const NODE_HEIGHT = 56;
-const GAP = 32;
-const PAD = 16;
-const height = NODE_HEIGHT + PAD * 2 + 22;
-const width = PAD * 2 + EXECUTION_MAP.length * NODE_WIDTH + (EXECUTION_MAP.length - 1) * GAP;
-
-const nodes = EXECUTION_MAP.map((state, index) => ({
-  ...state,
-  x: PAD + index * (NODE_WIDTH + GAP),
-  y: PAD,
-}));
+const nodes = EXECUTION_MAP;
 ---
 
 <section class="shell section" id="execution-map" aria-labelledby="map-heading" data-surface-context="reading">
@@ -34,8 +23,7 @@ const nodes = EXECUTION_MAP.map((state, index) => ({
     <p class="eyebrow">The map</p>
     <h2 id="map-heading">One run, five states you can point at</h2>
     <p class="lede">
-      Every <code>av run</code> moves along the same track. The states below are the documented public pipeline, not a
-      marketing abstraction over it.
+      The documented public pipeline follows one track from compile to proof.
     </p>
   </div>
 
@@ -45,57 +33,17 @@ const nodes = EXECUTION_MAP.map((state, index) => ({
 
   <div class="execution-spread">
     <figure class="map__figure" data-surface-context="instrument" tabindex="0">
-    <svg
-      class="map__svg"
-      viewBox={`0 0 ${width} ${height}`}
-      role="presentation"
-      aria-hidden="true"
-      focusable="false"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <defs>
-        <marker id="map-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
-          <path class="map__edge-head" d="M0 0 L8 4 L0 8 z" />
-        </marker>
-      </defs>
-
-      {
-        nodes.slice(0, -1).map((node) => (
-          <line
-            class="map__edge"
-            x1={node.x + NODE_WIDTH}
-            y1={PAD + NODE_HEIGHT / 2}
-            x2={node.x + NODE_WIDTH + GAP - 8}
-            y2={PAD + NODE_HEIGHT / 2}
-            marker-end="url(#map-arrow)"
-          />
-        ))
-      }
-
-      {
-        nodes.map((node) => (
-          <g class="map__node" data-map-node={node.id}>
-            <rect
-              class="map__node-shape"
-              x={node.x}
-              y={node.y}
-              width={NODE_WIDTH}
-              height={NODE_HEIGHT}
-              rx="4"
-            />
-            <text class="map__node-label" x={node.x + NODE_WIDTH / 2} y={node.y + 26} text-anchor="middle">
-              {node.label}
-            </text>
-            <text class="map__node-produces" x={node.x + NODE_WIDTH / 2} y={node.y + 44} text-anchor="middle">
-              {node.id}
-            </text>
-          </g>
-        ))
-      }
-    </svg>
+    <ol class="map__trace" aria-hidden="true">
+      {nodes.map((node, index) => (
+        <li data-map-node={node.id}>
+          <span>{String(index + 1).padStart(2, "0")}</span>
+          <strong>{node.label}</strong>
+          <small>{node.id}</small>
+        </li>
+      ))}
+    </ol>
     <figcaption class="note">
-      Compile, policy, execute, checkpoint, proof — the same order every time. The drawing repeats the list below; it
-      never replaces it.
+      The trace repeats the lifecycle dossier beside it; it never replaces it.
     </figcaption>
     </figure>
 
@@ -103,18 +51,18 @@ const nodes = EXECUTION_MAP.map((state, index) => ({
     {
       nodes.map((node) => (
         <li class="map__step" id={`map-step-${node.id}`} data-map-step={node.id} tabindex="-1">
-          <p class="map__step-index">{node.id}</p>
+          <p>{node.id}</p>
           <h3>{node.label}</h3>
           <dl class="map__step-facets">
-            <div class="map__step-facet">
+            <div>
               <dt>Meaning</dt>
               <dd>{node.summary}</dd>
             </div>
-            <div class="map__step-facet">
+            <div>
               <dt>Evidence</dt>
               <dd>{node.produces}</dd>
             </div>
-            <div class="map__step-facet">
+            <div>
               <dt>Boundary</dt>
               <dd>{node.boundary}</dd>
             </div>

@@ -18,8 +18,8 @@ import { PROVIDERS, PROVIDER_PRINCIPLE, SITE } from "../data/marketing-facts";
     {
       PROVIDERS.map((provider) => (
         <li class="provider">
-          <span class="provider__id"><code>{provider.id}</code></span>
-          <span class="provider__note">{provider.note}</span>
+          <span><code>{provider.id}</code></span>
+          <span>{provider.note}</span>
         </li>
       ))
     }

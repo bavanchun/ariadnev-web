@@ -13,8 +13,7 @@ import { WORKFLOWS, WORKFLOW_SOURCE } from "../data/marketing-facts";
     <p class="eyebrow">Canonical workflows</p>
     <h3 id="workflows-heading">Three graphs, three authority boundaries</h3>
     <p class="lede">
-      These are the workflows that ship in the kit. What matters is not how many steps each one has, but what it is
-      permitted to do and where it stops for you.
+      The shipped graphs are summarized by authority, human gate, and recovery.
     </p>
   </div>
 
@@ -25,20 +24,20 @@ import { WORKFLOWS, WORKFLOW_SOURCE } from "../data/marketing-facts";
           <p class="workflow__id"><code>{workflow.id}</code></p>
           <h4 id={`workflow-${workflow.id}`}>{workflow.title}</h4>
           <dl class="workflow__facets">
-            <div class="workflow__facet">
+            <div>
               <dt>Authority</dt>
               <dd>{workflow.authority}</dd>
             </div>
-            <div class="workflow__facet workflow__facet--gate">
+            <div class="workflow__facet--gate">
               <dt>Gate — held for a human</dt>
               <dd>{workflow.gate}</dd>
             </div>
-            <div class="workflow__facet">
+            <div>
               <dt>Recovery</dt>
               <dd>{workflow.recovery}</dd>
             </div>
           </dl>
-          <p class="workflow__availability">{workflow.availability}</p>
+          <p>{workflow.availability}</p>
         </article>
       ))
     }
