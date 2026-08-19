@@ -45,19 +45,16 @@ const STRINGS = {
 } as const;
 
 export function SkillCatalogExperience({ children }: DocsScreenContext) {
-  return <div className="skill-catalog">{children}</div>;
+  return <div className="reference-dossier skill-catalog">{children}</div>;
 }
 
 export function SkillCategoryExperience({ catalogPage, children }: DocsScreenContext) {
   const strings = STRINGS[catalogPage.locale] ?? STRINGS.en;
-  // No wrapping element around the filter and the body: `ReferenceIndexFilter`
-  // walks `#rendered-markdown`'s *direct* children looking for `<table>`
-  // (optionally preceded by a sibling `<h3>`) to toggle. The generated
-  // category page body is already a flat back-link/count/`<table>` sequence
-  // with no wrapper `<div>`, so a Fragment here keeps the filter and the
-  // table as true siblings under the root the filter inspects.
+  // `ReferenceIndexFilter` queries every table below `#rendered-markdown`, so
+  // this page-specific dossier wrapper can establish composition without
+  // changing the complete server-rendered table or the no-JS path.
   return (
-    <>
+    <div className="reference-dossier skill-category">
       <ReferenceIndexFilter
         rootId="rendered-markdown"
         label={strings.filterLabel}
@@ -67,6 +64,6 @@ export function SkillCategoryExperience({ catalogPage, children }: DocsScreenCon
         clearLabel={strings.filterClear}
       />
       {children}
-    </>
+    </div>
   );
 }

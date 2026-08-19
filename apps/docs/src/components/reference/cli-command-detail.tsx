@@ -13,8 +13,24 @@ import type { DocsScreenContext } from "../docs-screen-registry.tsx";
 // links are computed once, at request time, from the closed catalog.
 
 const STRINGS = {
-  en: { relatedHeading: "Related commands", relatedAria: "Other commands in this namespace" },
-  vi: { relatedHeading: "Lệnh liên quan", relatedAria: "Các lệnh khác trong cùng nhóm" },
+  en: {
+    dossierLabel: "Command dossier",
+    commandLabel: "Canonical command",
+    editionLabel: "Source edition",
+    authorityLabel: "Authority",
+    authorityValue: "Verified release projection",
+    relatedHeading: "Related commands",
+    relatedAria: "Other commands in this namespace",
+  },
+  vi: {
+    dossierLabel: "Hồ sơ lệnh",
+    commandLabel: "Lệnh chuẩn",
+    editionLabel: "Ấn bản nguồn",
+    authorityLabel: "Nguồn thẩm quyền",
+    authorityValue: "Bản chiếu từ bản phát hành đã xác minh",
+    relatedHeading: "Lệnh liên quan",
+    relatedAria: "Các lệnh khác trong cùng nhóm",
+  },
 } as const;
 
 /** First slug segment before a `-`, or the whole segment when there is none — mirrors `commandNamespace` in the content generator, computed here from the route slug instead of the source command path. */
@@ -37,10 +53,18 @@ export function CliCommandDetailExperience({ catalog, catalogPage, routeVersion,
     .sort((left, right) => left.title.localeCompare(right.title, "en"));
 
   return (
-    <div className="cli-command-detail">
-      {children}
+    <div className="reference-dossier cli-command-detail">
+      <aside className="command-dossier-ledger" data-surface-context="instrument" aria-label={strings.dossierLabel}>
+        <p>{strings.dossierLabel}</p>
+        <dl>
+          <div><dt>{strings.commandLabel}</dt><dd><code>{catalogPage.title}</code></dd></div>
+          <div><dt>{strings.editionLabel}</dt><dd><code>{catalogPage.version}</code></dd></div>
+          <div><dt>{strings.authorityLabel}</dt><dd>{strings.authorityValue}</dd></div>
+        </dl>
+      </aside>
+      <div className="command-dossier-body">{children}</div>
       {related.length > 0 && (
-        <nav className="cli-command-related" aria-label={strings.relatedAria}>
+        <nav className="cli-command-related" data-surface-context="instrument" aria-label={strings.relatedAria}>
           <h2>{strings.relatedHeading}</h2>
           <ul>
             {related.map((page) => (

@@ -68,9 +68,9 @@ export function ProviderReferenceExperience({ catalog, catalogPage, children }: 
   const providers = readProviders(catalogPage.version, catalog.currentStable);
 
   return (
-    <div className="provider-reference">
+    <div className="reference-dossier provider-reference" data-locale={catalogPage.locale}>
       {providers.length > 0 && (
-        <nav className="provider-reference-jump" aria-label={strings.jumpAria}>
+        <nav className="provider-reference-jump" data-surface-context="instrument" aria-label={strings.jumpAria}>
           <span className="reference-badges-label">{strings.jumpLabel}</span>
           <ul>
             {providers.map((provider) => (

@@ -72,9 +72,9 @@ export function ReleaseTimelineExperience({ catalogPage, children }: DocsScreenC
   const highlights = readReleaseNotesHighlights();
 
   return (
-    <>
+    <div className="reference-dossier release-ledger">
       {highlights.length > 0 && (
-        <nav className="release-timeline-highlights" aria-labelledby="rt-hl">
+        <nav className="release-timeline-highlights" data-surface-context="instrument" aria-labelledby="rt-hl">
           <span id="rt-hl" className="reference-badges-label">{strings.highlightsLabel}</span>
           <ul>
             {highlights.map((highlight) => (
@@ -87,7 +87,7 @@ export function ReleaseTimelineExperience({ catalogPage, children }: DocsScreenC
           </ul>
         </nav>
       )}
-      {children}
-    </>
+      <div className="release-ledger-body">{children}</div>
+    </div>
   );
 }

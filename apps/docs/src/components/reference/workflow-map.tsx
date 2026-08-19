@@ -280,12 +280,12 @@ export function WorkflowMapExperience({ catalogPage, children }: DocsScreenConte
   return (
     <div className="workflow-map">
       {workflows.map((workflow, index) => (
-        <div key={workflow.id} className="workflow-diagram" id={`${workflow.id}-diagram`}>
+        <div key={workflow.id} className="workflow-diagram" data-surface-context="instrument" id={`${workflow.id}-diagram`}>
           <h3>{strings.diagramHeading}: {workflow.id}</h3>
           <WorkflowDiagram workflow={workflow} index={index} />
         </div>
       ))}
-      {children}
+      <div className="workflow-text-authority">{children}</div>
     </div>
   );
 }

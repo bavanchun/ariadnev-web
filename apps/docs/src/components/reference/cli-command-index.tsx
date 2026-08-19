@@ -89,7 +89,7 @@ export function CliCommandIndexExperience({ catalog, catalogPage, routeVersion }
   const href = (page: DocsCatalogPage) => `/${[page.locale, routeVersion, ...page.slug].join("/")}/`;
 
   return (
-    <div className="cli-command-index">
+    <div className="reference-dossier cli-command-index">
       <p className="cli-command-orientation">{strings.introPrefix}<code>ariadnev</code>{strings.introAnd}<code>av</code>{strings.introSuffix}</p>
       <ReferenceIndexFilter
         rootId="rendered-markdown"
