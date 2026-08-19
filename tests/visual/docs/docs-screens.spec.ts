@@ -33,6 +33,8 @@ for (const fixture of DOCS_FIXTURES) {
         });
         expect(response?.status()).toBe(fixture.expectStatus ?? 200);
         await readyForScreenshot(page);
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+        expect(overflow, `${fixture.id} document overflow at ${width}px`).toBeLessThanOrEqual(0);
         await expect(page).toHaveScreenshot(baselineName(fixture.id, width), {
           fullPage: true,
         });
