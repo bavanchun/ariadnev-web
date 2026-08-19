@@ -51,11 +51,14 @@ export function DocumentCopyEnhancer({ rootId }: { rootId: string }) {
     }
 
     for (const heading of root.querySelectorAll<HTMLHeadingElement>("h2[id], h3[id], h4[id], h5[id], h6[id]")) {
+      const labelSource = heading.cloneNode(true) as HTMLHeadingElement;
+      for (const control of labelSource.querySelectorAll("a, button")) control.remove();
+      const headingLabel = labelSource.textContent?.trim() || "heading";
       const button = document.createElement("button");
       button.type = "button";
       button.className = "heading-copy-button";
       button.textContent = "#";
-      button.setAttribute("aria-label", `Copy link to ${heading.textContent ?? "heading"}`);
+      button.setAttribute("aria-label", `Copy link to ${headingLabel}`);
       button.addEventListener("click", () => void copy(`${location.origin}${location.pathname}#${encodeURIComponent(heading.id)}`, "Heading link copied"));
       heading.append(" ", button);
       controls.push(button);

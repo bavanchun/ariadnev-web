@@ -73,7 +73,10 @@ async function inspectViewport(browser, width) {
   await page.evaluate(() => document.fonts.ready);
   assert.equal(await page.locator("html").getAttribute("lang"), "en");
   assert.equal(await page.locator("h1").count(), 1);
-  const mobile = width <= 768;
+  // Keep this boundary aligned with docs.css and MobileDrawerEnhancer: the
+  // mobile drawer/TOC mode ends at 45rem (720px), so 768px is the tablet
+  // workbench with the persistent TOC.
+  const mobile = width <= 720;
   assert.ok(await page.locator(mobile ? ".docs-mobile-toc" : ".docs-toc").isVisible(), `${width}px hides the page TOC`);
   assert.equal(await page.locator(mobile ? ".docs-toc" : ".docs-mobile-toc").isVisible(), false, `${width}px exposes duplicate TOCs`);
   const layout = await page.evaluate(() => {
@@ -84,10 +87,21 @@ async function inspectViewport(browser, width) {
     const copyActions = document.querySelector(".page-copy-actions");
     const docsHeader = document.querySelector(".docs-header");
     const docsSidebar = document.querySelector(".docs-sidebar");
+    const isInsideHorizontalScroller = (element) => {
+      for (let ancestor = element.parentElement; ancestor && ancestor !== document.body; ancestor = ancestor.parentElement) {
+        const overflowX = getComputedStyle(ancestor).overflowX;
+        if ((overflowX === "auto" || overflowX === "scroll") && ancestor.scrollWidth > ancestor.clientWidth) return true;
+      }
+      return false;
+    };
     const overflow = [...document.body.querySelectorAll("*")].filter((element) => {
       const style = getComputedStyle(element);
       const rect = element.getBoundingClientRect();
-      return style.display !== "none" && style.visibility !== "hidden" && rect.width > 1 && (rect.left < -1 || rect.right > innerWidth + 1);
+      return style.display !== "none"
+        && style.visibility !== "hidden"
+        && rect.width > 1
+        && (rect.left < -1 || rect.right > innerWidth + 1)
+        && !isInsideHorizontalScroller(element);
     }).slice(0, 8).map((element) => `${element.tagName.toLowerCase()}.${element.className}`);
     const targets = ".docs-header a, .docs-header button, .docs-header summary, .docs-sidebar a, .docs-toc a, .breadcrumb a, .page-copy-actions button, .copy-source-link, .search-control li a";
     const undersized = [...document.querySelectorAll(targets)].filter((element) => {
@@ -113,7 +127,7 @@ async function inspectViewport(browser, width) {
   assert.deepEqual(layout.undersized, [], `${width}px has undersized navigation targets`);
   assert.notEqual(layout.headingFontFamily, layout.bodyFontFamily, `${width}px docs headings do not use the display face`);
   assert.ok(layout.docsBodyTop < layout.copyActionsTop, `${width}px copy actions precede the document body`);
-  if (width <= 768) {
+  if (mobile) {
     assert.ok(layout.docsBodyTop < 620, `${width}px document content starts too far below the viewport (${layout.docsBodyTop}px)`);
     assert.ok(layout.headerHeight <= 120, `${width}px docs header is too tall (${layout.headerHeight}px)`);
     assert.ok(layout.sidebarHeight <= 68, `${width}px mobile sidebar is too tall (${layout.sidebarHeight}px)`);
@@ -151,7 +165,7 @@ try {
   await searchInput.fill("not-a-published-page");
   await page.keyboard.press("Enter");
   await searchInput.fill("installation");
-  await page.getByRole("link", { name: /Installation/ }).waitFor();
+  await page.getByRole("link", { name: "Installation", exact: true }).waitFor();
   await page.waitForTimeout(200);
   assert.equal(page.url(), `${origin}/en/stable/`);
   await searchInput.fill("");
@@ -166,8 +180,8 @@ try {
   await page.getByRole("menuitem", { name: "Tiếng Việt", exact: true }).click();
   await page.waitForURL(`${origin}/vi/stable/get-started/installation/`);
   assert.equal(await page.locator("html").getAttribute("lang"), "vi");
-  await page.getByRole("button", { name: /^Version:/ }).click();
-  await page.getByRole("menuitem", { name: "Previous stable", exact: true }).click();
+  await page.getByRole("button", { name: /^Phiên bản:/ }).click();
+  await page.getByRole("menuitem", { name: "Current 1.1.0", exact: true }).click();
   await page.waitForURL(`${origin}/vi/1.1.0/get-started/installation/`);
 
   await page.getByRole("button", { name: "Copy Markdown", exact: true }).click();
@@ -191,12 +205,12 @@ try {
   });
   const copySuccessPage = await copySuccess.newPage();
   await copySuccessPage.goto(`${origin}${installationRoute}`, { waitUntil: "networkidle" });
-  await copySuccessPage.getByRole("button", { name: "Copy link to Overview", exact: true }).click();
+  await copySuccessPage.getByRole("button", { name: "Copy link to macOS and Linux", exact: true }).click();
   assert.equal(await copySuccessPage.getByLabel("Selected copy source").inputValue(), "");
   assert.equal(await copySuccessPage.getByLabel("Selected copy source").isHidden(), true);
   assert.match(await copySuccessPage.getByRole("status").filter({ hasText: "Heading link copied" }).textContent(), /Heading link copied/);
-  assert.match(await copySuccessPage.evaluate(() => window.__ariadnevCopiedText), /#overview$/);
-  const headingButtonStyle = await copySuccessPage.getByRole("button", { name: "Copy link to Overview", exact: true }).evaluate((button) => {
+  assert.match(await copySuccessPage.evaluate(() => window.__ariadnevCopiedText), /#macos-and-linux$/);
+  const headingButtonStyle = await copySuccessPage.getByRole("button", { name: "Copy link to macOS and Linux", exact: true }).evaluate((button) => {
     const style = getComputedStyle(button);
     return { backgroundColor: style.backgroundColor, borderColor: style.borderTopColor };
   });
