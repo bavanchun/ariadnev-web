@@ -33,8 +33,11 @@ const ROUTES = [
     url: `http://127.0.0.1:${DOCS.port}/en/stable/reference/providers/`,
   },
   {
-    name: "D18 docs recovery",
-    url: `http://127.0.0.1:${DOCS.port}/en/stable/does-not-exist/`,
+    // Lighthouse does not score non-2xx documents. Audit the exact generated
+    // recovery artifact here; the critical journey separately proves that an
+    // unknown public URL serves this artifact with a real 404 response.
+    name: "D18 docs recovery artifact",
+    url: `http://127.0.0.1:${DOCS.port}/404.html`,
   },
 ];
 
