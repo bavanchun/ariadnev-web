@@ -11,15 +11,10 @@ import type { DocsLocale } from "@/lib/i18n.ts";
 // `tabIndex={0}` on the `<table>` matches the same unconditional pattern
 // `.docs-body table[tabindex]` already styles site-wide.
 //
-// Every body cell also carries a `data-label` attribute so a narrow-viewport
-// record-card reflow is a pure-CSS `docs.css` addition with zero markup
-// change whenever it lands — see the `.rdr-table` comment in `docs.css` for
-// why that rule is deferred (not missing by oversight): the shared
-// stylesheet's tightest-margin route currently has no compressed-byte
-// headroom left under the frozen per-route cap. Until then this table still
-// gets the site-wide `.docs-body table` local-scroll treatment at every
-// width — no clipped or hidden content, just a horizontal scroll instead of
-// a stacked card. No JavaScript is required either way.
+// Every body cell also carries a `data-label` attribute. At narrow viewports
+// CSS presents each row as a labelled record while this single semantic table
+// remains the only DOM/data source. No JavaScript or duplicated mobile copy is
+// required.
 
 export interface DataColumn {
   readonly key: string;

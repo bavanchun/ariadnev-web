@@ -335,6 +335,11 @@ button { border: var(--vc-border-width-hairline) solid var(--vc-color-border-str
   #docs-content { padding: var(--vc-space-4) var(--vc-space-4) var(--vc-space-12); }
   .breadcrumb ol { margin-bottom: var(--vc-space-3); }
   .docs-description { margin-bottom: var(--vc-space-6); }
+  .rdr-table, .rdr-table tbody, .rdr-table tr, .rdr-table td { display: block; width: 100%; }
+  .rdr-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+  .rdr-table tr { padding-block: var(--vc-space-2); border-block-start: var(--vc-border-width-hairline) solid var(--vc-color-border); }
+  .rdr-table td { display: grid; grid-template-columns: minmax(7rem, 0.45fr) minmax(0, 1fr); gap: var(--vc-space-2); border: 0; }
+  .rdr-table td::before { content: attr(data-label); color: var(--vc-color-text-muted); font: var(--vc-font-weight-semibold) var(--vc-font-size-caption)/1.2 var(--vc-font-family-mono); text-transform: uppercase; }
   .authored-screen-instrument { margin-inline: calc(var(--vc-space-2) * -1); padding: var(--vc-space-3) var(--vc-space-2); }
   .cli-command-group { margin-inline: calc(var(--vc-space-2) * -1); padding-inline: var(--vc-space-2); }
   .docs-pager { grid-template-columns: 1fr; }
