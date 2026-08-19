@@ -61,7 +61,7 @@ export function DocsHomeExperience({ catalog, catalogPage, children }: DocsScree
   // reader can skip it in one gesture; the same information reads clearly
   // as text if CSS is disabled.
   return (
-    <>
+    <div className="authored-screen authored-screen-home">
       <aside className="docs-home-counts" aria-label={strings.ariaLabel}>
         <p>{strings.heading}</p>
         <dl>
@@ -71,7 +71,7 @@ export function DocsHomeExperience({ catalog, catalogPage, children }: DocsScree
           <div><dt>{strings.workflowsLabel}</dt><dd>{counts.workflows}</dd></div>
         </dl>
       </aside>
-      {children}
-    </>
+      <div className="authored-screen-reading" data-surface-context="reading">{children}</div>
+    </div>
   );
 }

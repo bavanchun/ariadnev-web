@@ -58,7 +58,9 @@ export function UninstallAndDoctorExperience({ catalogPage, children }: DocsScre
   const operations = OPERATIONS[locale] ?? OPERATIONS.en;
   return (
     <>
-      <OperationMatrix locale={locale} caption={strings.caption} attributeColumns={attributeColumns} operations={operations} />
+      <div className="authored-screen-instrument authored-screen-operations" data-surface-context="instrument">
+        <OperationMatrix locale={locale} caption={strings.caption} attributeColumns={attributeColumns} operations={operations} />
+      </div>
       {children}
     </>
   );

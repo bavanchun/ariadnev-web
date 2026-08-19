@@ -58,7 +58,9 @@ export function KitAdaptExperience({ catalogPage, children }: DocsScreenContext)
   const edges = EDGES[locale] ?? EDGES.en;
   return (
     <>
-      <Topology locale={locale} heading={strings.heading} nodes={nodes} edges={edges} />
+      <div className="authored-screen-instrument authored-screen-concept authored-screen-kit" data-surface-context="instrument">
+        <Topology locale={locale} heading={strings.heading} nodes={nodes} edges={edges} />
+      </div>
       {children}
     </>
   );

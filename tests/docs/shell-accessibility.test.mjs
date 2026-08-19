@@ -111,7 +111,7 @@ test("styles enforce touch targets, focus, reduced motion, and responsive overfl
   assert.match(css, /\.docs-toc\s*\{\s*border-inline-start:/);
   assert.match(css, /\.docs-mobile-toc\s*\{\s*display:\s*none/);
   assert.match(css, /@media \(max-width:\s*45rem\)[\s\S]*\.docs-toc\s*\{\s*display:\s*none;\s*\}[\s\S]*\.docs-mobile-toc\s*\{\s*display:\s*block/);
-  assert.match(css, /\.graph-execution-experience\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+  assert.match(css, /\.authored-screen\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
   assert.match(css, /\.docs-sidebar-drawer\[data-drawer-mode="modal"\]\[open\]/);
   assert.doesNotMatch(css, /#[0-9a-f]{3,8}\b/i);
   assert.match(css, /\.prose h1, \.prose h2[\s\S]*--vc-font-family-display/);
@@ -119,7 +119,7 @@ test("styles enforce touch targets, focus, reduced motion, and responsive overfl
   assert.doesNotMatch(css, /var\(--vcs-color-/);
   assert.doesNotMatch(css, /(?:linear-|radial-)gradient|backdrop-filter|box-shadow|transition:\s*all/);
   assert.match(css, /\.brand-logo-zone\s*\{[^}]*min-width:\s*3rem/);
-  assert.match(css, /\.graph-execution-instrument[^}]*data-surface-context|data-surface-context="instrument"/);
+  assert.match(css, /\.authored-screen-instrument\s*\{[^}]*overflow-x:\s*auto/);
 });
 
 test("headers and robots cover HTML, Markdown, search, LLM, assets, and static 404", async () => {

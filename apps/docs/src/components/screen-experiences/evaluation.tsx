@@ -58,7 +58,9 @@ export function EvaluationExperience({ catalogPage, children }: DocsScreenContex
   const edges = EDGES[locale] ?? EDGES.en;
   return (
     <>
-      <Topology locale={locale} heading={strings.heading} nodes={nodes} edges={edges} />
+      <div className="authored-screen-instrument authored-screen-concept authored-screen-evaluation" data-surface-context="instrument">
+        <Topology locale={locale} heading={strings.heading} nodes={nodes} edges={edges} />
+      </div>
       {children}
     </>
   );

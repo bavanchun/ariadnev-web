@@ -11,19 +11,21 @@ export const metadata = {
 
 export default function NotFound() {
   return (
-    <main className="not-found">
+    <main className="not-found" data-surface-context="reading">
       <div className="not-found-block" data-not-found-lang="en">
+        <p className="not-found-kicker">EN · Recovery</p>
         <h1>Documentation page not found</h1>
         <p>This locale, version, or page is not part of the published static catalog.</p>
-        <nav aria-label="Documentation recovery">
+        <nav aria-label="Documentation recovery" data-surface-context="instrument">
           <a href="/en/stable/">Current English docs</a>
           <a href="/">Choose a language</a>
         </nav>
       </div>
       <div className="not-found-block" data-not-found-lang="vi" lang="vi">
+        <p className="not-found-kicker">VI · Khôi phục</p>
         <h1>Không tìm thấy trang tài liệu</h1>
         <p>Ngôn ngữ, phiên bản hoặc trang này không nằm trong danh mục tĩnh đã xuất bản.</p>
-        <nav aria-label="Khôi phục tài liệu">
+        <nav aria-label="Khôi phục tài liệu" data-surface-context="instrument">
           <a href="/vi/stable/">Tài liệu tiếng Việt hiện tại</a>
           <a href="/">Chọn ngôn ngữ</a>
         </nav>

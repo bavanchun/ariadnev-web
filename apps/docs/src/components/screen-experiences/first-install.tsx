@@ -61,7 +61,9 @@ export function FirstInstallExperience({ catalogPage, children }: DocsScreenCont
   const edges = EDGES[locale] ?? EDGES.en;
   return (
     <>
-      <Topology locale={locale} heading={strings.heading} nodes={nodes} edges={edges} />
+      <div className="authored-screen-instrument authored-screen-task authored-screen-first-install" data-surface-context="instrument">
+        <Topology locale={locale} heading={strings.heading} nodes={nodes} edges={edges} />
+      </div>
       {children}
     </>
   );

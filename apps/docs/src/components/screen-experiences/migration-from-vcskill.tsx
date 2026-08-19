@@ -115,7 +115,9 @@ export function MigrationFromVcskillExperience({ catalogPage, children }: DocsSc
   const edges = EDGES[locale] ?? EDGES.en;
   return (
     <>
-      <Topology locale={locale} heading={strings.heading} nodes={nodes} edges={edges} />
+      <div className="authored-screen-instrument authored-screen-migration" data-surface-context="instrument">
+        <Topology locale={locale} heading={strings.heading} nodes={nodes} edges={edges} />
+      </div>
       <MigrationDiffTable locale={locale} />
       {children}
     </>

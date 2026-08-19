@@ -9,8 +9,9 @@ export default function HomePage() {
   return (
     <main className="chooser-page">
       <img className="chooser-logo" src="/ariadnev-logo.webp" width="192" height="128" alt="" />
+      <p className="chooser-kicker">Documentation gateway · EN / VI</p>
       <h1>ariadnev documentation</h1>
-      <p>Choose your documentation language.</p>
+      <p className="chooser-intro">Choose a language for the current stable edition. The choice changes only this route and is not remembered.</p>
       <LanguageChooser />
       <p className="chooser-marketing-return"><a href="https://ariadnev.com/" rel="noreferrer">← ariadnev.com</a></p>
     </main>

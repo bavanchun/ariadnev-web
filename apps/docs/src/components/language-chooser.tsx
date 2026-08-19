@@ -3,14 +3,22 @@ import { LOCALE_LABELS } from "@/lib/i18n.ts";
 export function LanguageChooser() {
   return (
     <nav aria-label="Documentation languages" className="language-chooser">
-      <a href="/en/stable/" lang="en" className="language-chooser-card">
-        <strong className="language-chooser-title">{LOCALE_LABELS.en}</strong>
-        <span className="language-chooser-desc">Guides, CLI Reference & Architecture Atlas</span>
-      </a>
-      <a href="/vi/stable/" lang="vi" className="language-chooser-card">
-        <strong className="language-chooser-title">{LOCALE_LABELS.vi}</strong>
-        <span className="language-chooser-desc">Hướng dẫn, Lệnh CLI & Bản đồ Kiến trúc</span>
-      </a>
+      <ol>
+        <li>
+          <a href="/en/stable/" lang="en">
+            <span aria-hidden="true">01</span>
+            <span><strong>{LOCALE_LABELS.en}</strong><small>Guides, CLI reference, and architecture</small></span>
+            <span aria-hidden="true">Enter →</span>
+          </a>
+        </li>
+        <li>
+          <a href="/vi/stable/" lang="vi">
+            <span aria-hidden="true">02</span>
+            <span><strong>{LOCALE_LABELS.vi}</strong><small>Hướng dẫn, tham chiếu CLI và kiến trúc</small></span>
+            <span aria-hidden="true">Mở →</span>
+          </a>
+        </li>
+      </ol>
     </nav>
   );
 }

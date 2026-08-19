@@ -54,7 +54,9 @@ export function UpgradingExperience({ catalogPage, children }: DocsScreenContext
   const edges = EDGES[locale] ?? EDGES.en;
   return (
     <>
-      <Topology locale={locale} heading={strings.heading} nodes={nodes} edges={edges} />
+      <div className="authored-screen-instrument authored-screen-decision authored-screen-upgrade" data-surface-context="instrument">
+        <Topology locale={locale} heading={strings.heading} nodes={nodes} edges={edges} />
+      </div>
       {children}
     </>
   );

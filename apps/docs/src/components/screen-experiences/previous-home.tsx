@@ -57,7 +57,7 @@ export function PreviousHomeExperience({ catalog, catalogPage, routeVersion, chi
   const returnPage = findDeclaredSibling(catalog, catalogPage, catalogPage.locale, catalog.stableAlias);
 
   return (
-    <>
+    <div className="authored-screen authored-screen-edition">
       <Callout variant="boundary" locale={locale} heading={strings.noticeHeading}>
         <p>{noticeText(locale, catalog.previousStable, catalog.currentStable)}</p>
       </Callout>
@@ -70,6 +70,6 @@ export function PreviousHomeExperience({ catalog, catalogPage, routeVersion, chi
           <a href={pageHref(returnPage.locale, catalog.stableAlias, returnPage.slug)}>{strings.returnLabel}</a>
         </nav>
       )}
-    </>
+    </div>
   );
 }
