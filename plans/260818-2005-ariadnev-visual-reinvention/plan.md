@@ -1,7 +1,7 @@
 ---
 title: "Ariadnev visual reinvention — Prismatic Technical Dossier"
 description: "Replace the shipped execution-cartography presentation across marketing and docs with one mixed-surface editorial/technical system while preserving brand assets and every public behavior contract."
-status: pending
+status: in-progress
 priority: P1
 effort: "30-42 engineer-days; 6-8 weeks single stream"
 issue: null

@@ -1,5 +1,11 @@
 # Execution cartography
 
+> Superseded visual authority. The dark-only canvas and global cartography
+> composition described here are retained as historical context. New visual
+> work follows [Prismatic Technical Dossier](./prismatic-technical-dossier.md).
+> The topology, gate, checkpoint, and path-witness vocabulary below remains
+> product terminology where it describes real behavior.
+
 The design contract for both the marketing site and the documentation. It is
 framework-neutral on purpose: Astro and Fumadocs consume the same generated
 tokens, and neither owns the visual language.

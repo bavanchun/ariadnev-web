@@ -97,16 +97,16 @@ read-only inputs in this phase except generated CSS produced by the token build.
 
 ## Function and interface checklist
 
-- [ ] DTCG resolver supports aliases across all four contexts without cycles.
-- [ ] Generated custom-property names are identical in `site.css` and
+- [x] DTCG resolver supports aliases across all four contexts without cycles.
+- [x] Generated custom-property names are identical in `site.css` and
   `docs.css` for shared roles.
-- [ ] Existing state aliases keep their behavioral names and distinctions.
-- [ ] Asset checksum test covers both app-specific logo binaries separately.
-- [ ] Static presentation tests reject logo filters, clipping/cropping, invalid
+- [x] Existing state aliases keep their behavioral names and distinctions.
+- [x] Asset checksum test covers both app-specific logo binaries separately.
+- [x] Static presentation tests reject logo filters, clipping/cropping, invalid
   object-fit/aspect-ratio behavior, or generated/replaced asset URLs.
-- [ ] Font contract confirms no font file, weight range, or Vietnamese coverage
+- [x] Font contract confirms no font file, weight range, or Vietnamese coverage
   drift.
-- [ ] M01/D06/D12 pilot briefs specify exact content facts, contexts, states,
+- [x] M01/D06/D12 pilot briefs specify exact content facts, contexts, states,
   viewport transforms, and rejection conditions.
 
 ## Implementation steps
@@ -152,24 +152,24 @@ pilot briefs ───┘
 
 ## Todo
 
-- [ ] Freeze asset and live-budget evidence.
-- [ ] Add context-first tests.
-- [ ] Implement and generate context tokens.
-- [ ] Update visual authority document.
-- [ ] Approve M01/D06/D12 pilot briefs.
-- [ ] Pass phase test and budget gates.
+- [x] Freeze asset and live-budget evidence.
+- [x] Add context-first tests.
+- [x] Implement and generate context tokens.
+- [x] Update visual authority document.
+- [x] Approve M01/D06/D12 pilot briefs.
+- [x] Pass phase test and budget gates.
 
 ## Success criteria
 
-- [ ] Four explicit contexts cover every existing semantic state; every current
+- [x] Four explicit contexts cover every existing semantic state; every current
   raw application palette consumer has a file/selector migration entry and no
   new consumer is introduced. Absolute zero is a Phase 2/whole-plan gate.
-- [ ] Logo/favicon checksums, paths, aspect ratios, minimum sizes, clear space,
+- [x] Logo/favicon checksums, paths, aspect ratios, minimum sizes, clear space,
   and backing-value gate are machine/durably recorded.
-- [ ] All token/font/generated-CSS tests pass.
-- [ ] M01/D06/D12 briefs can be implemented without new product claims,
+- [x] All token/font/generated-CSS tests pass.
+- [x] M01/D06/D12 briefs can be implemented without new product claims,
   runtime-only content, or budget changes.
-- [ ] A reviewer can distinguish the new system from the old dark-only thesis
+- [x] A reviewer can distinguish the new system from the old dark-only thesis
   before seeing a completed page.
 
 ## Risk assessment
