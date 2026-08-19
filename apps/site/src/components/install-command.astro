@@ -17,7 +17,7 @@ interface Props {
 const { label, command, id } = Astro.props;
 ---
 
-<div class="command">
+<div class="command" data-surface-context="instrument">
   <span class="command__label" id={`${id}-label`}>{label}</span>
   <code class="command__text" id={id}>{command}</code>
   <button

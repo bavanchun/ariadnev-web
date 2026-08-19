@@ -168,7 +168,7 @@ test("application source keeps the immutable public asset paths", () => {
 
 test("existing application palette debt is frozen until Phase 2 removes it", () => {
   const expected = new Map([
-    ["apps/site/src/styles/site.css", 9],
+    ["apps/site/src/styles/site.css", 0],
     ["apps/docs/src/styles/docs.css", 79],
   ]);
   for (const [path, count] of expected) {

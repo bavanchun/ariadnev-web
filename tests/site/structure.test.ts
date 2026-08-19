@@ -56,6 +56,23 @@ describe("information architecture", () => {
     }
   });
 
+  it("declares explicit brand, reading, and instrument ownership", () => {
+    expect(html).toContain('<header class="site-header" data-surface-context="brand">');
+    expect(html).toContain('id="promise" aria-labelledby="promise-heading" data-surface-context="brand"');
+    expect(html).toContain('class="hero__path" aria-labelledby="hero-path-caption" data-surface-context="instrument"');
+    for (const id of ["execution-map", "authority-boundary", "evidence", "install"]) {
+      const section = new RegExp(`<section[^>]*id="${id}"[^>]*>`).exec(html)?.[0] ?? "";
+      expect(section, `${id} must own the reading context`).toContain('data-surface-context="reading"');
+    }
+  });
+
+  it("preserves the logo inside its measured backing zone", () => {
+    const header = html.slice(html.indexOf("<header"), html.indexOf("</header>"));
+    expect(header).toContain('class="site-header__logo-zone"');
+    expect(header).toContain('src="/ariadnev-logo.webp" width="192" height="128"');
+    expect(header).not.toMatch(/(?:style|class)="[^"]*(?:filter|crop)/);
+  });
+
   it("keeps the promise to exactly three lines under one stable heading", () => {
     expect(html).toContain("Agent work you can route, gate, and prove.");
     // Scoped to the promise list, not the whole document: evidence rows and
@@ -134,13 +151,11 @@ describe("style discipline", () => {
   const code = css.replace(/\/\*[\s\S]*?\*\//g, "");
 
   it("declares no literal colour outside the token layer", () => {
-    // The print block is the single exception: paper is white and ink is black,
-    // and neither is a brand colour the token palette should own.
-    const printBlock = code.slice(code.indexOf("@media print"));
-    const scanned = code.slice(0, code.indexOf("@media print"));
-    expect(scanned).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
-    expect(scanned).not.toMatch(/\b(rgb|hsl|oklch|lab)a?\(/);
-    expect(printBlock).toMatch(/#fff/);
+    expect(code).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
+    expect(code).not.toMatch(/\b(rgb|hsl|oklch|lab)a?\(/);
+    expect(code).not.toMatch(/var\(--vcs-color-/);
+    expect(code).toContain("background: Canvas");
+    expect(code).toContain("color: CanvasText");
   });
 
   it("declares no font stack of its own", () => {

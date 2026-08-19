@@ -5,11 +5,13 @@
 import { SITE } from "../data/marketing-facts";
 ---
 
-<header class="site-header">
+<header class="site-header" data-surface-context="brand">
   <div class="shell site-header__bar">
     <a class="site-header__mark" href="/" aria-label={`${SITE.name} home`}>
-      <img class="site-header__logo" src="/ariadnev-logo.webp" width="192" height="128" alt="" />
-      <span>{SITE.name}</span>
+      <span class="site-header__logo-zone" aria-hidden="true">
+        <img class="site-header__logo" src="/ariadnev-logo.webp" width="192" height="128" alt="" />
+      </span>
+      <span class="site-header__name">{SITE.name}</span>
     </a>
     <nav class="site-header__nav" aria-label="Primary">
       <a class="action" href={SITE.docsEntry}>Docs</a>

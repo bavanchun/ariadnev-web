@@ -14,6 +14,56 @@
 
 @import "@ariadnev-web/tokens/site.css";
 
+/* Explicit context ownership. Existing component rules consume the stable
+ * semantic aliases below, while each region resolves those aliases from its
+ * declared context instead of a global light/dark switch. */
+[data-surface-context="brand"] {
+  --vcs-surface-canvas: var(--vcs-context-brand-canvas);
+  --vcs-surface-raised: var(--vcs-context-brand-raised);
+  --vcs-surface-overlay: var(--vcs-context-brand-raised);
+  --vcs-surface-border: var(--vcs-context-brand-border);
+  --vcs-surface-border-strong: var(--vcs-context-brand-border-strong);
+  --vcs-text-primary: var(--vcs-context-brand-text-primary);
+  --vcs-text-secondary: var(--vcs-context-brand-text-muted);
+  --vcs-text-muted: var(--vcs-context-brand-text-muted);
+  --vcs-text-accent: var(--vcs-context-brand-link-default);
+  --vcs-focus-color: var(--vcs-context-brand-focus-ring);
+  --context-link-hover: var(--vcs-context-brand-link-hover);
+}
+
+[data-surface-context="reading"] {
+  --vcs-surface-canvas: var(--vcs-context-reading-canvas);
+  --vcs-surface-raised: var(--vcs-context-reading-raised);
+  --vcs-surface-overlay: var(--vcs-context-reading-raised);
+  --vcs-surface-border: var(--vcs-context-reading-border);
+  --vcs-surface-border-strong: var(--vcs-context-reading-border-strong);
+  --vcs-text-primary: var(--vcs-context-reading-text-primary);
+  --vcs-text-secondary: var(--vcs-context-reading-text-muted);
+  --vcs-text-muted: var(--vcs-context-reading-text-muted);
+  --vcs-text-accent: var(--vcs-context-reading-link-default);
+  --vcs-focus-color: var(--vcs-context-reading-focus-ring);
+  --context-link-hover: var(--vcs-context-reading-link-hover);
+}
+
+[data-surface-context="instrument"] {
+  --vcs-surface-canvas: var(--vcs-context-instrument-canvas);
+  --vcs-surface-raised: var(--vcs-context-instrument-raised);
+  --vcs-surface-overlay: var(--vcs-context-instrument-raised);
+  --vcs-surface-border: var(--vcs-context-instrument-border);
+  --vcs-surface-border-strong: var(--vcs-context-instrument-border-strong);
+  --vcs-text-primary: var(--vcs-context-instrument-text-primary);
+  --vcs-text-secondary: var(--vcs-context-instrument-text-muted);
+  --vcs-text-muted: var(--vcs-context-instrument-text-muted);
+  --vcs-text-accent: var(--vcs-context-instrument-link-default);
+  --vcs-focus-color: var(--vcs-context-instrument-focus-ring);
+  --context-link-hover: var(--vcs-context-instrument-link-hover);
+}
+
+[data-surface-context] {
+  background: var(--vcs-surface-canvas);
+  color: var(--vcs-text-primary);
+}
+
 /* ------------------------------------------------------------------ reset */
 
 *,
@@ -35,8 +85,8 @@ html {
 
 body {
   margin: 0;
-  background: var(--vcs-app-background);
-  color: var(--vcs-app-foreground);
+  background: var(--vcs-surface-canvas);
+  color: var(--vcs-text-primary);
   font-family: var(--vcs-font-family-body);
   font-size: var(--vcs-font-size-md);
   line-height: var(--vcs-font-line-height-normal);
@@ -67,7 +117,7 @@ a {
 }
 
 a:hover {
-  color: var(--vcs-color-spectral-500);
+  color: var(--context-link-hover);
 }
 
 :where(a, button, summary, [tabindex]):focus-visible {
@@ -89,7 +139,7 @@ h3 {
 }
 
 h1 {
-  font-size: var(--vcs-font-size-3xl);
+  font-size: var(--vcs-font-size-2xl);
 }
 
 h2 {
@@ -103,11 +153,17 @@ h3 {
 
 @media (min-width: 48rem) {
   h1 {
-    font-size: var(--vcs-font-size-4xl);
+    font-size: var(--vcs-font-size-3xl);
   }
 
   h2 {
     font-size: var(--vcs-font-size-2xl);
+  }
+}
+
+@media (min-width: 80rem) {
+  h1 {
+    font-size: var(--vcs-font-size-4xl);
   }
 }
 
@@ -206,7 +262,7 @@ pre {
   justify-content: space-between;
   gap: var(--vcs-space-3);
   min-height: var(--vcs-size-touch-target);
-  padding-block: var(--vcs-space-2);
+  padding-block: 0;
 }
 
 .site-header__mark {
@@ -221,13 +277,28 @@ pre {
 }
 
 .site-header__logo {
-  width: calc(var(--vcs-space-8) + var(--vcs-space-4));
-  height: var(--vcs-space-8);
+  display: block;
+  width: var(--vcs-space-7);
+  height: var(--vcs-space-6);
   object-fit: contain;
 }
 
+.site-header__logo-zone {
+  display: grid;
+  place-items: center;
+  padding: var(--vcs-space-2);
+  background: var(--vcs-context-brand-canvas);
+}
+
+@media (min-width: 48rem) {
+  .site-header__logo {
+    width: calc(var(--vcs-space-7) + var(--vcs-space-5));
+    height: var(--vcs-space-7);
+  }
+}
+
 @media (max-width: 22rem) {
-  .site-header__mark > span {
+  .site-header__name {
     display: none;
   }
 }
@@ -291,14 +362,14 @@ pre {
 }
 
 .action--primary:hover {
-  background: var(--vcs-color-spectral-500);
-  border-color: var(--vcs-color-spectral-500);
+  background: var(--vcs-state-selected-border);
+  border-color: var(--vcs-state-selected-border);
   color: var(--vcs-state-selected-text);
 }
 
 .action--primary:active {
-  background: var(--vcs-color-spectral-600);
-  border-color: var(--vcs-color-spectral-600);
+  background: var(--vcs-topology-node-active);
+  border-color: var(--vcs-topology-node-active);
   color: var(--vcs-state-selected-text);
 }
 
@@ -356,14 +427,18 @@ pre {
 
 .hero {
   padding-block: var(--vcs-space-7) var(--vcs-space-7);
+  border-bottom: var(--vcs-border-width-hairline) solid var(--vcs-context-brand-border);
+}
+
+.hero__grid {
   display: grid;
   gap: var(--vcs-space-6);
 }
 
 @media (min-width: 960px) {
-  .hero {
-    grid-template-columns: 5fr 7fr;
-    align-items: start;
+  .hero__grid {
+    grid-template-columns: minmax(0, 6fr) minmax(0, 7fr);
+    align-items: center;
   }
 }
 
@@ -372,10 +447,10 @@ pre {
 }
 
 .hero__path {
+  min-width: 0;
   margin: 0;
   padding: var(--vcs-space-4);
   border: var(--vcs-border-width-hairline) solid var(--vcs-surface-border);
-  border-radius: var(--vcs-border-radius-md);
   background: var(--vcs-surface-raised);
 }
 
@@ -409,6 +484,7 @@ pre {
 }
 
 .hero-path__step {
+  min-width: 0;
   display: grid;
   grid-template-columns: auto 1fr;
   column-gap: var(--vcs-space-4);
@@ -427,11 +503,13 @@ pre {
 
 .hero-path__label {
   font-weight: var(--vcs-font-weight-heading);
+  overflow-wrap: anywhere;
 }
 
 .hero-path__produces {
   font-size: var(--vcs-font-size-sm);
   color: var(--vcs-text-secondary);
+  overflow-wrap: anywhere;
 }
 
 /* ----------------------------------------------------------- promise */
@@ -787,7 +865,7 @@ pre {
 .ledger__field dd > a {
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
+  min-height: var(--vcs-size-touch-target);
 }
 
 @media (min-width: 60rem) {
@@ -830,7 +908,7 @@ pre {
 /* Kind is carried by the label text as well as the colour, so the distinction
    survives monochrome print and colour-vision deficiency. */
 .ledger__kind[data-kind="measured"] {
-  color: var(--vcs-color-signal-pass);
+  color: var(--vcs-context-reading-verified-text);
 }
 
 .ledger__kind[data-kind="contract"] {
@@ -920,7 +998,7 @@ pre {
   max-width: 30rem;
   height: auto;
   margin-block: var(--vcs-space-2) 0;
-  color: var(--vcs-color-graphite-500, currentColor);
+  color: var(--vcs-surface-border-strong);
 }
 
 .not-found__map-nodes circle {
@@ -929,7 +1007,7 @@ pre {
 }
 
 .not-found__map-nodes .not-found__map-node--broken {
-  fill: var(--vcs-color-copper-500, currentColor);
+  fill: var(--vcs-context-brand-gate-indicator);
   opacity: 1;
 }
 
@@ -941,7 +1019,7 @@ pre {
 }
 
 .not-found__map-fracture {
-  stroke: var(--vcs-color-copper-500, currentColor);
+  stroke: var(--vcs-context-brand-gate-indicator);
   stroke-width: 2;
   stroke-linecap: round;
   fill: none;
@@ -952,8 +1030,8 @@ pre {
 
 @media print {
   body {
-    background: #fff;
-    color: #000;
+    background: Canvas;
+    color: CanvasText;
   }
 
   .site-header__nav,
@@ -972,20 +1050,20 @@ pre {
      already carries the facts and the shape still helps. */
   .map__node-shape {
     fill: none;
-    stroke: #000;
+    stroke: CanvasText;
   }
 
   .map__node-label,
   .map__node-produces {
-    fill: #000;
+    fill: CanvasText;
   }
 
   .map__edge {
-    stroke: #000;
+    stroke: CanvasText;
   }
 
   .map__edge-head {
-    fill: #000;
+    fill: CanvasText;
   }
 
   /* A printed page cannot be clicked, so link targets are printed inline. */

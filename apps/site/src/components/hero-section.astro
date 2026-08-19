@@ -16,7 +16,8 @@ import InstallCommand from "./install-command.astro";
 const release = loadReleasePin();
 ---
 
-<section class="shell hero" id="promise" aria-labelledby="promise-heading">
+<section class="hero" id="promise" aria-labelledby="promise-heading" data-surface-context="brand">
+  <div class="shell hero__grid">
   <div class="hero__promise">
     <p class="eyebrow">{PROMISE.eyebrow}</p>
     <h1 id="promise-heading">{PROMISE.heading}</h1>
@@ -45,7 +46,7 @@ const release = loadReleasePin();
     }
   </div>
 
-  <figure class="hero__path" aria-labelledby="hero-path-caption">
+  <figure class="hero__path" aria-labelledby="hero-path-caption" data-surface-context="instrument">
     <ol class="hero-path">
       {
         EXECUTION_MAP.map((state, index) => (
@@ -61,4 +62,5 @@ const release = loadReleasePin();
       Every <code>av run</code> moves through these five states in this order. The map below narrates each one.
     </figcaption>
   </figure>
+  </div>
 </section>

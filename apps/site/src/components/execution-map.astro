@@ -29,7 +29,7 @@ const nodes = EXECUTION_MAP.map((state, index) => ({
 }));
 ---
 
-<section class="shell section" id="execution-map" aria-labelledby="map-heading">
+<section class="shell section" id="execution-map" aria-labelledby="map-heading" data-surface-context="reading">
   <div class="section__head">
     <p class="eyebrow">The map</p>
     <h2 id="map-heading">One run, five states you can point at</h2>
@@ -43,7 +43,7 @@ const nodes = EXECUTION_MAP.map((state, index) => ({
     {nodes.map((node) => <a href={`#map-step-${node.id}`}>{node.label}</a>)}
   </nav>
 
-  <figure class="map__figure">
+  <figure class="map__figure" data-surface-context="instrument">
     <svg
       class="map__svg"
       viewBox={`0 0 ${width} ${height}`}
