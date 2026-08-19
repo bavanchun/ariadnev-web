@@ -17,7 +17,7 @@ const ORIGIN = `http://127.0.0.1:${DOCS.port}`;
 // Fixtures whose composition changes across the declared tablet/desktop
 // breakpoints get the extra viewports; every other fixture stays on the
 // required trio so the harness stays lean.
-const BREAKPOINT_SENSITIVE = new Set(["D01", "D01-vi", "D06", "D12", "D14"]);
+const BREAKPOINT_SENSITIVE = new Set(["D01", "D01-vi", "D06", "D12", "D13", "D14"]);
 
 for (const fixture of DOCS_FIXTURES) {
   const widths = BREAKPOINT_SENSITIVE.has(fixture.id)

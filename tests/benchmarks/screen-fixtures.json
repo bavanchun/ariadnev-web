@@ -25,6 +25,7 @@
     { "id": "D10", "surface": "docs", "route": "/en/stable/guides/uninstall-and-doctor/", "locale": "en", "description": "Operations by diagnostic and mutating intent" },
     { "id": "D11", "surface": "docs", "route": "/en/stable/guides/migration-from-vcskill/", "locale": "en", "description": "Migration — irreversible stages" },
     { "id": "D12", "surface": "docs", "route": "/en/stable/reference/cli/", "locale": "en", "description": "CLI aggregate index" },
+    { "id": "D13", "surface": "docs", "route": "/en/stable/reference/cli/mcp-add/", "locale": "en", "description": "CLI command dossier — signature, aliases, options, examples, and related commands" },
     { "id": "D14", "surface": "docs", "route": "/en/stable/reference/providers/", "locale": "en", "description": "Provider comparison + records" },
     { "id": "D15", "surface": "docs", "route": "/en/stable/reference/skills/", "locale": "en", "description": "Skill catalog + per-category split" },
     { "id": "D16", "surface": "docs", "route": "/en/stable/reference/workflows/", "locale": "en", "description": "Workflow topology text-first" },

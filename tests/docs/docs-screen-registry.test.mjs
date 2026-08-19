@@ -99,3 +99,19 @@ test("every authored D03-D11 screen carries its screenKind in both locales of th
     }
   }
 });
+
+test("the representative D13 command keeps canonical identity and reference-only navigation", async () => {
+  const catalog = await currentCatalog();
+  for (const locale of ["en", "vi"]) {
+    const page = catalog.pages.find(
+      (candidate) => candidate.locale === locale
+        && candidate.version === catalog.currentStable
+        && candidate.canonicalId === "reference/cli/mcp-add",
+    );
+    assert.ok(page, `${locale} mcp-add command detail is missing from the current stable edition`);
+    assert.equal(page.screenKind, "D13-cli-command-detail");
+    assert.equal(page.pageKind, "command");
+    assert.equal(page.navigationVisibility, "reference-only");
+    assert.deepEqual(page.slug, ["reference", "cli", "mcp-add"]);
+  }
+});
