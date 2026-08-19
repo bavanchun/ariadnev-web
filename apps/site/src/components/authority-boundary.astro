@@ -12,8 +12,9 @@ import WorkflowSection from "./workflow-section.astro";
 import ProviderProjection from "./provider-projection.astro";
 ---
 
-<section class="shell section authority" id="authority-boundary" aria-labelledby="authority-boundary-heading" data-surface-context="reading">
-  <div class="section__head">
+<section class="section authority" id="authority-boundary" aria-labelledby="authority-boundary-heading" data-surface-context="reading">
+  <div class="shell authority__inner">
+    <div class="section__head">
     <p class="eyebrow">Authority boundary</p>
     <h2 id="authority-boundary-heading">Where the graph stops, and where the provider stops</h2>
     <p class="lede">
@@ -21,10 +22,11 @@ import ProviderProjection from "./provider-projection.astro";
       and where it hands control to a human. The provider projection says which parts of the kit are actually written
       for the runtime a reader will run.
     </p>
-  </div>
+    </div>
 
-  <div class="authority__regions">
-    <WorkflowSection />
-    <ProviderProjection />
+    <div class="authority__regions">
+      <WorkflowSection />
+      <ProviderProjection />
+    </div>
   </div>
 </section>

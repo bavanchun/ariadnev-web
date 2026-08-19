@@ -7,9 +7,9 @@
  * stack, a raw pixel spacing value, or a second motion scale in this file is a
  * contract violation and `tests/site/structure.test.ts` fails on it.
  *
- * The visual language is execution cartography (see docs/execution-cartography.md):
- * ink ground, ruled structure, spectral for live execution, copper for gates.
- * No gradient, glass, orb, or broad shadow.
+ * The visual language is the Prismatic Technical Dossier defined in
+ * docs/prismatic-technical-dossier.md: brand, reading, and instrument fields
+ * joined by ruled structure and explicit semantic states.
  */
 
 @import "@ariadnev-web/tokens/site.css";
@@ -90,8 +90,6 @@ body {
   font-family: var(--vcs-font-family-body);
   font-size: var(--vcs-font-size-md);
   line-height: var(--vcs-font-line-height-normal);
-  /* Nothing on this page is wider than the viewport. */
-  overflow-x: hidden;
 }
 
 h1,
@@ -555,10 +553,22 @@ pre {
   overflow-x: auto;
 }
 
+.execution-spread {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--vcs-space-6);
+  align-items: start;
+}
+
 /* On desktop the compact topology follows the reader down the chapter list so
    the state currently being narrated stays visible. Mobile keeps the natural
    flow; a sticky element would eat scarce viewport height. */
 @media (min-width: 960px) {
+  .execution-spread {
+    grid-template-columns: minmax(18rem, 5fr) minmax(0, 7fr);
+    gap: var(--vcs-space-8);
+  }
+
   .map__figure {
     position: sticky;
     top: var(--vcs-space-4);
@@ -649,28 +659,23 @@ pre {
 
 .map__steps {
   display: grid;
-  gap: var(--vcs-space-4);
+  gap: 0;
   counter-reset: map-step;
-}
-
-@media (min-width: 60rem) {
-  .map__steps {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 .map__step {
   display: grid;
   gap: var(--vcs-space-2);
-  padding: var(--vcs-space-4);
-  border: var(--vcs-border-width-hairline) solid var(--vcs-surface-border);
-  border-top: var(--vcs-border-width-thick) solid var(--vcs-topology-edge);
-  border-radius: var(--vcs-border-radius-md);
+  padding-block: var(--vcs-space-5);
+  border-bottom: var(--vcs-border-width-hairline) solid var(--vcs-surface-border);
+  border-inline-start: var(--vcs-border-width-thick) solid transparent;
+  padding-inline-start: var(--vcs-space-4);
 }
 
 .map__step:target,
 .map__step[data-emphasis="on"] {
-  border-top-color: var(--vcs-topology-node-active);
+  border-inline-start-color: var(--vcs-topology-node-active);
+  background: var(--vcs-surface-raised);
 }
 
 .map__step-index {
@@ -703,8 +708,7 @@ pre {
   align-items: center;
   min-height: var(--vcs-size-touch-target);
   padding-inline: var(--vcs-space-3);
-  border: var(--vcs-border-width-hairline) solid var(--vcs-surface-border);
-  border-radius: var(--vcs-border-radius-pill);
+  border-bottom: var(--vcs-border-width-hairline) solid var(--vcs-surface-border-strong);
   font-family: var(--vcs-font-family-mono);
   font-size: var(--vcs-font-size-xs);
   letter-spacing: var(--vcs-font-tracking-wide);
@@ -719,13 +723,33 @@ pre {
   gap: var(--vcs-space-6);
 }
 
+.authority {
+  border-block: var(--vcs-border-width-hairline) solid var(--vcs-surface-border);
+  background: var(--vcs-surface-raised);
+}
+
+.authority__inner {
+  display: grid;
+  gap: var(--vcs-space-6);
+}
+
+@media (min-width: 60rem) {
+  .authority__regions {
+    grid-template-columns: minmax(0, 7fr) minmax(18rem, 5fr);
+    gap: var(--vcs-space-8);
+    align-items: start;
+  }
+}
+
 .authority__region {
   display: block;
 }
 
 .authority__region + .authority__region {
-  padding-top: var(--vcs-space-6);
-  border-top: var(--vcs-border-width-hairline) solid var(--vcs-surface-border);
+  padding: var(--vcs-space-5);
+  border-inline-start: var(--vcs-border-width-thick) solid var(--vcs-context-instrument-active-indicator);
+  background: var(--vcs-surface-canvas);
+  color: var(--vcs-text-primary);
 }
 
 /* ------------------------------------------------------------- workflows */
@@ -738,8 +762,26 @@ pre {
 .workflow {
   display: grid;
   gap: var(--vcs-space-3);
-  padding: var(--vcs-space-5) 0 0;
+  padding: var(--vcs-space-5) 0;
   border-top: var(--vcs-border-width-hairline) solid var(--vcs-surface-border);
+}
+
+@media (min-width: 60rem) {
+  .workflow {
+    grid-template-columns: minmax(10rem, 1fr) minmax(0, 3fr);
+    column-gap: var(--vcs-space-5);
+  }
+
+  .workflow__id,
+  .workflow h4,
+  .workflow__availability {
+    grid-column: 1;
+  }
+
+  .workflow__facets {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+  }
 }
 
 .workflow__id {
@@ -751,12 +793,6 @@ pre {
 .workflow__facets {
   display: grid;
   gap: var(--vcs-space-4);
-}
-
-@media (min-width: 60rem) {
-  .workflow__facets {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 
 .workflow__facet dt {
@@ -800,7 +836,7 @@ pre {
 
 @media (min-width: 48rem) {
   .provider {
-    grid-template-columns: 12rem minmax(0, 1fr);
+    grid-template-columns: 8rem minmax(0, 1fr);
     gap: var(--vcs-space-4);
     align-items: baseline;
   }
@@ -817,6 +853,23 @@ pre {
 }
 
 /* -------------------------------------------------------------- evidence */
+
+.evidence {
+  display: grid;
+  gap: var(--vcs-space-6);
+}
+
+@media (min-width: 60rem) {
+  .evidence {
+    grid-template-columns: minmax(14rem, 3fr) minmax(0, 9fr);
+    gap: var(--vcs-space-8);
+  }
+
+  .evidence .section__head {
+    align-self: start;
+    margin-bottom: 0;
+  }
+}
 
 .ledger {
   display: grid;
@@ -870,7 +923,7 @@ pre {
 
 @media (min-width: 60rem) {
   .ledger__record {
-    grid-template-columns: 10rem minmax(0, 20rem) minmax(0, 1fr);
+    grid-template-columns: 8rem minmax(0, 3fr) minmax(10rem, 2fr);
     column-gap: var(--vcs-space-5);
     row-gap: var(--vcs-space-2);
   }
@@ -927,8 +980,40 @@ pre {
 /* ----------------------------------------------------------------- final */
 
 .final {
+  border-top: var(--vcs-border-width-hairline) solid var(--vcs-surface-border);
+  background: var(--vcs-surface-canvas);
+  color: var(--vcs-text-primary);
+}
+
+.final__inner {
   display: grid;
-  gap: var(--vcs-space-5);
+  gap: var(--vcs-space-6);
+}
+
+@media (min-width: 60rem) {
+  .final__inner {
+    grid-template-columns: minmax(0, 6fr) minmax(14rem, 3fr) minmax(14rem, 3fr);
+    align-items: start;
+  }
+
+  .final__inner > .section__head,
+  .final__commands {
+    grid-column: 1;
+  }
+
+  .final__inner > .section__head {
+    margin-bottom: 0;
+  }
+
+  .final__after {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .final__source {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
 }
 
 .final__block {
@@ -985,7 +1070,30 @@ pre {
   display: grid;
   gap: var(--vcs-space-5);
   padding-block: var(--vcs-space-8);
+}
+
+.not-found__orientation {
+  display: grid;
+  gap: var(--vcs-space-4);
   max-width: var(--vcs-size-prose-max);
+}
+
+.not-found__dispatch {
+  display: grid;
+  gap: var(--vcs-space-4);
+  align-content: start;
+  padding: var(--vcs-space-5);
+  border-inline-start: var(--vcs-border-width-thick) solid var(--vcs-context-instrument-gate-indicator);
+  background: var(--vcs-surface-canvas);
+  color: var(--vcs-text-primary);
+}
+
+@media (min-width: 60rem) {
+  .not-found {
+    grid-template-columns: minmax(0, 7fr) minmax(20rem, 5fr);
+    align-items: start;
+    min-height: calc(100vh - var(--vcs-size-touch-target));
+  }
 }
 
 /* Broken-graphite route for M02. The nodes use the same execution-cartography

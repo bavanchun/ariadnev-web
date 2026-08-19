@@ -17,10 +17,11 @@ import InstallCommand from "../components/install-command.astro";
 >
   <SiteHeader />
 
-  <main id="main" class="shell">
-    <div class="not-found">
-      <p class="eyebrow">404</p>
-      <h1>This path does not exist</h1>
+  <main id="main" class="recovery" data-surface-context="reading">
+    <article class="shell not-found" aria-labelledby="not-found-heading">
+      <div class="not-found__orientation">
+        <p class="eyebrow">404 · unavailable path</p>
+        <h1 id="not-found-heading">This path does not exist</h1>
 
       {/* Broken-graphite execution route. Decorative reinforcement of the "path
           not found" idea, drawn as the same compile → policy → execute →
@@ -51,18 +52,22 @@ import InstallCommand from "../components/install-command.astro";
         </g>
       </svg>
 
-      <p class="lede">
+        <p class="lede">
         Nothing is served here. If you followed a link to a release asset or an installer path, it either moved or was
         never published — the site does not substitute a page for a missing file.
-      </p>
-
-      <InstallCommand id="not-found-install-unix" label={INSTALL.unixLabel} command={INSTALL.unixCommand} />
-
-      <div class="action-row">
-        <a class="action action--primary" href="/">Back to the start</a>
-        <a class="action" href={SITE.docsEntry}>Documentation</a>
-        <a class="action" href={DOCS.releaseNotes}>Release notes</a>
+        </p>
       </div>
-    </div>
+
+      <div class="not-found__dispatch" data-surface-context="instrument">
+        <p class="eyebrow">Recovery routes</p>
+        <InstallCommand id="not-found-install-unix" label={INSTALL.unixLabel} command={INSTALL.unixCommand} />
+
+        <div class="action-row">
+          <a class="action action--primary" href="/">Back to the start</a>
+          <a class="action" href={SITE.docsEntry}>Documentation</a>
+          <a class="action" href={DOCS.releaseNotes}>Release notes</a>
+        </div>
+      </div>
+    </article>
   </main>
 </BaseLayout>

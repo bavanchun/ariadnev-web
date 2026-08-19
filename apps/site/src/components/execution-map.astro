@@ -34,7 +34,7 @@ const nodes = EXECUTION_MAP.map((state, index) => ({
     <p class="eyebrow">The map</p>
     <h2 id="map-heading">One run, five states you can point at</h2>
     <p class="lede">
-      Every <code>vc run</code> moves along the same track. The states below are the documented public pipeline, not a
+      Every <code>av run</code> moves along the same track. The states below are the documented public pipeline, not a
       marketing abstraction over it.
     </p>
   </div>
@@ -43,7 +43,8 @@ const nodes = EXECUTION_MAP.map((state, index) => ({
     {nodes.map((node) => <a href={`#map-step-${node.id}`}>{node.label}</a>)}
   </nav>
 
-  <figure class="map__figure" data-surface-context="instrument">
+  <div class="execution-spread">
+    <figure class="map__figure" data-surface-context="instrument">
     <svg
       class="map__svg"
       viewBox={`0 0 ${width} ${height}`}
@@ -96,9 +97,9 @@ const nodes = EXECUTION_MAP.map((state, index) => ({
       Compile, policy, execute, checkpoint, proof — the same order every time. The drawing repeats the list below; it
       never replaces it.
     </figcaption>
-  </figure>
+    </figure>
 
-  <ol class="map__steps" data-map-steps>
+    <ol class="map__steps" data-map-steps>
     {
       nodes.map((node) => (
         <li class="map__step" id={`map-step-${node.id}`} data-map-step={node.id} tabindex="-1">
@@ -121,7 +122,8 @@ const nodes = EXECUTION_MAP.map((state, index) => ({
         </li>
       ))
     }
-  </ol>
+    </ol>
+  </div>
 
   <p class="note">
     Source: <a href={EXECUTION_MAP_SOURCE.source}>{EXECUTION_MAP_SOURCE.sourceLabel}</a>. {EXECUTION_MAP_SOURCE.claim}{" "}

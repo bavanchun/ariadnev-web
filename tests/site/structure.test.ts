@@ -60,10 +60,19 @@ describe("information architecture", () => {
     expect(html).toContain('<header class="site-header" data-surface-context="brand">');
     expect(html).toContain('id="promise" aria-labelledby="promise-heading" data-surface-context="brand"');
     expect(html).toContain('class="hero__path" aria-labelledby="hero-path-caption" data-surface-context="instrument"');
-    for (const id of ["execution-map", "authority-boundary", "evidence", "install"]) {
+    for (const id of ["execution-map", "authority-boundary", "evidence"]) {
       const section = new RegExp(`<section[^>]*id="${id}"[^>]*>`).exec(html)?.[0] ?? "";
       expect(section, `${id} must own the reading context`).toContain('data-surface-context="reading"');
     }
+    expect(html).toContain('id="install" aria-labelledby="install-heading" data-surface-context="instrument"');
+  });
+
+  it("renders five distinct marketing macro rhythms", () => {
+    for (const marker of ["hero__grid", "execution-spread", "authority__regions", "evidence", "final__inner"]) {
+      expect(html, `missing macro composition ${marker}`).toContain(marker);
+    }
+    expect(html).toContain('class="authority__region authority__registry"');
+    expect(html).toContain('id="install" aria-labelledby="install-heading" data-surface-context="instrument"');
   });
 
   it("preserves the logo inside its measured backing zone", () => {
@@ -171,6 +180,11 @@ describe("style discipline", () => {
     }
   });
 
+  it("contains overflow locally instead of masking the document", () => {
+    expect(code).not.toMatch(/body\s*\{[^}]*overflow-x:\s*hidden/s);
+    expect(code).toMatch(/\.map__figure\s*\{[^}]*overflow-x:\s*auto/s);
+  });
+
   it("uses no second motion scale", () => {
     const durations = [...code.matchAll(/(?:transition|animation)[^;]*?(\d+m?s)\b/g)];
     expect(durations, "durations must come from --vcs-motion-duration-*").toEqual([]);
@@ -182,6 +196,8 @@ describe("404 page", () => {
     expect(notFound).toContain("This path does not exist");
     expect(notFound).toContain('name="robots" content="noindex, follow"');
     expect(notFound).toContain('href="/"');
+    expect(notFound).toContain('class="shell not-found"');
+    expect(notFound).toContain('class="not-found__dispatch" data-surface-context="instrument"');
   });
 
   it("never claims the path succeeded", () => {

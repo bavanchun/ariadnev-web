@@ -8,35 +8,37 @@ import { INSTALL, SITE, DOCS } from "../data/marketing-facts";
 import InstallCommand from "./install-command.astro";
 ---
 
-<section class="shell section final" id="install" aria-labelledby="install-heading" data-surface-context="reading">
-  <div class="section__head">
+<section class="section final" id="install" aria-labelledby="install-heading" data-surface-context="instrument">
+  <div class="shell final__inner">
+    <div class="section__head">
     <p class="eyebrow">Install</p>
     <h2 id="install-heading">One command, then pick your providers</h2>
     <p class="lede">{INSTALL.note}</p>
-  </div>
+    </div>
 
-  <div class="final__block">
+    <div class="final__block final__commands">
     <p class="eyebrow final__eyebrow">Platform commands</p>
     <div class="command-list">
       <InstallCommand id="final-install-unix" label={INSTALL.unixLabel} command={INSTALL.unixCommand} />
       <InstallCommand id="final-install-windows" label={INSTALL.windowsLabel} command={INSTALL.windowsCommand} />
     </div>
-  </div>
+    </div>
 
-  <div class="final__block">
+    <div class="final__block final__after">
     <p class="eyebrow final__eyebrow">After installing</p>
     <div class="action-row">
       <a class="action action--primary" href={DOCS.installation}>First-run guide</a>
       <a class="action" href={DOCS.releaseNotes}>Release notes</a>
     </div>
-  </div>
+    </div>
 
-  <div class="final__block">
+    <div class="final__block final__source">
     <p class="eyebrow final__eyebrow">Read the script first</p>
     <p class="note">
       Prefer to inspect the script before piping it into a shell? Open{" "}
       <a href="/install">{SITE.origin}/install</a> — it is the same anonymous path the command above fetches, and no
       authentication is involved.
     </p>
+    </div>
   </div>
 </section>
