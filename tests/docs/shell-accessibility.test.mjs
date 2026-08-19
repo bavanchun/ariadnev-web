@@ -107,10 +107,12 @@ test("styles enforce touch targets, focus, reduced motion, and responsive overfl
   assert.match(css, /\.docs-body pre\s*\{[^}]*overflow-x:\s*auto/);
   assert.match(css, /\.docs-body table\s*\{[^}]*overflow-x:\s*auto/);
   assert.match(css, /overflow-wrap:\s*break-word/);
-  assert.match(css, /@media \(max-width:\s*48rem\)/);
+  assert.match(css, /@media \(max-width:\s*45rem\)/);
   assert.match(css, /\.docs-toc\s*\{\s*border-inline-start:/);
   assert.match(css, /\.docs-mobile-toc\s*\{\s*display:\s*none/);
-  assert.match(css, /@media \(max-width:\s*48rem\)[\s\S]*\.docs-toc\s*\{\s*display:\s*none;\s*\}[\s\S]*\.docs-mobile-toc\s*\{\s*display:\s*block/);
+  assert.match(css, /@media \(max-width:\s*45rem\)[\s\S]*\.docs-toc\s*\{\s*display:\s*none;\s*\}[\s\S]*\.docs-mobile-toc\s*\{\s*display:\s*block/);
+  assert.match(css, /\.graph-execution-experience\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+  assert.match(css, /\.docs-sidebar-drawer\[data-drawer-mode="modal"\]\[open\]/);
   assert.doesNotMatch(css, /#[0-9a-f]{3,8}\b/i);
   assert.match(css, /\.prose h1, \.prose h2[\s\S]*--vc-font-family-display/);
   assert.match(css, /\.heading-copy-button[\s\S]*border-color:\s*transparent/);

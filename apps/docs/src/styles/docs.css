@@ -183,7 +183,7 @@ button { border: var(--vc-border-width-hairline) solid var(--vc-color-border-str
 .docs-sidebar, .docs-toc { min-width: 0; padding: var(--vc-space-4); background: var(--vc-color-canvas); color: var(--vc-color-text); }
 .docs-sidebar { border-inline-end: var(--vc-border-width-hairline) solid var(--vc-color-border); }
 .docs-sidebar-drawer > summary { display: none; }
-.docs-sidebar-drawer[data-drawer-mode="modal"] { position: fixed; inset: 0; z-index: 40; background: var(--vc-color-canvas); overflow: auto; padding: var(--vc-space-4); }
+.docs-sidebar-drawer[data-drawer-mode="modal"][open] { position: fixed; inset: 0; z-index: 40; background: var(--vc-color-canvas); overflow: auto; padding: var(--vc-space-4); }
 .docs-sidebar-drawer[data-drawer-mode="modal"] > summary { display: inline-flex; }
 .docs-sidebar nav { display: grid; gap: var(--vc-space-5); }
 .docs-sidebar-section { display: grid; gap: var(--vc-space-1); }
@@ -242,7 +242,7 @@ button { border: var(--vc-border-width-hairline) solid var(--vc-color-border-str
 .docs-pager-next { text-align: end; }
 .docs-pager-empty { display: block; }
 
-.graph-execution-experience { display: grid; gap: var(--vc-space-8); }
+.graph-execution-experience { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--vc-space-8); }
 .graph-execution-instrument { margin-inline: calc(var(--vc-space-4) * -1); padding: var(--vc-space-4); border-inline-start: var(--vc-border-width-strong) solid var(--vc-color-active-indicator); background: var(--vc-color-canvas); color: var(--vc-color-text); }
 .graph-execution-instrument h3 { margin-block-start: 0; }
 .cli-command-orientation { max-width: 62ch; }
@@ -300,7 +300,9 @@ button { border: var(--vc-border-width-hairline) solid var(--vc-color-border-str
   .docs-frame { grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr); }
   .docs-toc { grid-column: 2; border-inline-start: 0; border-top: var(--vc-border-width-hairline) solid var(--vc-color-border); }
 }
-@media (max-width: 48rem) {
+/* Match MobileDrawerEnhancer's 720px media query exactly so the native open
+   disclosure never occupies the desktop workbench at the boundary. */
+@media (max-width: 45rem) {
   .docs-frame { display: block; }
   .docs-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--vc-space-2); padding: var(--vc-space-1) var(--vc-space-3); }
   .brand-logo-zone { min-width: 2.75rem; }
