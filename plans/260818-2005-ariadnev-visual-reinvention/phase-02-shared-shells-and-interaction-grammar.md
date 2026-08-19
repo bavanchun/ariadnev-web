@@ -83,20 +83,20 @@ component package.
 
 ## Function and interface checklist
 
-- [ ] `DocsShell` preserves landmark order, current page/section, no-JS
+- [x] `DocsShell` preserves landmark order, current page/section, no-JS
   sidebar, breadcrumb, previous-edition notice, and TOC omission when empty.
-- [ ] `SearchDialog` keeps partition isolation, focus containment, Escape,
+- [x] `SearchDialog` keeps partition isolation, focus containment, Escape,
   loading/error/empty states, and localized announcements.
-- [ ] Switchers keep explicit links and do not remember/redirect preference.
-- [ ] Drawer enhancer cleans listeners, contains focus, returns focus, and
+- [x] Switchers keep explicit links and do not remember/redirect preference.
+- [x] Drawer enhancer cleans listeners, contains focus, returns focus, and
   leaves native `<details>` usable without JS.
-- [ ] TOC observer retains sticky-offset calculation and reduced-motion-safe
+- [x] TOC observer retains sticky-offset calculation and reduced-motion-safe
   current-location behavior.
-- [ ] Copy actions keep manual fallback and sighted/screen-reader confirmation.
-- [ ] M01 essential claim, proof, install, docs, and release facts exist in
+- [x] Copy actions keep manual fallback and sighted/screen-reader confirmation.
+- [x] M01 essential claim, proof, install, docs, and release facts exist in
   initial HTML.
-- [ ] D06 textual graph authority remains complete next to supplemental visual.
-- [ ] D12 remains a complete no-JS command index; filter only enhances it.
+- [x] D06 textual graph authority remains complete next to supplemental visual.
+- [x] D12 remains a complete no-JS command index; filter only enhances it.
 
 ## Implementation steps
 
@@ -144,24 +144,24 @@ Phase 1 contexts
 
 ## Todo
 
-- [ ] Protect current semantic/no-JS behavior with focused tests.
-- [ ] Implement both brand shells and complete state grammar.
-- [ ] Complete M01, D06, and D12 pilots.
-- [ ] Pass pilot accessibility, budget, and responsive reviews.
-- [ ] Record approved pilot proofs; defer committed baseline rotation to each
+- [x] Protect current semantic/no-JS behavior with focused tests.
+- [x] Implement both brand shells and complete state grammar.
+- [x] Complete M01, D06, and D12 pilots.
+- [x] Pass pilot accessibility, budget, and responsive reviews.
+- [x] Record approved pilot proofs; defer committed baseline rotation to each
   owning page-family phase.
 
 ## Success criteria
 
-- [ ] Both shells visibly belong to one system without sharing framework code.
-- [ ] Logo assets remain byte-identical and legible in preservation zones.
-- [ ] M01, D06, and D12 are final-quality archetypes, not throwaway prototypes.
-- [ ] All native/static/no-JS/pilot task gates pass before temporary proofs are
+- [x] Both shells visibly belong to one system without sharing framework code.
+- [x] Logo assets remain byte-identical and legible in preservation zones.
+- [x] M01, D06, and D12 are final-quality archetypes, not throwaway prototypes.
+- [x] All native/static/no-JS/pilot task gates pass before temporary proofs are
   approved; committed screenshots remain unchanged until owning phases finish.
-- [ ] No old glass/gradient/glow/bento/pill-default pattern remains in pilots.
-- [ ] Application CSS contains zero direct palette-step consumers except a
+- [x] No old glass/gradient/glow/bento/pill-default pattern remains in pilots.
+- [x] Application CSS contains zero direct palette-step consumers except a
   documented forced-colors/browser boundary that cannot use semantic aliases.
-- [ ] Remaining phases can expand page families by reusing proven context and
+- [x] Remaining phases can expand page families by reusing proven context and
   composition patterns instead of inventing new visual systems.
 
 ## Risk assessment
