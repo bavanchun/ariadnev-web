@@ -1,7 +1,7 @@
 ---
 phase: 4
 title: "Authored docs D00-D11 and D18"
-status: pending
+status: in-progress
 priority: P1
 effort: "7-9 engineer-days"
 dependencies:

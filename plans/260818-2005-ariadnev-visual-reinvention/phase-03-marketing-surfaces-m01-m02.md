@@ -1,7 +1,7 @@
 ---
 phase: 3
 title: "Marketing surfaces M01-M02"
-status: pending
+status: completed
 priority: P1
 effort: "4-6 engineer-days"
 dependencies:
@@ -83,16 +83,16 @@ initial HTML is complete -> page-enhancer adds copy/finite emphasis only
 
 ## Function and interface checklist
 
-- [ ] Structured data remains limited to verified software name, description,
+- [x] Structured data remains limited to verified software name, description,
   URL, category, and operating systems.
-- [ ] `InstallCommand` preserves explicit label, code text, copy target, status
+- [x] `InstallCommand` preserves explicit label, code text, copy target, status
   region, and no-JS manual selection.
-- [ ] `page-enhancer.ts` creates no essential content and cleans observers/listeners.
-- [ ] Execution visuals retain adjacent textual lifecycle/evidence/boundary
+- [x] `page-enhancer.ts` creates no essential content and cleans observers/listeners.
+- [x] Execution visuals retain adjacent textual lifecycle/evidence/boundary
   equivalents.
-- [ ] Provider/workflow claims still resolve through `marketing-facts.ts` and
+- [x] Provider/workflow claims still resolve through `marketing-facts.ts` and
   authoritative docs links.
-- [ ] M02 response stays 404 while offering working recovery links.
+- [x] M02 response stays 404 while offering working recovery links.
 
 ## Implementation steps
 
@@ -141,20 +141,20 @@ Phase 2 M01 pilot
 
 ## Todo
 
-- [ ] Protect marketing facts and no-JS contracts.
-- [ ] Complete all M01 macro compositions.
-- [ ] Complete M02 recovery composition.
-- [ ] Verify responsive/accessibility/performance behavior.
-- [ ] Rotate and stabilize M01/M02 baselines.
+- [x] Protect marketing facts and no-JS contracts.
+- [x] Complete all M01 macro compositions.
+- [x] Complete M02 recovery composition.
+- [x] Verify responsive/accessibility/performance behavior.
+- [x] Rotate and stabilize M01/M02 baselines.
 
 ## Success criteria
 
-- [ ] M01 presents five distinct macro rhythms and materially shorter perceived
+- [x] M01 presents five distinct macro rhythms and materially shorter perceived
   reading effort without removing required facts.
-- [ ] Promise, install, docs, release evidence, authority limits, and telemetry
+- [x] Promise, install, docs, release evidence, authority limits, and telemetry
   boundary remain accurate and discoverable.
-- [ ] M02 is visually intentional, returns 404, and offers purposeful recovery.
-- [ ] Site tests, budget, a11y modes, journeys, and two visual runs pass.
+- [x] M02 is visually intentional, returns 404, and offers purposeful recovery.
+- [x] Site tests, budget, a11y modes, journeys, and two visual runs pass.
 
 ## Risk assessment
 
@@ -174,4 +174,3 @@ Phase 2 M01 pilot
 Keep structured data truthful, external links explicit, CSP unchanged, and copy
 behavior local. Do not add analytics, remote media, form submission, or new
 script origins.
-

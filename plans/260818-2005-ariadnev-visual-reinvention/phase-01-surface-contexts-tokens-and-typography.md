@@ -1,7 +1,7 @@
 ---
 phase: 1
 title: "Surface contexts, tokens, typography, and archetype gates"
-status: pending
+status: completed
 priority: P1
 effort: "5-7 engineer-days"
 dependencies: []

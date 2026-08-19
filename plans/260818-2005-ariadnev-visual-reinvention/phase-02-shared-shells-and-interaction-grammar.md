@@ -1,7 +1,7 @@
 ---
 phase: 2
 title: "Shared shells, interaction grammar, and archetype pilots"
-status: pending
+status: completed
 priority: P1
 effort: "6-8 engineer-days"
 dependencies: ["phase-01-surface-contexts-tokens-and-typography.md"]

@@ -102,10 +102,10 @@ and [migration/verification research](./research/research-260818-2014-migration-
 
 | # | Phase | Depends on | Status |
 |---|---|---|---|
-| 1 | [Surface contexts, tokens, typography, and archetype gates](./phase-01-surface-contexts-tokens-and-typography.md) | — | Pending |
-| 2 | [Shared shells and interaction grammar](./phase-02-shared-shells-and-interaction-grammar.md) | 1 | Pending |
-| 3 | [Marketing surfaces M01-M02](./phase-03-marketing-surfaces-m01-m02.md) | 1, 2 | Pending |
-| 4 | [Authored docs D00-D11 and D18](./phase-04-authored-docs-d00-d11-d18.md) | 1, 2 | Pending |
+| 1 | [Surface contexts, tokens, typography, and archetype gates](./phase-01-surface-contexts-tokens-and-typography.md) | — | Completed |
+| 2 | [Shared shells and interaction grammar](./phase-02-shared-shells-and-interaction-grammar.md) | 1 | Completed |
+| 3 | [Marketing surfaces M01-M02](./phase-03-marketing-surfaces-m01-m02.md) | 1, 2 | Completed |
+| 4 | [Authored docs D00-D11 and D18](./phase-04-authored-docs-d00-d11-d18.md) | 1, 2 | In progress |
 | 5 | [Generated references D12-D17](./phase-05-generated-references-d12-d17.md) | 1, 2, 4 | Pending |
 | 6 | [Whole-site verification and rollout](./phase-06-whole-site-verification-and-rollout.md) | 3, 4, 5 | Pending |
 
