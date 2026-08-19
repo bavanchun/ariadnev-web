@@ -14,10 +14,14 @@ what to do when it fails.
 - **Cross-browser critical journeys** — Chromium + Firefox + WebKit; 5
   semantic assertions × 3 engines.
 - **Accessibility-mode gates** — SC 1.4.10 reflow at 400% and 200% zoom, SC
-  1.4.12 text spacing overrides, forced-colors emulation, print media.
-- **Task-outcome gates** — 8 plan-critical task journeys plus one marketing
-  bonus.
-- **Lighthouse runner** — on-demand; not in `test:qualification`.
+  1.4.12 text spacing overrides, forced-colors emulation, print media, and a
+  390px overflow/visible-focus probe across every fixture.
+- **Task-outcome gates** — 8 plan-critical task journeys, a local CLI-filter
+  shortcut gate, and one marketing bonus.
+- **No-JS browser gate** — `pnpm run test:docs:browser` covers shell layout,
+  search, EN/VI switching, copy fallbacks, axe, and the JS-disabled locale path.
+- **Lighthouse runner** — on-demand on M01, D01-vi, D06, D12, D14, and D18;
+  not in `test:qualification`.
 
 The four independent performance groups from Phase 1 stay gated by the
 vitest and Node suites (`tests/site/performance-budget.test.ts`,
@@ -30,7 +34,8 @@ duplicate them.
 every route the harness verifies. Gated by
 `tests/docs/screen-fixture-manifest.test.mjs` (schema + required IDs) and
 `tests/docs/screen-fixture-structural-probes.test.mjs` (built HTML
-identity). Adding a screen means adding one entry there and one spec entry.
+identity). Adding a screen means adding one manifest entry; the parameterized
+screen, axe, and 390px probes consume it automatically.
 
 ## Running the harness
 
@@ -41,12 +46,19 @@ pnpm install
 pnpm exec playwright install chromium firefox webkit
 ```
 
-Full visual gate (Chromium screenshots + axe + accessibility-modes +
-task-outcomes + cross-browser journeys):
+Full visual gate (Chromium screenshots + axe + accessibility modes + task
+outcomes + cross-browser journeys):
 
 ```bash
 pnpm run build            # required — the harness runs against built output
 pnpm run test:visual
+```
+
+The full qualification command also runs the no-JS browser gate after the
+clean production build and before the visual suite:
+
+```bash
+pnpm run test:qualification
 ```
 
 Individual slices during development:
@@ -64,11 +76,19 @@ blanket regeneration: every rotation must be explained in the commit
 message (which macro or component changed, and why the new pixels are the
 intent).
 
+Start with the owning spec and fixture IDs, inspect the exact image diff, and
+only then run the complete visual suite unchanged:
+
 ```bash
 pnpm run build
-pnpm run test:visual:update      # regenerates every Chromium baseline
-git diff --stat tests/visual/__baselines__/   # sanity-check the churn
+pnpm exec playwright test tests/visual/docs/docs-screens.spec.ts \
+  --project=chromium --grep 'D1[2-7]' --update-snapshots=all
+git diff --stat tests/visual/__baselines__/
+pnpm run test:visual
 ```
+
+`pnpm run test:visual:update` remains an emergency full-regeneration utility;
+it is not the first acceptance step.
 
 ## Lighthouse (on-demand)
 

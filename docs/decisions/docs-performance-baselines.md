@@ -14,6 +14,27 @@ Sources of record:
 - [`apps/docs/out/`](../../apps/docs/out) — the production build measured
 - [`plans/260816-2345-ariadnev-web-uiux-upgrade/phase-01-contract-gate-and-measurement-spike.md`](../../plans/260816-2345-ariadnev-web-uiux-upgrade/phase-01-contract-gate-and-measurement-spike.md) — the phase this decision closes
 
+## Live reconciliation — 2026-08-19
+
+The tables below remain the dated 2026-08-17 decision evidence. The enforceable
+contracts have since moved through reviewed UI work and now report:
+
+| Metric | Verified live value | Enforced cap |
+|---|---:|---:|
+| Tightest docs route transfer | 304,768 bytes | 308,000 bytes |
+| Routes measured by the walker | 444 | every enumerable route |
+| Grandfathered routes | 0 | 0 |
+| English search (`stable` / `1.1.0` / `1.0.0`) | 117,115 / 117,353 / 33,926 bytes | 160,000 each |
+| Vietnamese search (`stable` / `1.1.0` / `1.0.0`) | 112,028 / 112,267 / 35,175 bytes | 160,000 each |
+| Static output | 2,715 files; 447 HTML routes; 45,460,845 bytes | observed, no frozen cap |
+
+The 308,000-byte route cap is the explicit 2026-08-18 user decision recorded
+in [`performance-budgets.json`](../../tests/benchmarks/performance-budgets.json),
+and [`docs-per-route-ratchet.json`](../../tests/benchmarks/docs-per-route-ratchet.json)
+mirrors it with an empty grandfather list. Current values were produced by the
+production build and the same Brotli-quality-9 logic used by the budget and
+search builders; no cap or ratchet moved during the 2026-08-19 reconciliation.
+
 ## Four independent budgets, not one
 
 Phase 1 confirmed the plan's four-metric separation is necessary: adding routes
