@@ -39,6 +39,23 @@ export function ReferenceIndexFilter({
   const statusRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    function focusLocalFilter(event: KeyboardEvent) {
+      const target = event.target;
+      const editable = target instanceof HTMLElement
+        && (target.isContentEditable || /^(?:INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
+      const slash = event.key === "/" && !event.metaKey && !event.ctrlKey && !event.altKey;
+      if (!slash || editable || !inputRef.current) return;
+      event.preventDefault();
+      // Reference indexes own `/` as their exact-lookup shortcut. Capture and
+      // stop here so the shell-wide search shortcut does not open as well.
+      event.stopImmediatePropagation();
+      inputRef.current.focus();
+    }
+    window.addEventListener("keydown", focusLocalFilter, { capture: true });
+    return () => window.removeEventListener("keydown", focusLocalFilter, { capture: true });
+  }, []);
+
+  useEffect(() => {
     const root = document.getElementById(rootId);
     if (!root) return;
     const needle = query.trim().toLowerCase();

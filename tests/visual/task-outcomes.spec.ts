@@ -64,6 +64,17 @@ test("Task 4: exact-command lookup — CLI index links a specific command in one
   expect(href, "CLI index must expose a per-command link").toMatch(/\/cli\/.+/);
 });
 
+test("Task 4: CLI index slash shortcut focuses its local exact-command filter", async ({
+  page,
+}) => {
+  await page.goto(`${DOCS_ORIGIN}/en/stable/reference/cli/`, {
+    waitUntil: "networkidle",
+  });
+  await page.keyboard.press("/");
+  await expect(page.getByLabel("Filter commands")).toBeFocused();
+  await expect(page.getByRole("dialog")).toBeHidden();
+});
+
 test("Task 5: provider comparison — providers reference exposes comparison table", async ({
   page,
 }) => {
