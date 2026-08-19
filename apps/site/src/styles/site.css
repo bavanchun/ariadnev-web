@@ -810,7 +810,7 @@ pre {
 }
 
 .workflow__facet--gate dt {
-  color: var(--vcs-text-gate);
+  color: var(--vcs-context-reading-gate-text);
 }
 
 .workflow__availability {
@@ -969,7 +969,7 @@ pre {
 }
 
 .ledger__kind[data-kind="boundary"] {
-  color: var(--vcs-text-gate);
+  color: var(--vcs-context-reading-gate-text);
 }
 
 .ledger__caveat {

@@ -73,6 +73,7 @@ describe("information architecture", () => {
     }
     expect(html).toContain('class="authority__region authority__registry"');
     expect(html).toContain('id="install" aria-labelledby="install-heading" data-surface-context="instrument"');
+    expect(html).toContain('class="map__figure" data-surface-context="instrument" tabindex="0"');
   });
 
   it("preserves the logo inside its measured backing zone", () => {
