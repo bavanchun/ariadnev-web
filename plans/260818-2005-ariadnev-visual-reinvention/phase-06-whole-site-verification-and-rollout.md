@@ -1,7 +1,7 @@
 ---
 phase: 6
 title: "Whole-site verification and rollout"
-status: in-progress
+status: completed
 priority: P1
 effort: "3-5 engineer-days"
 dependencies:
@@ -18,6 +18,8 @@ dependencies:
 - [Verification research](./research/research-260818-2014-migration-verification-rollout-strategy.md)
 - [Visual harness runbook](../../docs/operations/visual-verification-harness.md)
 - [Deployment and rollback](../../docs/operations/deployment-and-rollback.md)
+- [Qualification evidence](./reports/qualification-evidence-2026-08-19.md)
+- [Ship and rollback handoff](./reports/ship-and-rollback-handoff-2026-08-19.md)
 
 ## Overview
 
@@ -88,18 +90,18 @@ those return to the owning phase and rerun its focused gate.
 
 ## Function and interface checklist
 
-- [ ] Fixture manifest and specs have one intentional owner for M01-M02 and
+- [x] Fixture manifest and specs have one intentional owner for M01-M02 and
   every D00-D18 archetype.
-- [ ] Baseline helper waits for deterministic fonts/layout without arbitrary
+- [x] Baseline helper waits for deterministic fonts/layout without arbitrary
   sleeps or hidden animation disabling beyond reduced-motion policy.
-- [ ] Visual servers use deterministic ports 4331/4332; existing owners are
+- [x] Visual servers use deterministic ports 4331/4332; existing owners are
   identified before start and only processes started by this run are stopped.
-- [ ] Qualification script still orders content generation, contracts,
+- [x] Qualification script still orders content generation, contracts,
   typecheck, build, native tests, and visual tests correctly.
-- [ ] Budget walker measures every enumerable docs route and current site assets.
-- [ ] Deployment input pins explicit product/evidence SHAs and existing units;
+- [x] Budget walker measures every enumerable docs route and current site assets.
+- [x] Deployment input pins explicit product/evidence SHAs and existing units;
   no branch/latest aliases.
-- [ ] Rollback uses recorded worker/deployment identities and existing unit order.
+- [x] Rollback uses recorded worker/deployment identities and existing unit order.
 
 ## Implementation steps
 
@@ -124,8 +126,9 @@ those return to the owning phase and rerun its focused gate.
    dark/light transition grammar, first mobile viewport, Vietnamese typography,
    and absence of retired patterns.
 10. Update only affected durable runbook/decision claims, validate links, and
-    produce qualification evidence plus a ship/rollback recipe. Do not create
-    commits, deployment inputs, or external publication in this phase.
+    produce qualification evidence plus a ship/rollback recipe. The user's
+    execution advice authorized continuous commits; do not create deployment
+    inputs or external publication in this phase.
 11. Reconcile processes and verify ports are free or returned to their prior
     clearly owned state.
 
@@ -160,27 +163,27 @@ P5 reference ─┘                    |
 
 ## Todo
 
-- [ ] Map every acceptance criterion to evidence.
-- [ ] Complete full-archetype fixture and baseline review.
-- [ ] Pass clean qualification, Lighthouse, and two-run stability.
-- [ ] Reconcile immutable assets, budgets, docs claims, and processes.
-- [ ] Produce qualification evidence and ship/rollback recipe without commits,
-  deployment input creation, or external mutation.
+- [x] Map every acceptance criterion to evidence.
+- [x] Complete full-archetype fixture and baseline review.
+- [x] Pass clean qualification, Lighthouse, and two-run stability.
+- [x] Reconcile immutable assets, budgets, docs claims, and processes.
+- [x] Produce qualification evidence and ship/rollback recipe without
+  deployment input creation or external mutation.
 
 ## Success criteria
 
-- [ ] All six phase contracts pass with zero unresolved contradiction.
-- [ ] `pnpm run test:qualification` and on-demand Lighthouse pass from clean
+- [x] All six phase contracts pass with zero unresolved contradiction.
+- [x] `pnpm run test:qualification` and on-demand Lighthouse pass from clean
   artifacts; visual suite passes twice consecutively.
-- [ ] All M01-M02/D00-D18 archetypes have intentional semantic and visual
+- [x] All M01-M02/D00-D18 archetypes have intentional semantic and visual
   evidence at declared stress frames.
-- [ ] No immutable asset, public behavior, generated authority, locale, no-JS,
+- [x] No immutable asset, public behavior, generated authority, locale, no-JS,
   budget, or deployment contract regresses.
-- [ ] No retired visual pattern remains unintentionally and hidden-logo review
+- [x] No retired visual pattern remains unintentionally and hidden-logo review
   confirms one coherent system.
-- [ ] No background process started by verification is left running.
-- [ ] Deployment/rollback recipe is complete; commit, deployment-input creation,
-  and production mutation await explicit ship authorization.
+- [x] No background process started by verification is left running.
+- [x] Deployment/rollback recipe is complete; deployment-input creation and
+  production mutation await explicit ship authorization.
 
 ## Risk assessment
 

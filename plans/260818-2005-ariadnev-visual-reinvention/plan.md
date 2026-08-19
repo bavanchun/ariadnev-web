@@ -1,7 +1,7 @@
 ---
 title: "Ariadnev visual reinvention — Prismatic Technical Dossier"
 description: "Replace the shipped execution-cartography presentation across marketing and docs with one mixed-surface editorial/technical system while preserving brand assets and every public behavior contract."
-status: in-progress
+status: completed
 priority: P1
 effort: "30-42 engineer-days; 6-8 weeks single stream"
 issue: null
@@ -107,7 +107,7 @@ and [migration/verification research](./research/research-260818-2014-migration-
 | 3 | [Marketing surfaces M01-M02](./phase-03-marketing-surfaces-m01-m02.md) | 1, 2 | Completed |
 | 4 | [Authored docs D00-D11 and D18](./phase-04-authored-docs-d00-d11-d18.md) | 1, 2 | Completed |
 | 5 | [Generated references D12-D17](./phase-05-generated-references-d12-d17.md) | 1, 2, 4 | Completed |
-| 6 | [Whole-site verification and rollout](./phase-06-whole-site-verification-and-rollout.md) | 3, 4, 5 | In progress |
+| 6 | [Whole-site verification and rollout](./phase-06-whole-site-verification-and-rollout.md) | 3, 4, 5 | Completed |
 
 ```text
 P1 context contract + M01/D06/D12 proofs
@@ -141,25 +141,25 @@ budget gates.
 
 ## Whole-plan acceptance
 
-- [ ] Logo/favicon checksums and paths match the recorded immutable manifest;
+- [x] Logo/favicon checksums and paths match the recorded immutable manifest;
   logo detail remains legible at compact and desktop sizes without CSS effects.
-- [ ] M01-M02 and D00-D18 have an intentional composition and all required
+- [x] M01-M02 and D00-D18 have an intentional composition and all required
   states; no unchanged screen survives by accident.
-- [ ] With logos hidden, marketing and docs still share typography, grid,
+- [x] With logos hidden, marketing and docs still share typography, grid,
   state shapes, accent semantics, and context transition grammar.
-- [ ] The first mobile viewport answers where the user is, what the page does,
+- [x] The first mobile viewport answers where the user is, what the page does,
   and the next action; no decorative dead space precedes the title.
-- [ ] Exact command lookup remains at most two purposeful interactions; install
+- [x] Exact command lookup remains at most two purposeful interactions; install
   copy remains at most one; locale/version/recovery paths remain no-JS usable.
-- [ ] No clipping or hidden page overflow at 320/375/390/768/1280/1440;
+- [x] No clipping or hidden page overflow at 320/375/390/768/1280/1440;
   tables/code/graphs scroll or recompose locally and remain keyboard reachable.
-- [ ] EN/VI chrome parity, focus visibility, forced colors, text spacing,
+- [x] EN/VI chrome parity, focus visibility, forced colors, text spacing,
   400% reflow, print, reduced motion, and cross-browser journeys remain green.
-- [ ] Frozen site/docs/search budgets remain green; no new grandfathered route
+- [x] Frozen site/docs/search budgets remain green; no new grandfathered route
   or cap increase is introduced without a separate user decision.
-- [ ] Baselines rotate surgically only after semantic/static gates pass; no
+- [x] Baselines rotate surgically only after semantic/static gates pass; no
   unrelated fixture churn is accepted.
-- [ ] `pnpm run test:qualification` passes from a clean build; its visual step
+- [x] `pnpm run test:qualification` passes from a clean build; its visual step
   is run #1, an unchanged immediate `pnpm run test:visual` is run #2, then the
   on-demand Lighthouse gate passes.
 
@@ -185,10 +185,8 @@ without reopening their behavioral or architectural contracts.
 
 ## Open questions
 
-One execution-governance question remains: who gives the visual approval for
-the M01/D06/D12 pilot proofs before their page-family rollouts begin. Phase 1
-resolves exact backing values, minimum logo size, clear space, and mobile search
-placement through measured archetype proofs.
+None. The M01/D06/D12 pilot proofs and their page-family rollouts passed the
+recorded semantic, visual, accessibility, and human composition reviews.
 
 ## Red Team Review
 
@@ -226,6 +224,15 @@ placement through measured archetype proofs.
 - Phase 6 produces qualification evidence and a ship recipe only; commits and
   deployment inputs require later authorization.
 - Remaining validation fork: approval owner for M01/D06/D12 pilot proofs.
+
+### Execution authorization — 2026-08-19
+
+- The user's explicit execution advice authorized continuous conventional
+  commits throughout delivery, superseding the commit hold above.
+- No deployment input, workflow dispatch, push, or production mutation was
+  authorized or performed.
+- Qualification evidence: [record](./reports/qualification-evidence-2026-08-19.md).
+- Authorized-later recipe: [ship and rollback handoff](./reports/ship-and-rollback-handoff-2026-08-19.md).
 
 ## Validation Log
 
