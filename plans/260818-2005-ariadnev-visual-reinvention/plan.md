@@ -106,8 +106,8 @@ and [migration/verification research](./research/research-260818-2014-migration-
 | 2 | [Shared shells and interaction grammar](./phase-02-shared-shells-and-interaction-grammar.md) | 1 | Completed |
 | 3 | [Marketing surfaces M01-M02](./phase-03-marketing-surfaces-m01-m02.md) | 1, 2 | Completed |
 | 4 | [Authored docs D00-D11 and D18](./phase-04-authored-docs-d00-d11-d18.md) | 1, 2 | Completed |
-| 5 | [Generated references D12-D17](./phase-05-generated-references-d12-d17.md) | 1, 2, 4 | In progress |
-| 6 | [Whole-site verification and rollout](./phase-06-whole-site-verification-and-rollout.md) | 3, 4, 5 | Pending |
+| 5 | [Generated references D12-D17](./phase-05-generated-references-d12-d17.md) | 1, 2, 4 | Completed |
+| 6 | [Whole-site verification and rollout](./phase-06-whole-site-verification-and-rollout.md) | 3, 4, 5 | In progress |
 
 ```text
 P1 context contract + M01/D06/D12 proofs

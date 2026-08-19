@@ -1,7 +1,7 @@
 ---
 phase: 6
 title: "Whole-site verification and rollout"
-status: pending
+status: in-progress
 priority: P1
 effort: "3-5 engineer-days"
 dependencies:

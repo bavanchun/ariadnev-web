@@ -1,7 +1,7 @@
 ---
 phase: 5
 title: "Generated references D12-D17"
-status: in-progress
+status: completed
 priority: P1
 effort: "5-7 engineer-days"
 dependencies:
@@ -90,19 +90,19 @@ build products, never hand-edited.
 
 ## Function and interface checklist
 
-- [ ] `ReferenceIndexFilter` keeps `/` focus, Escape clear, accurate visible
+- [x] `ReferenceIndexFilter` keeps `/` focus, Escape clear, accurate visible
   count, localized live status, and complete no-JS initial records.
-- [ ] CLI details use immutable command identity/canonical slug and preserve
+- [x] CLI details use immutable command identity/canonical slug and preserve
   alias metadata without alias routes.
-- [ ] Command details remain excluded from global sidebar and appear once per
+- [x] Command details remain excluded from global sidebar and appear once per
   locale/version search partition.
-- [ ] Provider statuses distinguish supported/skipped/unverified using text,
+- [x] Provider statuses distinguish supported/skipped/unverified using text,
   shape, and source rationale.
-- [ ] Skill index/category split and page-kind identities remain unchanged.
-- [ ] Workflow SVG exposes no sole source of meaning; text adjacency remains
+- [x] Skill index/category split and page-kind identities remain unchanged.
+- [x] Workflow SVG exposes no sole source of meaning; text adjacency remains
   complete and keyboard/print usable.
-- [ ] Release highlight links are emitted only for headings that exist.
-- [ ] Search extraction remains MIN for command details and within 160000-byte
+- [x] Release highlight links are emitted only for headings that exist.
+- [x] Search extraction remains MIN for command details and within 160000-byte
   partition caps.
 
 ## Implementation steps
@@ -154,19 +154,19 @@ D12 pilot
 
 ## Todo
 
-- [ ] Add D13 fixture and protect generated contracts.
-- [ ] Recompose D13-D17 around the accepted D12 grammar.
-- [ ] Regenerate and verify route/search/discovery outputs.
-- [ ] Pass reference, no-JS, accessibility, and budget gates.
-- [ ] Seed/rotate and stabilize all reference baselines.
+- [x] Add D13 fixture and protect generated contracts.
+- [x] Recompose D13-D17 around the accepted D12 grammar.
+- [x] Regenerate and verify route/search/discovery outputs.
+- [x] Pass reference, no-JS, accessibility, and budget gates.
+- [x] Seed/rotate and stabilize all reference baselines.
 
 ## Success criteria
 
-- [ ] D12-D17 are visually coherent but retain distinct page jobs.
-- [ ] Every generated fact and route remains release-authoritative.
-- [ ] Exact command/provider/workflow tasks meet current interaction outcomes.
-- [ ] Search/discovery/route/budget contracts pass with no cap or ratchet change.
-- [ ] D13 joins deterministic visual coverage; two full reference visual runs
+- [x] D12-D17 are visually coherent but retain distinct page jobs.
+- [x] Every generated fact and route remains release-authoritative.
+- [x] Exact command/provider/workflow tasks meet current interaction outcomes.
+- [x] Search/discovery/route/budget contracts pass with no cap or ratchet change.
+- [x] D13 joins deterministic visual coverage; two full reference visual runs
   are stable.
 
 ## Risk assessment
