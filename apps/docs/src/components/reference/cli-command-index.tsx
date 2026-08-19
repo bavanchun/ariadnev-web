@@ -31,6 +31,8 @@ const STRINGS = {
     filterLabel: "Filter commands",
     filterPlaceholder: "Filter by command or description",
     filterNoMatches: "No commands match this filter.",
+    filterResults: "results",
+    filterClear: "Clear filter",
   },
   vi: {
     introPrefix: "Mỗi lệnh dưới đây có trang riêng với tham số, tùy chọn và bí danh. ",
@@ -42,6 +44,8 @@ const STRINGS = {
     filterLabel: "Lọc lệnh",
     filterPlaceholder: "Lọc theo tên lệnh hoặc mô tả",
     filterNoMatches: "Không có lệnh nào khớp bộ lọc.",
+    filterResults: "kết quả",
+    filterClear: "Xóa bộ lọc",
   },
 } as const;
 
@@ -85,16 +89,18 @@ export function CliCommandIndexExperience({ catalog, catalogPage, routeVersion }
   const href = (page: DocsCatalogPage) => `/${[page.locale, routeVersion, ...page.slug].join("/")}/`;
 
   return (
-    <>
-      <p>{strings.introPrefix}<code>ariadnev</code>{strings.introAnd}<code>av</code>{strings.introSuffix}</p>
+    <div className="cli-command-index">
+      <p className="cli-command-orientation">{strings.introPrefix}<code>ariadnev</code>{strings.introAnd}<code>av</code>{strings.introSuffix}</p>
       <ReferenceIndexFilter
         rootId="rendered-markdown"
         label={strings.filterLabel}
         placeholder={strings.filterPlaceholder}
         noMatchesLabel={strings.filterNoMatches}
+        resultsLabel={strings.filterResults}
+        clearLabel={strings.filterClear}
       />
       {groups.map(({ namespace, members }) => (
-        <div key={namespace || "other"}>
+        <div className="cli-command-group" data-surface-context="instrument" key={namespace || "other"}>
           <h3>{namespace ? namespace : strings.otherCommands}</h3>
           <table>
             <thead>
@@ -111,6 +117,6 @@ export function CliCommandIndexExperience({ catalog, catalogPage, routeVersion }
           </table>
         </div>
       ))}
-    </>
+    </div>
   );
 }

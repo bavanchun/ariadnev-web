@@ -70,9 +70,11 @@ export function GraphExecutionExperience({ catalogPage, children }: DocsScreenCo
   const nodes = NODES[locale] ?? NODES.en;
   const edges = EDGES[locale] ?? EDGES.en;
   return (
-    <>
-      <Topology locale={locale} heading={strings.heading} nodes={nodes} edges={edges} />
-      {children}
-    </>
+    <div className="graph-execution-experience">
+      <div className="graph-execution-instrument" data-surface-context="instrument">
+        <Topology locale={locale} heading={strings.heading} nodes={nodes} edges={edges} />
+      </div>
+      <div className="graph-execution-reading" data-surface-context="reading">{children}</div>
+    </div>
   );
 }

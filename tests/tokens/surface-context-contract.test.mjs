@@ -166,25 +166,21 @@ test("application source keeps the immutable public asset paths", () => {
   for (const [path, pattern] of sources) assert.match(readFileSync(join(repoRoot, path), "utf8"), pattern, `${path} asset path drifted`);
 });
 
-test("existing application palette debt is frozen until Phase 2 removes it", () => {
+test("applications contain no direct palette consumers", () => {
   const expected = new Map([
     ["apps/site/src/styles/site.css", 0],
-    ["apps/docs/src/styles/docs.css", 79],
+    ["apps/docs/src/styles/docs.css", 0],
   ]);
   for (const [path, count] of expected) {
     const css = readFileSync(join(repoRoot, path), "utf8");
     const consumers = [...css.matchAll(/var\(--vcs-color-[a-z0-9-]+/g)];
-    assert.equal(consumers.length, count, `${path} added or removed a direct palette consumer; update it only in Phase 2`);
+    assert.equal(consumers.length, count, `${path} must consume semantic context roles instead of palette steps`);
   }
 });
 
-test("the one shipped logo-filter debt cannot spread before Phase 2", () => {
+test("brand logos remain free of CSS filters", () => {
   const siteCss = readFileSync(join(repoRoot, "apps/site/src/styles/site.css"), "utf8");
   const docsCss = readFileSync(join(repoRoot, "apps/docs/src/styles/docs.css"), "utf8");
   assert.doesNotMatch(siteCss, /brand-logo[^{}]*\{[^}]*filter\s*:/s);
-  assert.equal(
-    [...docsCss.matchAll(/\.brand[^{}]*\.brand-logo\s*\{[^}]*filter\s*:/gs)].length,
-    1,
-    "the documented docs-logo filter debt changed before its Phase 2 removal",
-  );
+  assert.doesNotMatch(docsCss, /brand-logo[^{}]*\{[^}]*filter\s*:/s);
 });

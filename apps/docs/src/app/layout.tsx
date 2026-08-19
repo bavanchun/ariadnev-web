@@ -15,15 +15,13 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-// Dark-only theming: colorScheme hint tells browsers to use dark scrollbars
-// and form controls; themeColor sets the mobile status-bar tint to the docs
-// canvas so a phone reader sees a matched chrome, not a light bar over dark
-// content. Both come from the shared token surface.canvas (color.ink.900).
 export const viewport = {
-  colorScheme: "dark" as const,
-  themeColor: "#181818",
+  colorScheme: "light dark" as const,
+  // Browser chrome cannot consume CSS custom properties. This literal is the
+  // immutable brand-context canvas recorded by the token contract.
+  themeColor: "#090d15",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
-  return <html lang="en"><body>{children}</body></html>;
+  return <html lang="en"><body data-surface-context="reading">{children}</body></html>;
 }

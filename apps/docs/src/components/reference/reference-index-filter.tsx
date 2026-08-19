@@ -22,11 +22,15 @@ export function ReferenceIndexFilter({
   label,
   placeholder,
   noMatchesLabel,
+  resultsLabel,
+  clearLabel,
 }: {
   readonly rootId: string;
   readonly label: string;
   readonly placeholder: string;
   readonly noMatchesLabel: string;
+  readonly resultsLabel: string;
+  readonly clearLabel: string;
 }) {
   const inputId = useId();
   const statusId = useId();
@@ -64,9 +68,9 @@ export function ReferenceIndexFilter({
 
     if (statusRef.current) {
       statusRef.current.textContent =
-        needle !== "" && visibleGroups === 0 ? noMatchesLabel : needle !== "" ? `${totalVisibleRows} results` : "";
+        needle !== "" && visibleGroups === 0 ? noMatchesLabel : needle !== "" ? `${totalVisibleRows} ${resultsLabel}` : "";
     }
-  }, [query, rootId, noMatchesLabel]);
+  }, [query, rootId, noMatchesLabel, resultsLabel]);
 
   return (
     <div className="reference-index-filter" role="search">
@@ -96,7 +100,7 @@ export function ReferenceIndexFilter({
               setQuery("");
               inputRef.current?.focus();
             }}
-            aria-label="Clear filter"
+            aria-label={clearLabel}
           >
             ✕
           </button>

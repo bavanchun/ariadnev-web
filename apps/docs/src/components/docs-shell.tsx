@@ -98,16 +98,18 @@ export function DocsShell({ catalog, page, routeVersion, toc, children }: {
   return (
     <div className="docs-frame" data-toc={toc.length > 0 ? "populated" : "empty"} lang={page.locale} dir="ltr">
       <a className="skip-link" href="#docs-content">{strings.skipToContent}</a>
-      <header className="docs-header">
+      <header className="docs-header" data-surface-context="brand">
         <a className="brand" href="/" aria-label={strings.brandHomeLabel}>
-          <img className="brand-logo" src="/ariadnev-logo.webp" width="192" height="128" alt="" />
+          <span className="brand-logo-zone" aria-hidden="true">
+            <img className="brand-logo" src="/ariadnev-logo.webp" width="192" height="128" alt="" />
+          </span>
           <span className="brand-title">ariadnev</span>
           <span className="brand-badge">docs</span>
         </a>
         <SearchDialog locale={page.locale} version={routeVersion} indexUrl={`/search/${page.locale}/${routeVersion}.json`} />
         <LocaleVersionSwitcher catalog={catalog} page={page} routeVersion={routeVersion} />
       </header>
-      <aside className="docs-sidebar" aria-label={strings.sidebarLabel}>
+      <aside className="docs-sidebar" data-surface-context="reading" aria-label={strings.sidebarLabel}>
         {/* Native <details> is the no-JS mobile disclosure. Desktop CSS hides the
             summary so the tree always shows. The mobile-drawer-enhancer promotes
             this into a modal drawer at mobile viewports with focus containment,
@@ -128,7 +130,7 @@ export function DocsShell({ catalog, page, routeVersion, toc, children }: {
           </nav>
         </details>
       </aside>
-      <main id="docs-content" tabIndex={-1}>
+      <main id="docs-content" data-surface-context="reading" tabIndex={-1}>
         <nav aria-label={strings.breadcrumbLabel} className="breadcrumb"><ol>
           <li><a href="/">{strings.breadcrumbRoot}</a></li>
           <li><a href={`/${page.locale}/${routeVersion}/`}>{page.locale.toUpperCase()}</a></li>
@@ -144,7 +146,7 @@ export function DocsShell({ catalog, page, routeVersion, toc, children }: {
         {children}
       </main>
       {toc.length > 0 && (
-        <aside className="docs-toc" aria-label={strings.tocLabel}>
+        <aside className="docs-toc" data-surface-context="reading" aria-label={strings.tocLabel}>
           <strong>{strings.tocLabel}</strong>
           <TocLinks toc={toc} />
         </aside>

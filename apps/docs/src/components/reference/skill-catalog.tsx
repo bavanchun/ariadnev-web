@@ -32,11 +32,15 @@ const STRINGS = {
     filterLabel: "Filter skills in this category",
     filterPlaceholder: "Filter by name or description",
     filterNoMatches: "No skills match this filter.",
+    filterResults: "results",
+    filterClear: "Clear filter",
   },
   vi: {
     filterLabel: "Lọc skill trong danh mục này",
     filterPlaceholder: "Lọc theo tên hoặc mô tả",
     filterNoMatches: "Không có skill nào khớp bộ lọc.",
+    filterResults: "kết quả",
+    filterClear: "Xóa bộ lọc",
   },
 } as const;
 
@@ -59,6 +63,8 @@ export function SkillCategoryExperience({ catalogPage, children }: DocsScreenCon
         label={strings.filterLabel}
         placeholder={strings.filterPlaceholder}
         noMatchesLabel={strings.filterNoMatches}
+        resultsLabel={strings.filterResults}
+        clearLabel={strings.filterClear}
       />
       {children}
     </>

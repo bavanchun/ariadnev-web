@@ -122,7 +122,7 @@ export function SearchDialog({ locale, version, indexUrl }: { locale: string; ve
       const pendingAction = pendingResultAction.current?.query === value ? pendingResultAction.current.action : null;
       setResults(exact);
       setActiveResult(exact.length > 0 && pendingAction ? 0 : -1);
-      setMessage(exact.length === 0 ? strings.searchNoResults : `${exact.length} search results`);
+      setMessage(exact.length === 0 ? strings.searchNoResults : `${exact.length} ${strings.searchResultsLabel}`);
       if (exact.length > 0 && pendingAction === "navigate") {
         pendingResultAction.current = null;
         window.location.assign(exact[0]!.url);
@@ -192,7 +192,7 @@ export function SearchDialog({ locale, version, indexUrl }: { locale: string; ve
   return (
     <div className="search-control">
       <button type="button" onClick={openSearch} aria-label={strings.searchOpenLabel}>{strings.searchPlaceholder} <kbd>/</kbd></button>
-      <dialog ref={dialog} aria-labelledby={titleId} onClose={() => {
+      <dialog ref={dialog} data-surface-context="overlay" aria-labelledby={titleId} onClose={() => {
         requestSequence.current += 1;
         pendingResultAction.current = null;
         resultsQuery.current = "";

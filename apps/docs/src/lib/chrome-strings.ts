@@ -26,6 +26,7 @@ export interface ChromeStrings {
   readonly searchInputLabel: string;
   readonly searchPlaceholder: string;
   readonly searchNoResults: string;
+  readonly searchResultsLabel: string;
   readonly searchLoading: string;
   readonly searchError: string;
   readonly copyOptionsLabel: string;
@@ -47,6 +48,7 @@ const en: ChromeStrings = {
   searchInputLabel: "Search query",
   searchPlaceholder: "Search",
   searchNoResults: "No results",
+  searchResultsLabel: "search results",
   searchLoading: "Loading",
   searchError: "Search is temporarily unavailable. Use the static sidebar to browse documentation.",
   copyOptionsLabel: "Copy options",
@@ -68,6 +70,7 @@ const vi: ChromeStrings = {
   searchInputLabel: "Truy vấn tìm",
   searchPlaceholder: "Tìm",
   searchNoResults: "Không có kết quả",
+  searchResultsLabel: "kết quả tìm kiếm",
   searchLoading: "Đang tải",
   searchError: "Tìm kiếm tạm thời không khả dụng. Dùng thanh điều hướng tĩnh để duyệt tài liệu.",
   copyOptionsLabel: "Tùy chọn sao chép",

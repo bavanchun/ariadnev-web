@@ -18,6 +18,9 @@ test("chooser, navigation, search, and copy controls expose static and accessibl
   assert.match(shell, /cleanTocTitle/);
   assert.match(shell, /skip-link/);
   assert.match(shell, /lang=\{page\.locale\}/);
+  assert.match(shell, /className="docs-header" data-surface-context="brand"/);
+  assert.match(shell, /className="brand-logo-zone"/);
+  assert.match(shell, /data-surface-context="reading"/);
   // Mobile drawer: server-rendered <details> is the no-JS fallback; the enhancer
   // upgrades it into a modal at mobile viewports with focus containment, Escape
   // close, focus return, and scroll-locked background.
@@ -52,9 +55,12 @@ test("chooser, navigation, search, and copy controls expose static and accessibl
   assert.match(search, /partitionPromise/);
   assert.match(search, /ArrowDown/);
   assert.match(search, /window\.location\.assign/);
+  assert.match(search, /data-surface-context="overlay"/);
+  assert.match(search, /strings\.searchResultsLabel/);
   // Search failure fallback text lives in chrome-strings now; assert both places
   assert.match(chromeStrings, /static sidebar/i);
   assert.match(chromeStrings, /điều hướng tĩnh/i);
+  assert.match(chromeStrings, /kết quả tìm kiếm/i);
 
   const copy = await readFile(new URL("src/components/copy-actions.tsx", app), "utf8");
   assert.match(copy, /<textarea/);
@@ -108,6 +114,10 @@ test("styles enforce touch targets, focus, reduced motion, and responsive overfl
   assert.doesNotMatch(css, /#[0-9a-f]{3,8}\b/i);
   assert.match(css, /\.prose h1, \.prose h2[\s\S]*--vc-font-family-display/);
   assert.match(css, /\.heading-copy-button[\s\S]*border-color:\s*transparent/);
+  assert.doesNotMatch(css, /var\(--vcs-color-/);
+  assert.doesNotMatch(css, /(?:linear-|radial-)gradient|backdrop-filter|box-shadow|transition:\s*all/);
+  assert.match(css, /\.brand-logo-zone\s*\{[^}]*min-width:\s*3rem/);
+  assert.match(css, /\.graph-execution-instrument[^}]*data-surface-context|data-surface-context="instrument"/);
 });
 
 test("headers and robots cover HTML, Markdown, search, LLM, assets, and static 404", async () => {
