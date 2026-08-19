@@ -19,14 +19,22 @@ import { SITE, DOCS } from "./lib/servers.mjs";
 
 const ROUTES = [
   { name: "M01 marketing home", url: `http://127.0.0.1:${SITE.port}/` },
-  { name: "D01 docs home", url: `http://127.0.0.1:${DOCS.port}/en/stable/` },
+  { name: "D01-vi docs home", url: `http://127.0.0.1:${DOCS.port}/vi/stable/` },
   {
-    name: "D03 installation",
-    url: `http://127.0.0.1:${DOCS.port}/en/stable/get-started/installation/`,
+    name: "D06 graph execution",
+    url: `http://127.0.0.1:${DOCS.port}/en/stable/concepts/graph-execution/`,
   },
   {
     name: "D12 CLI index",
     url: `http://127.0.0.1:${DOCS.port}/en/stable/reference/cli/`,
+  },
+  {
+    name: "D14 provider reference",
+    url: `http://127.0.0.1:${DOCS.port}/en/stable/reference/providers/`,
+  },
+  {
+    name: "D18 docs recovery",
+    url: `http://127.0.0.1:${DOCS.port}/en/stable/does-not-exist/`,
   },
 ];
 

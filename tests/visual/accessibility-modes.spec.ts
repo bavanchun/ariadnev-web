@@ -8,6 +8,7 @@
 
 import { test, expect, type Page } from "@playwright/test";
 import { DOCS, SITE } from "./lib/servers.mjs";
+import { DOCS_FIXTURES, SITE_FIXTURES } from "./lib/screen-fixtures.mjs";
 
 const SITE_ORIGIN = `http://127.0.0.1:${SITE.port}`;
 const DOCS_ORIGIN = `http://127.0.0.1:${DOCS.port}`;
@@ -55,6 +56,35 @@ async function collectPageErrors(page: Page) {
     errors.push(error.message);
   });
   return errors;
+}
+
+// 390px is the compact-width seam the plan calls out without adding another
+// screenshot tier. Every archetype must contain page overflow and expose a
+// visible first keyboard focus target at that width.
+for (const fixture of [...SITE_FIXTURES, ...DOCS_FIXTURES]) {
+  const origin = fixture.surface === "site" ? SITE_ORIGIN : DOCS_ORIGIN;
+  test(`compact 390px — ${fixture.id} contains overflow and exposes focus`, async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const response = await page.goto(`${origin}${fixture.route}`, { waitUntil: "networkidle" });
+    expect(response?.status()).toBe(fixture.expectStatus ?? 200);
+    await page.evaluate(() => document.fonts?.ready);
+    await expectNoHorizontalScroll(page, `${fixture.id} 390×844`);
+    await page.keyboard.press("Tab");
+    const focus = await page.evaluate(() => {
+      const active = document.activeElement;
+      if (!(active instanceof HTMLElement) || active === document.body) return null;
+      const rect = active.getBoundingClientRect();
+      const style = getComputedStyle(active);
+      return {
+        tag: active.tagName,
+        intersectsViewport: rect.right > 0 && rect.bottom > 0 && rect.left < innerWidth && rect.top < innerHeight,
+        outlineVisible: style.outlineStyle !== "none" && Number.parseFloat(style.outlineWidth) > 0,
+      };
+    });
+    expect(focus, `${fixture.id} did not expose a keyboard focus target`).not.toBeNull();
+    expect(focus?.intersectsViewport, `${fixture.id} focused target is outside the 390px viewport`).toBe(true);
+    expect(focus?.outlineVisible, `${fixture.id} focused target has no visible outline`).toBe(true);
+  });
 }
 
 // SC 1.4.10 reflow: content usable at 320×256 (400% zoom of 1280×1024)
