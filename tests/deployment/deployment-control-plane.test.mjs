@@ -5,9 +5,9 @@
 // on are enforced by code rather than by discipline.
 
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import test from "node:test";
 
 import {
@@ -486,6 +486,27 @@ test("the deploy workflow is human-triggered only and its policy job reads two s
   const policyJob = deploy.slice(deploy.indexOf("  environment-policy:"), deploy.indexOf("  build:"));
   assert.match(policyJob, /GITHUB_TOKEN: \$\{\{ github\.token \}\}/);
   assert.match(policyJob, /CORE_POLICY_READ_TOKEN: \$\{\{ secrets\.CORE_POLICY_READ_TOKEN \}\}/);
+});
+
+test("only the dispatch-gated workflow may deploy production", () => {
+  // The declared human gate is the manual dispatch itself, which is worth
+  // nothing the moment some other workflow reaches production on a push. It
+  // once did: auto-deploy.yml deployed production about five minutes after
+  // every merge to main while its header credited a required-reviewer rule
+  // that this plan cannot create. Assert the shape instead of trusting prose.
+  const policy = JSON.parse(readFileSync(join(process.cwd(), "deployment/production-policy.json"), "utf8"));
+  assert.equal(policy.web.humanGate, "workflow-dispatch");
+  assert.deepEqual(policy.web.autoDeployedEnvironments, ["staging"]);
+  assert.equal(policy.web.productionWorkflow, ".github/workflows/deploy.yml");
+
+  const gated = basename(policy.web.productionWorkflow);
+  for (const name of readdirSync(join(process.cwd(), ".github", "workflows"))) {
+    if (name === gated) continue;
+    const yaml = workflow(name);
+    if (!/^\s+environment:.*web-production/m.test(yaml)) continue;
+    assert.match(yaml, /^on:\n  workflow_dispatch:/m, `${name} reaches web-production without a dispatch gate`);
+    assert.doesNotMatch(yaml, /^\s+(push|pull_request|schedule):/m, `${name} reaches web-production from an automatic trigger`);
+  }
 });
 
 test("an unexpected finalizer workflow digest blocks the cutover", async () => {
