@@ -1,16 +1,27 @@
-# Full-auto deploy: every push to `main` is qualified, composed into a
-# deployment input, and deployed to staging and then production.
+# Staging auto-deploy: every push to `main` is qualified, composed into a
+# deployment input, and deployed to STAGING. It stops there.
 #
-# This supersedes the "commit the input JSON, then `workflow_dispatch`" ceremony
-# in `deploy.yml` for the common path. `deploy.yml` stays as a manual escape
-# hatch (re-deploy an old input, rehearse a specific commit); this workflow is
-# the everyday path and never touches `deploy.yml` or its committed inputs.
+# This workflow does not deploy production and has no production job. Merging
+# to `main` publishes nothing to ariadnev.com; production is a separate,
+# deliberate human action — `deploy.yml` run by `workflow_dispatch` against a
+# committed immutable input. That is the human gate
+# `deployment/production-policy.json` declares (`"humanGate":
+# "workflow-dispatch"`) and the one `docs/decisions/
+# production-gate-without-required-reviewers.md` accepted.
 #
-# The immutable-input gate that `deploy.yml` gets from a human committing the
-# input file is replaced here by two things instead: the qualification gate
-# below must pass before anything is composed, and the `web-production`
-# GitHub environment's approver rule still runs before the production job
-# executes. That approver gate is the load-bearing safety net.
+# It has to work that way, not by convention but by arithmetic. Earlier text
+# here claimed the `web-production` environment's approver rule was "the
+# load-bearing safety net" standing between a merge and production. It was not:
+# both `web-staging` and `web-production` have zero required reviewers, because
+# required reviewers are unavailable for a private repository on this plan
+# (HTTP 422 — see the decision record). What actually stood there was nothing,
+# and a push to `main` reached production unattended about five minutes later.
+# Routing production through `deploy.yml` also restores the `environment-policy`
+# preflight (`verify-production-environment.mjs`), which this workflow never ran.
+#
+# What is still enforced here: the qualification gate must pass before anything
+# is composed, and the `web-staging` environment's branch policy still limits
+# which refs may deploy at all.
 #
 # Neither the composed evidence file nor the composed deployment input is
 # committed back to `main` — they are build artifacts of this run only, which
@@ -30,6 +41,7 @@ name: auto-deploy
 on:
   push:
     branches: [main]
+  # Re-runs staging on demand. It cannot reach production either.
   workflow_dispatch: {}
 
 permissions:
@@ -38,7 +50,7 @@ permissions:
 concurrency:
   # Never cancelled midway: an interrupted deploy leaves the topology
   # half-swapped, exactly as in deploy.yml.
-  group: auto-deploy-production
+  group: auto-deploy-staging
   cancel-in-progress: false
 
 jobs:
@@ -135,6 +147,10 @@ jobs:
           node scripts/deploy/compose-deployment-input.mjs --environment staging
           --product-sha "${{ github.sha }}" --evidence-sha "$EVIDENCE_SHA"
           --out "$RUNNER_TEMP/deployment-inputs/staging-input.json"
+      # Composed but not deployed here. It is the exact JSON a maintainer
+      # commits under deployment/inputs/ to promote this commit to production
+      # through deploy.yml, so composing it now saves recomputing it later and
+      # keeps the two inputs provably derived from one qualification.
       - name: Compose the production input
         run: >
           node scripts/deploy/compose-deployment-input.mjs --environment production
@@ -212,71 +228,6 @@ jobs:
       - uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v5
         with:
           name: cutover-record-staging-${{ github.sha }}
-          path: cutover-record.json
-          if-no-files-found: error
-          retention-days: 90
-
-  deploy-production:
-    name: Deploy production
-    needs: deploy-staging
-    runs-on: ubuntu-latest
-    # Human approval and branch policy come from the GitHub environment, not
-    # from logic in this file that a caller could route around. This is the
-    # safety net that replaces the removed immutable-input ceremony.
-    environment: web-production
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version-file: .node-version
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
-        with:
-          name: web-product-${{ github.sha }}
-          path: apps
-      - name: Refuse to deploy without both unit outputs
-        run: test -f apps/site/dist/index.html && test -f apps/docs/out/index.html
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
-        with:
-          name: deployment-inputs-${{ github.sha }}
-          path: .deployment-input
-      - name: Prove the input names this checkout
-        run: |
-          INPUT_PATH=".deployment-input/production-input.json"
-          test "$(node -p "require('./$INPUT_PATH').productSha")" = "$(git rev-parse HEAD)"
-          echo "INPUT_PATH=$INPUT_PATH" >> "$GITHUB_ENV"
-      - run: node scripts/deploy/validate-deployment-input.mjs "$INPUT_PATH"
-      - name: Reconcile the source-owned ingress rule
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WAF_TOKEN }}
-        run: node scripts/manage-edge-ingress-rule.mjs apply production
-      - name: Deploy in topology order and smoke every machine route
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DEPLOY_TOKEN }}
-        run: |
-          set -o pipefail
-          date -u +%Y-%m-%dT%H:%M:%SZ > deploy-started-at.txt
-          node scripts/deploy/deploy-units.mjs "$INPUT_PATH" | tee deploy-result.json
-      - name: Verify convergence against the declared release
-        run: |
-          set -o pipefail
-          node scripts/deploy/verify-convergence.mjs "$INPUT_PATH" | tee convergence.json
-      - name: Probe the public edge
-        run: node scripts/deploy/probe-public-edge.mjs --environment production
-      - name: Write the sanitized cutover record
-        run: |
-          node scripts/deploy/compose-cutover-record.mjs "$INPUT_PATH" \
-            --deploy-result deploy-result.json --convergence convergence.json \
-            --started-at "$(cat deploy-started-at.txt)" --out cutover-record.json
-      - uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v5
-        with:
-          name: cutover-record-production-${{ github.sha }}
           path: cutover-record.json
           if-no-files-found: error
           retention-days: 90

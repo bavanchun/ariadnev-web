@@ -1,0 +1,71 @@
+# Pull-request checks.
+#
+# Until this file existed, a pull request into `main` got no signal at all: the
+# first time anything was compiled or tested was after the merge, inside
+# `auto-deploy.yml`. That fails closed — a bad merge deploys nothing — but it
+# turns `main` red and blocks every deploy until someone fixes it forward.
+#
+# This job is a strict SUBSET of `pnpm run test:qualification:ci`, in the same
+# order, stopping before `pnpm run build`:
+#
+#   qualification:  contracts build → docs:content → contracts → typecheck → build → test
+#   here:           contracts build → docs:content → contracts → typecheck ──────────┘
+#                                                                  + the build-free part of `test`
+#
+# Nothing here is PR-only. Anything added to this file that qualification does
+# not also run would let a pull request pass a check that `main` never repeats,
+# which is the failure this workflow exists to prevent.
+#
+# Deliberately absent, because qualification already owns them and running them
+# twice would buy nothing:
+#   - `pnpm run build` (Astro + Next static export) and every test that reads
+#     its output — `tests/site/**`, `tests/docs/**` (`pnpm run test:docs`),
+#     and therefore the plain `vitest run` leg of `pnpm run test`;
+#   - Playwright and its browsers: `test:docs:browser`, `test:visual`.
+# That keeps this leg to roughly two minutes, most of it runner setup.
+#
+# Every `uses:` is pinned to a full commit SHA, matching the other workflows.
+
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  # Nothing here deploys or mutates anything, so a superseded run is pure waste:
+  # unlike the deploy workflows, this one is safe to cancel mid-flight.
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Typecheck · Contracts · Unit tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      # The docs content root and the schema digest the contract tests read are
+      # both generated, not committed. Skipping either makes the next two steps
+      # fail on a missing file rather than on a real defect.
+      - run: pnpm --filter @ariadnev-web/contracts run build
+      - run: pnpm run docs:content
+
+      - run: pnpm run contracts
+      - run: pnpm run typecheck
+
+      # `test:native` minus `test:docs`: the same node:test suites, without the
+      # ones that read `apps/docs/out`, which only exists after a full build.
+      - run: pnpm run test:native:no-build

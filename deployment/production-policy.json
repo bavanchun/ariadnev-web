@@ -5,6 +5,9 @@
     "repo": "bavanchun/ariadnev-web",
     "environment": "web-production",
     "humanGate": "workflow-dispatch",
+    "humanGateNote": "requiredReviewers is unavailable for a private repository on this plan (HTTP 422), so the dispatch itself is the gate. It only holds while no push-triggered workflow deploys production: productionWorkflow is the only workflow with a web-production job, and it is workflow_dispatch-only. auto-deploy.yml deploys autoDeployedEnvironments and nothing else.",
+    "productionWorkflow": ".github/workflows/deploy.yml",
+    "autoDeployedEnvironments": ["staging"],
     "requiredReviewers": "unavailable-on-plan",
     "deploymentBranches": ["main"]
   },
