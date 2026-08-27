@@ -179,6 +179,8 @@ test("parseReleaseSelector accepts a beta version, bare or tagged", () => {
     ["version=2.0.0-beta.1", "2.0.0-beta.1"],
     ["version=ariadnev@2.0.0-beta.1", "2.0.0-beta.1"],
     ["version=0.1.0-beta.12", "0.1.0-beta.12"],
+    // `changesets pre enter beta` emits `-beta.0` on the first Version PR.
+    ["version=1.2.1-beta.0", "1.2.1-beta.0"],
   ]) {
     const selector = parseReleaseSelector(new URLSearchParams(query));
     assert.deepEqual(selector, { mode: "pinned", version, tag: `ariadnev@${version}` });
@@ -201,7 +203,6 @@ test("parseReleaseSelector rejects every invalid selector shape", () => {
     ["version=1.0.0-rc.1", "malformed"],
     ["version=1.0.0-alpha.1", "malformed"],
     ["version=1.0.0-beta", "malformed"],
-    ["version=1.0.0-beta.0", "malformed"],
     ["version=1.0.0-beta.01", "malformed"],
     ["version=1.0.0-beta.1.2", "malformed"],
     // `+` in a raw query decodes to a space, so the literal build-metadata form

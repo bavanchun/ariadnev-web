@@ -11,7 +11,10 @@ const STABLE_SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 // The only prerelease ariadnev publishes. Deliberately narrower than semver:
 // this value becomes a release tag, and `-alpha`, `-rc` and build metadata are
 // all legal semver and none of them is a thing that exists upstream.
-const BETA_SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)-beta\.[1-9]\d*$/;
+// Counter starts at 0 because that is what `changesets pre enter beta` emits on
+// the first Version PR. Leading-zero counters (`beta.01`) stay rejected — that
+// is a semver violation, not the same shape as `beta.0`.
+const BETA_SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)-beta\.(0|[1-9]\d*)$/;
 const MAX_SELECTOR_LENGTH = 32;
 
 export const SELECTOR_PARAM = "version";
