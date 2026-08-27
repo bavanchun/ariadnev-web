@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "productSha": "95e2960020dc22dbd2ebf97099b8bd03d9a6280a",
+  "evidenceSha": "611d94628506f2011b7395462acee71c54a43b36",
+  "gate": "pnpm run test:qualification:ci",
+  "result": "pass",
+  "ciRunUrl": "https://github.com/bavanchun/ariadnev-web/actions/runs/33092150055",
+  "composedAtUtc": "2026-08-27T16:17:39Z"
+}
