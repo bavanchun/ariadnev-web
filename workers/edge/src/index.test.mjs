@@ -167,6 +167,24 @@ test("parseReleaseSelector accepts absent and canonical stable selectors", () =>
   assert.deepEqual(parseReleaseSelector(new URLSearchParams("version=ariadnev@0.10.0")).tag, "ariadnev@0.10.0");
 });
 
+/**
+ * A beta is installed by naming its exact version — there is no channel concept
+ * in the CLI, so this selector is the whole opt-in. It does not make a beta
+ * reachable by accident: `/version` answers from the latest release, and a
+ * prerelease is never marked latest, so the bare install and bare update paths
+ * never arrive here.
+ */
+test("parseReleaseSelector accepts a beta version, bare or tagged", () => {
+  for (const [query, version] of [
+    ["version=2.0.0-beta.1", "2.0.0-beta.1"],
+    ["version=ariadnev@2.0.0-beta.1", "2.0.0-beta.1"],
+    ["version=0.1.0-beta.12", "0.1.0-beta.12"],
+  ]) {
+    const selector = parseReleaseSelector(new URLSearchParams(query));
+    assert.deepEqual(selector, { mode: "pinned", version, tag: `ariadnev@${version}` });
+  }
+});
+
 test("parseReleaseSelector rejects every invalid selector shape", () => {
   const cases = [
     ["version=", "empty"],
@@ -177,10 +195,19 @@ test("parseReleaseSelector rejects every invalid selector shape", () => {
     ["version=v0.10.0", "malformed"],
     ["version=0.10.0.0", "malformed"],
     ["version=01.2.3", "malformed"],
-    ["version=1.0.0-rc.1", "prerelease-or-build-unsupported"],
+    // `-beta.N` is selectable now; every other prerelease word is not. These
+    // fall through to the shape check rather than a prerelease-specific one,
+    // because there is no longer a blanket prerelease rule to hit.
+    ["version=1.0.0-rc.1", "malformed"],
+    ["version=1.0.0-alpha.1", "malformed"],
+    ["version=1.0.0-beta", "malformed"],
+    ["version=1.0.0-beta.0", "malformed"],
+    ["version=1.0.0-beta.01", "malformed"],
+    ["version=1.0.0-beta.1.2", "malformed"],
     // `+` in a raw query decodes to a space, so the literal build-metadata form
-    // must be sent percent-encoded to reach the prerelease/build guard.
-    ["version=1.0.0%2Bbuild.5", "prerelease-or-build-unsupported"],
+    // must be sent percent-encoded to reach the build-metadata guard.
+    ["version=1.0.0%2Bbuild.5", "build-metadata-unsupported"],
+    ["version=1.0.0-beta.1%2Bbuild.5", "build-metadata-unsupported"],
     ["version=1.0.0+build.5", "illegal-character"],
     ["version=../../etc/passwd", "illegal-character"],
     [`version=${"9".repeat(40)}`, "too-long"],

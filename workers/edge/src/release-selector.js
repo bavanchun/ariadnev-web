@@ -8,6 +8,10 @@
 // Stable release policy: MAJOR.MINOR.PATCH only. Prerelease and build metadata
 // are rejected because the current release policy does not publish them.
 const STABLE_SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
+// The only prerelease ariadnev publishes. Deliberately narrower than semver:
+// this value becomes a release tag, and `-alpha`, `-rc` and build metadata are
+// all legal semver and none of them is a thing that exists upstream.
+const BETA_SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)-beta\.[1-9]\d*$/;
 const MAX_SELECTOR_LENGTH = 32;
 
 export const SELECTOR_PARAM = "version";
@@ -50,10 +54,17 @@ export function parseReleaseSelector(searchParams) {
   // must not be decoded again into a valid value.
   if (/%[0-9a-fA-F]{2}/.test(raw)) throw new SelectorError("encoded");
   if (/[/\\\s\u0000-\u001f\u007f]/.test(raw)) throw new SelectorError("illegal-character");
-  if (raw.includes("-") || raw.includes("+")) throw new SelectorError("prerelease-or-build-unsupported");
+  // Build metadata stays unsupported. A `-beta.N` prerelease is now selectable,
+  // because that is how a beta is installed: there is no channel concept in the
+  // CLI, only an exact version someone asked for by name.
+  //
+  // This does not make a beta reachable by accident. `/version` still answers
+  // from the *latest* release and a prerelease is never marked latest, so the
+  // bare install and bare update paths cannot arrive here.
+  if (raw.includes("+")) throw new SelectorError("build-metadata-unsupported");
 
   const normalized = raw.startsWith(TAG_PREFIX) ? raw.slice(TAG_PREFIX.length) : raw;
-  if (!STABLE_SEMVER.test(normalized)) throw new SelectorError("malformed");
+  if (!STABLE_SEMVER.test(normalized) && !BETA_SEMVER.test(normalized)) throw new SelectorError("malformed");
 
   return { mode: "pinned", version: normalized, tag: `${TAG_PREFIX}${normalized}` };
 }
